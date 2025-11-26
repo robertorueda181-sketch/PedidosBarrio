@@ -1,0 +1,151 @@
+<div class="flex flex-col min-h-screen font-sans bg-gray-50">
+
+  <!-- Header -->
+  <header class="bg-cream p-4 flex justify-between items-center border-b border-gray-300">
+    <div class="flex items-center space-x-2">
+      <img src="assets/logoamanro.png" alt="Delicius Ammiro Logo" class="h-8 md:h-10 w-auto" />
+    </div>
+    <div class="space-x-2 md:space-x-4 text-brown flex items-center">
+      <button aria-label="Buscar" class="hover:text-brown-dark"><svg class="w-5 h-5 md:w-6 md:h-6" fill="none"
+          stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <circle cx="11" cy="11" r="7" stroke-linecap="round" stroke-linejoin="round"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65" stroke-linecap="round" stroke-linejoin="round"></line>
+        </svg></button>
+      <!-- <button aria-label="Carrito" class="hover:text-brown-dark"><svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="9" cy="21" r="1" stroke-linecap="round" stroke-linejoin="round"></circle><circle cx="20" cy="21" r="1" stroke-linecap="round" stroke-linejoin="round"></circle></svg></button> -->
+      <!-- Hamburguer menu for small screens -->
+      <button aria-label="Menú" class="md:hidden hover:text-brown-dark">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Navigation -->
+  <nav
+    class="bg-amber-950 text-white flex-col md:flex-row justify-center md:space-x-8 py-3 font-semibold tracking-widest uppercase text-sm hidden md:flex">
+    <a href="#" class="hover:text-brown px-3 py-1">inicio</a>
+    <a href="#" class="hover:text-brown px-3 py-1">makis</a>
+    <a href="#" class="hover:text-brown px-3 py-1">comida criolla</a>
+    <a href="#" class="hover:text-brown px-3 py-1">parrillas</a>
+    <a href="#" class="hover:text-brown px-3 py-1">menu completo</a>
+    <a href="#" class="hover:text-brown px-3 py-1">resevar</a>
+  </nav>
+
+  <!-- Top section with images -->
+  <section class="grid grid-cols-1 md:grid-cols-3 gap-2 p-4">
+    <img src="assets/makis.png" alt="Makis" class="w-full h-48 object-cover rounded" />
+    <div class="bg-gray-800 text-white flex flex-col justify-center items-center p-4">
+      <h2 class="text-center font-bold uppercase mb-3 text-lg md:text-xl">SABOR PERUANO, FUSION DE TRADICION & FUEGO
+      </h2>
+      <button class="bg-white text-black px-4 py-1 hover:bg-gray-200 uppercase font-semibold text-sm">Explora
+        Menú</button>
+    </div>
+    <img src="assets/parrilla.png" alt="Parrilla" class="w-full h-48 object-cover rounded" />
+  </section>
+
+  <!-- Middle section -->
+  <section style="background-color: #fedeb8;"
+    class="bg-amber-200 text-amber-950 p-6 grid grid-cols-1 md:grid-cols-12 gap-4">
+    <!-- Left part: makis fusion -->
+    <div class="col-span-full md:col-span-4 text-center md:text-left">
+      <h3 class="font-semibold uppercase mb-4 text-xl">NUESTRA CARTA</h3>
+      <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 justify-items-center md:justify-items-start">
+        <div class="relative group">
+          <img src="assets/makis1.png" alt="Maki 1"
+            class="rounded-full border-4 border-white object-cover w-20 h-20 sm:w-24 sm:h-24" />
+          <p class="mt-2 text-center text-xs">ACZSSSMBI0</p>
+        </div>
+        <div class="relative group">
+          <img src="assets/makis2.png" alt="Maki 2"
+            class="rounded-full border-4 border-white object-cover w-20 h-20 sm:w-24 sm:h-24" />
+          <p class="mt-2 text-center text-xs">BS OLLMMILA</p>
+        </div>
+        <div class="relative group">
+          <img src="assets/parrilla.png" alt="Maki 3"
+            class="rounded-full border-4 border-white object-cover w-20 h-20 sm:w-24 sm:h-24" />
+          <p class="mt-2 text-center text-xs">MMES RIUA</p>
+        </div>
+        <div class="relative group">
+          <img src="assets/clubsandwich.png" alt="Maki 4"
+            class="rounded-full border-4 border-white object-cover w-20 h-20 sm:w-24 sm:h-24" />
+          <p class="mt-2 text-center text-xs">MAES RUM</p>
+        </div>
+        <div class="relative group">
+          <img src="assets/chaufa.png" alt="Maki 5"
+            class="rounded-full border-4 border-white object-cover w-20 h-20 sm:w-24 sm:h-24" />
+          <p class="mt-2 text-center text-xs">MAKS RUM</p>
+        </div>
+        <div class="relative group">
+          <img src="assets/torta.png" alt="Maki 6"
+            class="rounded-full border-4 border-white object-cover w-20 h-20 sm:w-24 sm:h-24" />
+          <p class="mt-2 text-center text-xs">MAES HUM</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Center part -->
+    <div class="col-span-full md:col-span-4 flex flex-col items-center justify-center mt-6 md:mt-0">
+      <img src="assets/ajigallina.png" alt="Sabores Criollos"
+        class="mb-3 rounded w-full max-w-xs md:max-w-none object-cover h-48" />
+      <h3 class="text-lg font-semibold uppercase mb-2">Sabores Criollos</h3>
+      <p class="text-sm text-opacity-75 text-center max-w-xs">
+        Tradicin aa eada liesalo <br />
+        Delaff can fan desires pestinias
+      </p>
+    </div>
+
+    <!-- Right part -->
+    <div class="col-span-full md:col-span-4 flex flex-col items-center justify-center mt-6 md:mt-0">
+      <img src="assets/parrillafuego.png" alt="Parrillas & Fuego"
+        class="mb-3 rounded w-full max-w-xs md:max-w-none object-cover h-48" />
+      <h3 (click)="sendWhatsAppOrder()" class="text-lg font-semibold uppercase mb-2">Parrillas & Fuego</h3>
+      <p class="text-sm text-opacity-75 text-center max-w-xs">
+        Cames a la leress Jugsoes <br />
+        of palltio
+      </p>
+    </div>
+  </section>
+
+  <!-- Testimonials section -->
+  <section class="p-6 bg-gray-100 flex flex-col md:flex-row space-y-6 md:space-y-0 md:space-x-6">
+    <div class="flex-1">
+      <h4 class="text-center font-semibold uppercase mb-4 text-xl">Testimicios</h4>
+      <!-- Map Placeholder -->
+      <img src="assets/mapa.jpg" alt="Mapa Ubicación" class="rounded shadow-md w-full" />
+    </div>
+
+    <div class="flex-1 space-y-4">
+      <div>
+        <div class="flex items-center space-x-2 mb-1 justify-center md:justify-start">
+          <span class="text-yellow-400">★★★★★★★</span>
+          <img src="assets/user1.jpg" class="w-10 h-10 rounded-full" alt="User 1" />
+        </div>
+        <p class="text-xs text-gray-700 leading-tight text-center md:text-left">Unaulia pillr piedadet sueures jasbese
+          de palltudictne a diniate parriiate,</p>
+      </div>
+      <div>
+        <div class="flex items-center space-x-2 mb-1 justify-center md:justify-start">
+          <img src="assets/user2.jpg" class="w-10 h-10 rounded-full" alt="User 2" />
+        </div>
+        <p class="text-xs text-gray-700 leading-tight text-center md:text-left">Unsla ds sis sas liantes a da pessis a
+        </p>
+      </div>
+    </div>
+
+    <div class="flex-1 md:border-l md:border-gray-300 md:pl-4 pt-6 md:pt-0">
+      <h4 class="font-semibold uppercase mb-4 text-center md:text-left">Testimicios</h4>
+      <p class="text-xs text-gray-700 mb-2 text-center md:text-left">Camas a bross licag linika boescia des siurde.</p>
+      <div class="flex items-center space-x-2 justify-center md:justify-start">
+        <img src="assets/user3.jpg" class="w-10 h-10 rounded-full" alt="User 3" />
+        <p class="text-xs text-gray-700">la aiddcss da ness de pesstissies dislolres lanode</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="mt-auto bg-black text-white py-6 text-center text-sm">
+    &copy; 2024 Delicius Ammiro. Todos los derechos reservados.
+  </footer>
+
+</div>

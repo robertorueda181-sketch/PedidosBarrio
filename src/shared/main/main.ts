@@ -2,10 +2,10 @@ import { Component, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 
 @Component({
-  selector: 'app-footer',
+  selector: 'app-main',
   standalone: true,
   imports: [RouterOutlet],
-  templateUrl: './footer.html',
+  templateUrl: './main.html',
 })
-export class Footer {
+export class Main {
 }

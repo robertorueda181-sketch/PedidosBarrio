@@ -18,7 +18,13 @@
             "assets": [
               {
                 "glob": "**/*",
-                "input": "public"
+                "input": "src/assets",
+                "output": "assets"
+              },
+              {
+                "glob": "**/*",
+                "input": "public",
+                "output": "assets"
               }
             ],
             "styles": [
@@ -57,7 +63,13 @@
             },
             "development": {
               "buildTarget": "PedidosBarrio:build:development"
-            }
+            },
+            "allowedHosts": [
+              "localhost", 
+              "furthermore-puts-strikes-pubmed.trycloudflare.com",
+              "const-visits-state-origin.trycloudflare.com",
+              "*.trycloudflare.com"
+            ]
           },
           "defaultConfiguration": "development"
         },
