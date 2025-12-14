@@ -6,13 +6,13 @@ import { Router, RouterOutlet } from '@angular/router';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [ RouterOutlet],
+  imports: [RouterOutlet],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
 export class App {
 
-  constructor(private router: Router) {}
+  constructor(private router: Router) { }
 
   protected readonly title = signal('PedidosBarrio');
   searchQuery = '';
@@ -20,5 +20,5 @@ export class App {
     // Aquí puedes agregar la lógica para buscar negocios según searchQuery
     alert(`Buscando: ${this.searchQuery}`);
   }
-  
+
 }

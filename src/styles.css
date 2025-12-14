@@ -1,2 +1,12 @@
 /* You can add global styles to this file, and also import other style files */
+@import "primeicons/primeicons.css";
+@import "leaflet/dist/leaflet.css";
 @import "tailwindcss";
+
+/* Add asterisk to label if the input/select/textarea in the same container is required */
+div:has(input:required)>label::after,
+div:has(select:required)>label::after,
+div:has(textarea:required)>label::after {
+    content: " *";
+    color: red;
+}

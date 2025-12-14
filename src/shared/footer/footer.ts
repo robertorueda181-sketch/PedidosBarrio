@@ -1,10 +1,10 @@
 import { Component, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+
 
 @Component({
   selector: 'app-footer',
   standalone: true,
-  imports: [RouterOutlet],
+  imports: [],
   templateUrl: './footer.html',
 })
 export class Footer {
