@@ -10,3 +10,7 @@ div:has(textarea:required)>label::after {
     content: " *";
     color: red;
 }
+
+button {
+    cursor: pointer;
+}

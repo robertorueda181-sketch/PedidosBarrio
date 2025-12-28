@@ -1,0 +1,58 @@
+/* Oficios Component Styles */
+.service-row {
+  transition: background-color 0.2s ease-in-out;
+}
+
+.service-row:hover {
+  background-color: #f9fafb;
+}
+
+.service-icon {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.star-rating {
+  display: flex;
+  align-items: center;
+}
+
+.star {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+
+.star-full {
+  color: #fbbf24;
+}
+
+.star-half {
+  color: #fde68a;
+}
+
+.star-empty {
+  color: #d1d5db;
+}
+
+.btn-edit {
+  transition: color 0.2s ease-in-out;
+}
+
+.btn-delete {
+  transition: color 0.2s ease-in-out;
+}
+
+.btn-delete:hover {
+  color: #dc2626;
+}
+
+/* Table responsive adjustments */
+@media (max-width: 768px) {
+  .table-container {
+    overflow-x: auto;
+  }
+
+  .service-info {
+    min-width: 200px;
+  }
+}

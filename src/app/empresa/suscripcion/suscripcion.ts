@@ -1,0 +1,94 @@
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+
+interface Plan {
+  id: string;
+  name: string;
+  price: number;
+  period: string;
+  features: string[];
+  popular?: boolean;
+  current?: boolean;
+}
+
+import { FormsModule } from '@angular/forms';
+
+@Component({
+  selector: 'app-suscripcion',
+  imports: [CommonModule, FormsModule],
+  templateUrl: './suscripcion.html',
+  styleUrl: './suscripcion.css',
+})
+export class Suscripcion {
+  currentPlanId: string = 'free';
+  currentPlan: string = 'Gratuito';
+
+  plans: Plan[] = [
+    {
+      id: 'free',
+      name: 'Gratuito',
+      price: 0,
+      period: 'mes',
+      features: [
+        'Hasta 10 productos',
+        'Hasta 5 inmuebles',
+        'Hasta 3 servicios',
+        'Soporte básico',
+        'Anuncios limitados'
+      ]
+    },
+    {
+      id: 'pro',
+      name: 'Profesional',
+      price: 29.99,
+      period: 'mes',
+      popular: true,
+      features: [
+        'Productos ilimitados',
+        'Inmuebles ilimitados',
+        'Servicios ilimitados',
+        'Soporte prioritario',
+        'Anuncios destacados',
+        'Estadísticas avanzadas',
+        'API access',
+        'Múltiples usuarios'
+      ]
+    },
+    {
+      id: 'enterprise',
+      name: 'Empresarial',
+      price: 99.99,
+      period: 'mes',
+      features: [
+        'Todo lo del plan Profesional',
+        'Integraciones personalizadas',
+        'Soporte 24/7',
+        'Consultoría dedicada',
+        'SLA garantizado',
+        'Análisis predictivo',
+        'White-label'
+      ]
+    }
+  ];
+
+  selectPlan(planId: string) {
+    if (planId === 'pro') {
+      alert('Redirigiendo al proceso de pago para el Plan Profesional...');
+    } else if (planId === 'enterprise') {
+      alert('Contacta a nuestro equipo de ventas para el Plan Empresarial');
+    }
+  }
+
+  isCurrentPlan(planId: string): boolean {
+    return planId === this.currentPlanId;
+  }
+
+  // Método para simular cambio de plan (para desarrollo/demo)
+  setCurrentPlan(planId: string) {
+    this.currentPlanId = planId;
+    const plan = this.plans.find(p => p.id === planId);
+    if (plan) {
+      this.currentPlan = plan.name;
+    }
+  }
+}

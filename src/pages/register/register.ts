@@ -31,12 +31,15 @@ export class Register implements OnInit {
     category: ['', Validators.required],
     schedules: this.fb.array([], Validators.required),
     address: ['', Validators.required],
+    reference: [''],
     useMap: [false],
     lat: [''],
     lng: [''],
     phone: ['', [Validators.required, Validators.pattern(/^[9][0-9]{8}$/)]],
     email: ['', [Validators.required, Validators.email]],
     description: [''],
+    password: ['', [Validators.required, Validators.minLength(6)]],
+    confirmPassword: ['', Validators.required],
   });
 
   daysOptions = [
@@ -197,14 +200,22 @@ export class Register implements OnInit {
       return;
     }
 
-    if (!this.selectedPlan) {
-      alert('Seleccione un plan');
-      this.step = 1;
+    // if (!this.selectedPlan) {
+    //   alert('Seleccione un plan');
+    //   this.step = 1;
+    //   return;
+    // }
+
+    if (this.registerForm.value.password !== this.registerForm.value.confirmPassword) {
+      alert('Las contraseñas no coinciden');
       return;
     }
 
-    const formData = this.registerForm.value as RegisterRequest;
-    console.log('Datos enviados:', { plan: this.selectedPlan, ...formData });
+    const formData = {
+      ...this.registerForm.value,
+      registrationType: 'PRODUCT'
+    } as RegisterRequest;
+    console.log('Datos enviados:', formData);
 
     this.registerService.registerBusiness(formData).subscribe({
       next: (response) => {

@@ -26,9 +26,44 @@
     </ul>
   </div>
 
-  <button
-    class="bg-cyan-500 hover:bg-cyan-600 transition text-white font-bold px-5 py-2 rounded shadow"
-  (click)="goToRegistro()">
-    + Registrar Negocio
-  </button>
+  <div class="relative">
+    <!-- Overlay para cerrar el submenú al hacer click fuera -->
+    <div
+      *ngIf="isSubmenuOpen"
+      class="submenu-overlay"
+      (click)="closeSubmenu()">
+    </div>
+
+    <button
+      class="bg-cyan-500 hover:bg-cyan-600 transition text-white font-bold px-5 py-2 rounded shadow cursor-pointer flex items-center space-x-2 dropdown-button"
+      (click)="toggleSubmenu()">
+      <span>+ Registrar</span>
+      <svg class="w-4 h-4 transition-transform duration-200" [class.rotate-180]="isSubmenuOpen" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+      </svg>
+    </button>
+
+    <div
+      class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50 transition-all duration-200 ease-out"
+      [class.opacity-0]="!isSubmenuOpen"
+      [class.opacity-100]="isSubmenuOpen"
+      [class.transform]="isSubmenuOpen ? 'translateY(0)' : 'translateY(-10px)'"
+      [class.pointer-events-none]="!isSubmenuOpen"
+      [class.pointer-events-auto]="isSubmenuOpen">
+      <div class="py-1">
+        <button
+          class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors flex items-center space-x-2"
+          (click)="navigateToRegistro('empresa')">
+          <span>🏢</span>
+          <span>Soy empresa</span>
+        </button>
+        <button
+          class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors flex items-center space-x-2"
+          (click)="navigateToRegistro('cliente')">
+          <span>👤</span>
+          <span>Soy cliente</span>
+        </button>
+      </div>
+    </div>
+  </div>
 </nav>

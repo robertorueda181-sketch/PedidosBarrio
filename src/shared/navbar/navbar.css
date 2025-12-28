@@ -1,0 +1,35 @@
+/* Estilos para el submenú de registro */
+.rotate-180 {
+  transform: rotate(180deg);
+}
+
+/* Animación suave para el submenú */
+.submenu-enter {
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: all 0.2s ease-out;
+}
+
+.submenu-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Estilos para el botón del submenú */
+.dropdown-button {
+  position: relative;
+}
+
+.dropdown-button:focus {
+  outline: none;
+}
+
+/* Overlay para cerrar el submenú al hacer click fuera */
+.submenu-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 40;
+}

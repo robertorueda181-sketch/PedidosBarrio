@@ -1,0 +1,241 @@
+<div class="space-y-6">
+  <!-- Header -->
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-semibold text-gray-900">Perfil de la Empresa</h1>
+      <p class="mt-1 text-sm text-gray-600">Actualiza la información de tu empresa para que los clientes te encuentren fácilmente</p>
+    </div>
+    <div class="flex space-x-3">
+      <button
+        *ngIf="!isEditing"
+        (click)="toggleEdit()"
+        class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+        <svg class="-ml-1 mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+        </svg>
+        Editar
+      </button>
+    </div>
+  </div>
+
+  <!-- Success Message -->
+  <div *ngIf="saveSuccess" class="bg-green-50 border border-green-200 rounded-md p-4">
+    <div class="flex">
+      <div class="flex-shrink-0">
+        <svg class="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+        </svg>
+      </div>
+      <div class="ml-3">
+        <p class="text-sm font-medium text-green-800">Cambios guardados exitosamente</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Profile Form -->
+  <div class="bg-white shadow rounded-lg">
+    <div class="px-4 py-5 sm:p-6">
+      <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+
+        <!-- Company Logo -->
+        <div class="sm:col-span-2">
+          <label class="block text-sm font-medium text-gray-700">Logo de la Empresa</label>
+          <div class="mt-1 flex items-center space-x-5">
+            <div class="flex-shrink-0">
+              <div class="w-24 h-24 bg-gray-200 rounded-lg flex items-center justify-center">
+                <svg *ngIf="!companyProfile.logo" class="w-12 h-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                </svg>
+                <img *ngIf="companyProfile.logo" [src]="companyProfile.logo" class="w-24 h-24 object-cover rounded-lg" alt="Logo">
+              </div>
+            </div>
+            <div class="flex-1">
+              <div *ngIf="isEditing" class="flex items-center">
+                <input
+                  type="file"
+                  accept="image/*"
+                  (change)="onLogoChange($event)"
+                  class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+              </div>
+              <p class="text-sm text-gray-500">PNG, JPG hasta 2MB</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Company Name -->
+        <div>
+          <label for="name" class="block text-sm font-medium text-gray-700">Nombre de la Empresa</label>
+          <input
+            type="text"
+            id="name"
+            [(ngModel)]="companyProfile.name"
+            [disabled]="!isEditing"
+            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm disabled:bg-gray-50 disabled:text-gray-500">
+        </div>
+
+        <!-- Category -->
+        <div>
+          <label for="category" class="block text-sm font-medium text-gray-700">Categoría</label>
+          <select
+            id="category"
+            [(ngModel)]="companyProfile.category"
+            [disabled]="!isEditing"
+            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm disabled:bg-gray-50 disabled:text-gray-500">
+            <option *ngFor="let category of categories" [value]="category">{{ category }}</option>
+          </select>
+        </div>
+
+        <!-- Email -->
+        <div>
+          <label for="email" class="block text-sm font-medium text-gray-700">Correo Electrónico</label>
+          <input
+            type="email"
+            id="email"
+            [(ngModel)]="companyProfile.email"
+            [disabled]="!isEditing"
+            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm disabled:bg-gray-50 disabled:text-gray-500">
+        </div>
+
+        <!-- Phone -->
+        <div>
+          <label for="phone" class="block text-sm font-medium text-gray-700">Teléfono</label>
+          <input
+            type="tel"
+            id="phone"
+            [(ngModel)]="companyProfile.phone"
+            [disabled]="!isEditing"
+            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm disabled:bg-gray-50 disabled:text-gray-500">
+        </div>
+
+        <!-- Website -->
+        <div>
+          <label for="website" class="block text-sm font-medium text-gray-700">Sitio Web</label>
+          <input
+            type="url"
+            id="website"
+            [(ngModel)]="companyProfile.website"
+            [disabled]="!isEditing"
+            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm disabled:bg-gray-50 disabled:text-gray-500">
+        </div>
+
+        <!-- Founded Year -->
+        <div>
+          <label for="foundedYear" class="block text-sm font-medium text-gray-700">Año de Fundación</label>
+          <input
+            type="number"
+            id="foundedYear"
+            [(ngModel)]="companyProfile.foundedYear"
+            [disabled]="!isEditing"
+            min="1900"
+            max="2025"
+            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm disabled:bg-gray-50 disabled:text-gray-500">
+        </div>
+
+        <!-- Employee Count -->
+        <div>
+          <label for="employeeCount" class="block text-sm font-medium text-gray-700">Número de Empleados</label>
+          <select
+            id="employeeCount"
+            [(ngModel)]="companyProfile.employeeCount"
+            [disabled]="!isEditing"
+            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm disabled:bg-gray-50 disabled:text-gray-500">
+            <option *ngFor="let range of employeeRanges" [value]="range">{{ range }}</option>
+          </select>
+        </div>
+
+        <!-- Address Section -->
+        <div class="sm:col-span-2">
+          <h3 class="text-lg font-medium text-gray-900 mb-4">Dirección</h3>
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+
+            <!-- Street -->
+            <div class="sm:col-span-2">
+              <label for="street" class="block text-sm font-medium text-gray-700">Dirección</label>
+              <input
+                type="text"
+                id="street"
+                [(ngModel)]="companyProfile.address.street"
+                [disabled]="!isEditing"
+                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm disabled:bg-gray-50 disabled:text-gray-500">
+            </div>
+
+            <!-- City -->
+            <div>
+              <label for="city" class="block text-sm font-medium text-gray-700">Ciudad</label>
+              <input
+                type="text"
+                id="city"
+                [(ngModel)]="companyProfile.address.city"
+                [disabled]="!isEditing"
+                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm disabled:bg-gray-50 disabled:text-gray-500">
+            </div>
+
+            <!-- State -->
+            <div>
+              <label for="state" class="block text-sm font-medium text-gray-700">Estado/Provincia</label>
+              <input
+                type="text"
+                id="state"
+                [(ngModel)]="companyProfile.address.state"
+                [disabled]="!isEditing"
+                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm disabled:bg-gray-50 disabled:text-gray-500">
+            </div>
+
+            <!-- ZIP Code -->
+            <div>
+              <label for="zipCode" class="block text-sm font-medium text-gray-700">Código Postal</label>
+              <input
+                type="text"
+                id="zipCode"
+                [(ngModel)]="companyProfile.address.zipCode"
+                [disabled]="!isEditing"
+                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm disabled:bg-gray-50 disabled:text-gray-500">
+            </div>
+
+            <!-- Country -->
+            <div>
+              <label for="country" class="block text-sm font-medium text-gray-700">País</label>
+              <input
+                type="text"
+                id="country"
+                [(ngModel)]="companyProfile.address.country"
+                [disabled]="!isEditing"
+                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm disabled:bg-gray-50 disabled:text-gray-500">
+            </div>
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div class="sm:col-span-2">
+          <label for="description" class="block text-sm font-medium text-gray-700">Descripción de la Empresa</label>
+          <textarea
+            id="description"
+            [(ngModel)]="companyProfile.description"
+            [disabled]="!isEditing"
+            rows="4"
+            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm disabled:bg-gray-50 disabled:text-gray-500"
+            placeholder="Describe tu empresa, servicios y lo que te hace único..."></textarea>
+        </div>
+
+        <!-- Action Buttons -->
+        <div *ngIf="isEditing" class="sm:col-span-2 flex justify-end space-x-3">
+          <button
+            (click)="cancelEdit()"
+            class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+            Cancelar
+          </button>
+          <button
+            (click)="saveProfile()"
+            [disabled]="isLoading"
+            class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed">
+            <svg *ngIf="isLoading" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            {{ isLoading ? 'Guardando...' : 'Guardar Cambios' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
