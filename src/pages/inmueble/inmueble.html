@@ -1,105 +1,108 @@
-<div class="max-w-7xl mx-auto p-6 bg-white min-h-screen">
-  <h1 class="text-2xl font-bold mb-2 flex items-center gap-2">
-    <span>🏠</span> Inmuebles en tu barrio
-  </h1>
-  <p class="text-gray-600 mb-6">
-    Descubre departamentos, casas, locales comerciales y terrenos en alquiler o venta cerca de ti.</p>
-
-  <!-- Filtros -->
-  <div class="bg-gray-100 rounded-lg p-4 grid grid-cols-4 gap-4 w-full h-full ">
-    <div class="w-full ">
-      <label class="block text-sm font-semibold mb-1">Tipo de inmueble</label>
-      <select class="border border-gray-300 rounded px-3 py-2 w-full">
-        @for (tipo of tipos; track tipo) {
-        <option [value]="tipo">{{ tipo }}</option>
-        }
-      </select>
-    </div>
-    <div>
-      <label class="block text-sm font-semibold mb-1">Operación</label>
-      <select class="border border-gray-300 rounded px-3 py-2 w-full">
-        @for (operacion of operaciones; track operacion) {
-        <option [value]="operacion">{{ operacion }}</option>
-        }
-      </select>
-    </div>
-    <div>
-      <label class="block text-sm font-semibold mb-1">Distrito</label>
-      <select class="border border-gray-300 rounded px-3 py-2 w-full">
-        @for (distrito of distritos; track distrito) {
-        <option [value]="distrito">{{ distrito }}</option>
-        }
-      </select>
-    </div>
-    <div>
-      <label class="block text-sm font-semibold mb-1">Precio máximo</label>
-      <select class="border border-gray-300 rounded px-3 py-2 w-full">
-        @for (precio of precios; track precio) {
-        <option [value]="precio">{{ precio }}</option>
-        }
-      </select>
+<div class="max-w-7xl mx-auto p-6 bg-[#E5EDF1] min-h-screen">
+  <div class="flex justify-between items-center mb-8 bg-white p-6 rounded-xl shadow-sm">
+    <h1 class="text-3xl font-extrabold text-gray-900">
+      Catálogo de <span class="text-[#1A365D]">Inmuebles</span>
+    </h1>
+    <div class="flex gap-2">
+      <span class="bg-[#E5EDF1] text-[#1A365D] px-4 py-2 rounded-full text-sm font-semibold">
+        {{ inmuebles().length }} Propiedades
+      </span>
     </div>
   </div>
 
-  <!-- Tarjetas de inmuebles -->
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-    @for (inmueble of filtrarInmuebles(); track inmueble.inmuebleID) {
+  <!-- Filtros -->
+  <div class="bg-white rounded-xl p-6 mb-8 shadow-sm grid grid-cols-1 md:grid-cols-4 gap-4">
+    <div>
+      <label class="block text-sm font-semibold mb-1 text-gray-700">Tipo de inmueble</label>
+      <select class="border border-gray-300 rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-[#96C2DB] outline-none">
+        <option value="">Todos</option>
+        <option value="Departamento">Departamento</option>
+        <option value="Casa">Casa</option>
+        <option value="Local Comercial">Local Comercial</option>
+      </select>
+    </div>
+    <div>
+      <label class="block text-sm font-semibold mb-1 text-gray-700">Operación</label>
+      <select class="border border-gray-300 rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-[#96C2DB] outline-none">
+        <option value="">Todas</option>
+        <option value="Venta">Venta</option>
+        <option value="Alquiler">Alquiler</option>
+      </select>
+    </div>
+    <div>
+      <label class="block text-sm font-semibold mb-1 text-gray-700">Distrito</label>
+      <select class="border border-gray-300 rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-[#96C2DB] outline-none">
+        <option value="">Todos</option>
+        <option value="Lima">Lima</option>
+        <option value="Miraflores">Miraflores</option>
+        <option value="San Isidro">San Isidro</option>
+      </select>
+    </div>
+    <div class="flex items-end">
+      <button class="bg-[#1A365D] hover:bg-[#2C5282] text-white w-full py-2 rounded-lg font-semibold transition">
+        Filtrar
+      </button>
+    </div>
+  </div>
+
+  @if (inmuebles().length > 0) {
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    @for (inmueble of inmuebles(); track inmueble.inmuebleID) {
     <div (click)="navigateToDetail(inmueble.inmuebleID)"
-      class="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 cursor-pointer hover:shadow-lg transition-shadow">
-      <div class="relative">
-        <img [src]="inmueble.urlImagen" alt="Imagen inmueble" class="w-full h-48 object-cover rounded-t-lg" />
-        <span class="absolute top-2 left-2 text-xs font-semibold px-2 py-1 rounded text-white" [ngClass]="{
-              'bg-orange-500': inmueble.tipo === 'Departamento',
-              'bg-orange-400': inmueble.tipo === 'Casa',
-              'bg-orange-600': inmueble.tipo === 'Local Comercial'
-            }">{{ inmueble.tipo }}</span>
-        @if(inmueble.operacion == 'Alquiler'){
-        <span class="absolute top-2 right-2 bg-blue-500 text-white text-xs font-semibold px-2 py-1 rounded">
-          {{ inmueble.operacion }}
-        </span>
-        }
-        @if(inmueble.operacion == 'Venta'){
-        <span class="absolute top-2 right-2 bg-green-500 text-white text-xs font-semibold px-2 py-1 rounded">
-          {{ inmueble.operacion }}
-        </span>
-        }
+      class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition cursor-pointer border border-transparent hover:border-[#96C2DB]">
+      <!-- Imagen -->
+      <div class="relative h-48 bg-gray-200">
+        <img [src]="inmueble.urlImagen" [alt]="inmueble.titulo" class="w-full h-full object-cover"
+          onerror="this.src='https://images.unsplash.com/photo-1560448072-283bd0dfaa55?auto=format&fit=crop&w=800&q=60'" />
+        <div class="absolute top-3 right-3">
+          <span [class]="inmueble.operacion === 'Venta' ? 'bg-green-500' : 'bg-[#1A365D]'"
+            class="text-white px-3 py-1 rounded-full text-sm font-semibold shadow-sm">
+            {{ inmueble.operacion }}
+          </span>
+        </div>
       </div>
+
+      <!-- Contenido -->
       <div class="p-4">
-        <h3 class="font-bold mb-1">{{ inmueble.titulo }}</h3>
-        <p class="text-orange-600 font-semibold mb-2"> {{ inmueble.precio | currency: 'S/. ' }}</p>
-        <p class="text-gray-700 text-sm mb-4">{{ inmueble.ubicacion }}</p>
-        <div class="flex gap-4 text-gray-500 text-sm">
-          @if (inmueble.dormitorios > 0) {
-          <div class="flex items-center gap-1">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M3 12h18M9 6v6m6-6v6m-3 6v-6"></path>
+        <h3 class="font-bold text-lg text-gray-900 mb-2 line-clamp-1">
+          {{ inmueble.titulo }}
+        </h3>
+
+        <div class="flex items-center text-gray-600 text-sm mb-3">
+          <svg class="w-4 h-4 mr-1 text-[#96C2DB]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z">
+            </path>
+          </svg>
+          <span class="line-clamp-1">{{ inmueble.ubicacion }}</span>
+        </div>
+
+        <div class="flex justify-between items-center text-sm text-gray-600 mb-4 bg-[#E5EDF1] p-2 rounded-lg">
+          <span title="Dormitorios">🛏️ {{ inmueble.dormitorios }}</span>
+          <span title="Baños">🚿 {{ inmueble.banos }}</span>
+          <span title="Área">📐 {{ inmueble.medidas }}</span>
+        </div>
+
+        <div class="flex justify-between items-center border-t pt-4">
+          <p class="text-xl font-bold text-[#1A365D]">
+            S/. {{ inmueble.precio | number }}
+          </p>
+          <button class="text-[#1A365D] hover:text-[#2C5282] font-semibold flex items-center gap-1 transition">
+            Ver más
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
             </svg>
-            {{ inmueble.dormitorios }} hab
-          </div>
-          }
-          @if(inmueble.banos) {
-          <div class="flex items-center gap-1">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg">
-              <path stroke-linecap="round" stroke-linejoin="round"
-                d="M9 17v.01M15 17v.01M8 21h8a2 2 0 002-2v-5a2 2 0 00-2-2H8a2 2 0 00-2 2v5a2 2 0 002 2z"></path>
-            </svg>
-            {{ inmueble.banos }} baños
-          </div>
-          }
-          @if(inmueble.medidas) {
-          <div class="flex items-center gap-1">
-            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M5 19h14M5 15h14M7 11h10M7 7h10"></path>
-            </svg>
-            {{ inmueble.medidas }}
-          </div>
-          }
+          </button>
         </div>
       </div>
     </div>
     }
   </div>
+  } @else {
+  <div class="flex flex-col items-center justify-center py-20 bg-white rounded-2xl shadow-sm">
+    <div class="text-6xl mb-4">🏠</div>
+    <p class="text-gray-500 text-xl font-medium">No se encontraron inmuebles disponibles</p>
+  </div>
+  }
 </div>

@@ -3,6 +3,19 @@
 @import "leaflet/dist/leaflet.css";
 @import "tailwindcss";
 
+:root {
+    --primary-color: #96C2DB;
+    --secondary-color: #E5EDF1;
+    --dark-blue-color: #1A365D;
+    --white-color: #FFFFFF;
+}
+
+body {
+    background-color: var(--secondary-color);
+    color: #333;
+    font-family: 'Inter', sans-serif;
+}
+
 /* Add asterisk to label if the input/select/textarea in the same container is required */
 div:has(input:required)>label::after,
 div:has(select:required)>label::after,
@@ -13,4 +26,33 @@ div:has(textarea:required)>label::after {
 
 button {
     cursor: pointer;
+}
+
+/* Custom classes for the new palette */
+.bg-primary {
+    background-color: var(--primary-color);
+}
+
+.text-primary {
+    color: var(--primary-color);
+}
+
+.bg-secondary {
+    background-color: var(--secondary-color);
+}
+
+.text-secondary {
+    color: var(--secondary-color);
+}
+
+.bg-dark-blue {
+    background-color: var(--dark-blue-color);
+}
+
+.text-dark-blue {
+    color: var(--dark-blue-color);
+}
+
+.bg-white-custom {
+    background-color: var(--white-color);
 }

@@ -34,7 +34,7 @@
                     class="text-lg"></p-tag>
             </div>
 
-            <div class="text-4xl font-bold text-orange-600 mb-6">
+            <div class="text-4xl font-bold text-[#1A365D] mb-6">
                 {{ item.precio | currency: 'S/. ' }}
             </div>
 
@@ -62,13 +62,17 @@
 
             <div class="flex gap-4 mb-4">
                 <p-button label="Contactar Anunciante" icon="pi pi-whatsapp"
-                    styleClass="p-button-success w-full"></p-button>
-                <p-button label="Agendar Visita" icon="pi pi-calendar" styleClass="p-button-outlined w-full"></p-button>
+                    [style]="{'background-color': '#1A365D', 'border-color': '#1A365D'}" class="w-full"></p-button>
+                <p-button label="Agendar Visita" icon="pi pi-calendar"
+                    [style]="{'color': '#1A365D', 'border-color': '#1A365D'}"
+                    styleClass="p-button-outlined w-full"></p-button>
             </div>
 
             <div class="mt-4">
                 <p-button [label]="showMap() ? 'Ocultar Ubicación' : 'Ver Ubicación'" icon="pi pi-map-marker"
-                    (onClick)="toggleMap()" styleClass="p-button-info w-full"></p-button>
+                    (onClick)="toggleMap()"
+                    [style]="{'background-color': '#E5EDF1', 'color': '#1A365D', 'border-color': '#1A365D'}"
+                    class="w-full"></p-button>
             </div>
         </div>
     </div>
@@ -76,8 +80,8 @@
     <!-- Map Section -->
     @if (showMap()) {
     <div class="mt-8">
-        <div class="bg-white rounded-lg shadow-md p-4">
-            <h2 class="text-2xl font-bold mb-4">Ubicación y Ruta</h2>
+        <div class="bg-white rounded-lg shadow-md p-4 border border-[#E5EDF1]">
+            <h2 class="text-2xl font-bold mb-4 text-[#1A365D]">Ubicación y Ruta</h2>
             <div id="map" style="height: 500px; width: 100%; border-radius: 8px;"></div>
         </div>
     </div>
