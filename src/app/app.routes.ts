@@ -1,11 +1,10 @@
 import { Routes } from '@angular/router';
-import { App } from './app';
 import { Register } from '../pages/register/register';
 import { RegisterInmueble } from '../pages/register-inmueble/register-inmueble';
 import { Login } from '../pages/login/login';
 import { Main } from '../shared/main/main';
 import { Layout } from '../shared/Layout/layout';
-import { Inmbueble } from '../pages/inmbueble/inmbueble';
+import { InmuebleComponent } from '../pages/inmueble/inmueble';
 import { Company } from '../pages/company/company';
 import { Amanro } from '../pages/companies/amanro/amanro';
 import { Stacion64 } from '../pages/companies/stacion64/stacion64';
@@ -20,7 +19,7 @@ export const routes: Routes = [
       { path: 'login', component: Login },
       { path: 'registro-negocio', component: Register, canActivate: [authGuard] },
       { path: 'registro-inmueble', component: RegisterInmueble, canActivate: [authGuard] },
-      { path: 'inmueble', component: Inmbueble },
+      { path: 'inmueble', component: InmuebleComponent },
       { path: 'inmueble/:id', loadComponent: () => import('./pages/inmueble-detalle/inmueble-detalle').then(m => m.InmuebleDetalle) },
       { path: 'company', component: Company },
     ]
@@ -50,7 +49,7 @@ export const routes: Routes = [
       { path: '', component: Main },
       { path: 'registro-negocio', component: Register, canActivate: [authGuard] },
       { path: 'registro-inmueble', component: RegisterInmueble, canActivate: [authGuard] },
-      { path: 'inmueble', component: Inmbueble },
+      { path: 'inmueble', component: InmuebleComponent },
     ]
   },
   { path: 'amanro', component: Amanro },

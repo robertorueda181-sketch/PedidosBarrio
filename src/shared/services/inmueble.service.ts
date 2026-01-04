@@ -3,18 +3,29 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { AppConfigService } from './app-config.service';
 
+export interface InmuebleImagen {
+    urlImagen: string;
+    descripcion: string;
+}
+
 export interface Inmueble {
     inmuebleID: number;
     empresaID: string;
     tiposID: number;
-    tipo: string;
+    tipoInmueble?: string | null;
+    operacionID?: number | null;
+    tipoOperacion?: string | null;
+    tipo?: string; // For backward compatibility
     precio: number;
     medidas: string;
     ubicacion: string;
     dormitorios: number;
     banos: number;
     descripcion: string;
-    urlImagen?: string;
+    latitud?: string;
+    longitud?: string;
+    imagenes?: InmuebleImagen[];
+    urlImagen?: string; // For backward compatibility
     // UI fields
     operacion?: string;
     titulo?: string;
@@ -40,19 +51,37 @@ export class InmuebleService {
     }
 
     private transformInmueble(item: Inmueble): Inmueble {
-        // Extract filename from local path if present
-        // Example: D:\...\images/inmueble-1-fachada.jpg -> inmueble-1-fachada.jpg
-        const nombreArchivo = item.urlImagen ? item.urlImagen.split(/[/\\]/).pop() : '';
+        // Handle imagenes array - transform local paths to web URLs
+        let transformedImages: InmuebleImagen[] = [];
+        if (item.imagenes && item.imagenes.length > 0) {
+            transformedImages = item.imagenes.map(img => {
+                const nombreArchivo = img.urlImagen ? img.urlImagen.split(/[/\\]/).pop() : '';
+                return {
+                    urlImagen: nombreArchivo ? `${this.config.baseUrl}/images/${nombreArchivo}` : '',
+                    descripcion: img.descripcion
+                };
+            });
+        }
 
-        // Construct URL pointing to backend static files
-        const urlImagen = nombreArchivo
-            ? `${this.config.baseUrl}/images/${nombreArchivo}`
-            : 'https://images.unsplash.com/photo-1560448072-283bd0dfaa55?auto=format&fit=crop&w=800&q=60'; // Fallback
+        // For backward compatibility, set urlImagen from first image
+        const urlImagen = transformedImages.length > 0
+            ? transformedImages[0].urlImagen
+            : (item.urlImagen ? `${this.config.baseUrl}/images/${item.urlImagen.split(/[/\\]/).pop()}` :
+                'https://images.unsplash.com/photo-1560448072-283bd0dfaa55?auto=format&fit=crop&w=800&q=60');
+
+        // Set tipo from tipoInmueble if available, otherwise keep existing
+        const tipo = item.tipoInmueble || item.tipo || 'Inmueble';
+
+        // Set operacion from tipoOperacion if available
+        const operacion = item.tipoOperacion || item.operacion || 'Alquiler';
 
         return {
             ...item,
+            imagenes: transformedImages,
             urlImagen,
-            titulo: `${item.tipo} en ${item.ubicacion}`
+            tipo,
+            operacion,
+            titulo: `${tipo} en ${item.ubicacion}`
         };
     }
 }

@@ -3,15 +3,13 @@
     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
         <!-- Image Galleria -->
         <div class="w-full">
-            <p-galleria [value]="images()" [responsiveOptions]="responsiveOptions" [numVisible]="5" [circular]="true"
-                [showItemNavigators]="true" [showThumbnails]="true" [containerStyle]="{'max-width': '640px'}">
-                <ng-template pTemplate="item" let-item>
-                    <img [src]="item.itemImageSrc" [alt]="item.alt" class="w-full h-96 object-cover rounded-lg" />
+            <p-galleria [value]="images()" [responsiveOptions]="responsiveOptions"
+                [containerStyle]="{ 'max-width': '540px' }" [numVisible]="5">
+                <ng-template #item let-item>
+                    <img [src]="item.itemImageSrc" style="width:100%; object-fit: cover; display: block;" />
                 </ng-template>
-                <ng-template pTemplate="thumbnail" let-item>
-                    <div class="grid grid-nogutter justify-content-center">
-                        <img [src]="item.thumbnailImageSrc" [alt]="item.alt" class="w-20 h-20 object-cover" />
-                    </div>
+                <ng-template #thumbnail let-item>
+                    <img [src]="item.thumbnailImageSrc" style="max-height: 100px;" />
                 </ng-template>
             </p-galleria>
         </div>
@@ -62,13 +60,28 @@
                 </p>
             </div>
 
-            <div class="flex gap-4">
+            <div class="flex gap-4 mb-4">
                 <p-button label="Contactar Anunciante" icon="pi pi-whatsapp"
                     styleClass="p-button-success w-full"></p-button>
                 <p-button label="Agendar Visita" icon="pi pi-calendar" styleClass="p-button-outlined w-full"></p-button>
             </div>
+
+            <div class="mt-4">
+                <p-button [label]="showMap() ? 'Ocultar Ubicación' : 'Ver Ubicación'" icon="pi pi-map-marker"
+                    (onClick)="toggleMap()" styleClass="p-button-info w-full"></p-button>
+            </div>
         </div>
     </div>
+
+    <!-- Map Section -->
+    @if (showMap()) {
+    <div class="mt-8">
+        <div class="bg-white rounded-lg shadow-md p-4">
+            <h2 class="text-2xl font-bold mb-4">Ubicación y Ruta</h2>
+            <div id="map" style="height: 500px; width: 100%; border-radius: 8px;"></div>
+        </div>
+    </div>
+    }
     } @else {
     <div class="flex justify-center items-center h-64">
         <p class="text-gray-500">Cargando detalles del inmueble...</p>

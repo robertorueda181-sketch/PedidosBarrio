@@ -4,12 +4,12 @@ import { Router } from '@angular/router';
 import { Inmueble, InmuebleService } from '../../shared/services/inmueble.service';
 
 @Component({
-  selector: 'app-inmbueble',
+  selector: 'app-inmueble',
   imports: [CommonModule],
-  templateUrl: './inmbueble.html',
-  styleUrl: './inmbueble.css',
+  templateUrl: './inmueble.html',
+  styleUrl: './inmueble.css',
 })
-export class Inmbueble implements OnInit {
+export class InmuebleComponent implements OnInit {
   private inmuebleService = inject(InmuebleService);
   private router = inject(Router);
 
