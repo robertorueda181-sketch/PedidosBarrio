@@ -21,6 +21,7 @@ export const routes: Routes = [
       { path: 'registro-negocio', component: Register, canActivate: [authGuard] },
       { path: 'registro-inmueble', component: RegisterInmueble, canActivate: [authGuard] },
       { path: 'inmueble', component: Inmbueble },
+      { path: 'inmueble/:id', loadComponent: () => import('./pages/inmueble-detalle/inmueble-detalle').then(m => m.InmuebleDetalle) },
       { path: 'company', component: Company },
     ]
   },

@@ -20,4 +20,8 @@ export class AppConfigService {
     get apiUrl(): string {
         return this.config.apiUrl;
     }
+
+    get baseUrl(): string {
+        return this.config.baseUrl;
+    }
 }

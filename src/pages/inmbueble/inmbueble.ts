@@ -1,16 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
-interface Inmueble {
-  tipo: string;
-  operacion: string;
-  titulo: string;
-  precio: string;
-  distrito?: string;
-  habitaciones?: number;
-  banios?: number;
-  area?: string;
-  imagen: string;
-}
+import { Component, inject, OnInit, signal } from '@angular/core';
+import { Router } from '@angular/router';
+import { Inmueble, InmuebleService } from '../../shared/services/inmueble.service';
 
 @Component({
   selector: 'app-inmbueble',
@@ -18,8 +9,11 @@ interface Inmueble {
   templateUrl: './inmbueble.html',
   styleUrl: './inmbueble.css',
 })
-export class Inmbueble {
-      filtros = {
+export class Inmbueble implements OnInit {
+  private inmuebleService = inject(InmuebleService);
+  private router = inject(Router);
+
+  filtros = {
     tipo: 'Todos los tipos',
     operacion: 'Todas',
     distrito: 'Todos los distritos',
@@ -31,91 +25,36 @@ export class Inmbueble {
   distritos = ['Todos los distritos', 'San Isidro', 'Miraflores', 'San Miguel'];
   precios = ['Sin límite', 'S/ 1,000', 'S/ 3,000', 'S/ 5,000'];
 
-  inmuebles: Inmueble[] = [
-    {
-      tipo: 'Departamento',
-      operacion: 'Alquiler',
-      titulo: 'Departamento Moderno en San Isidro',
-      precio: 'S/ 2,800',
-      distrito: 'San Isidro',
-      habitaciones: 3,
-      banios: 2,
-      area: '90m²',
-      imagen: 'https://images.unsplash.com/photo-1560448072-283bd0dfaa55?auto=format&fit=crop&w=800&q=60',
-    },
-    {
-      tipo: 'Casa',
-      operacion: 'Alquiler',
-      titulo: 'Casa Familiar en Miraflores',
-      precio: 'S/ 4,500',
-      distrito: 'Miraflores',
-      habitaciones: 4,
-      banios: 3,
-      area: '150m²',
-      imagen: 'https://images.unsplash.com/photo-1501183638714-8adaf9bfeaa3?auto=format&fit=crop&w=800&q=60',
-    },
-    {
-      tipo: 'Local Comercial',
-      operacion: 'Alquiler',
-      titulo: 'Local Comercial en San Miguel',
-      precio: 'S/ 3,200',
-      distrito: 'San Miguel',
-      habitaciones: 0,
-      banios: 1,
-      area: '80m²',
-      imagen: 'https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=800&q=60',
-    },
-    {
-      tipo: 'Local Comercial',
-      operacion: 'Alquiler',
-      titulo: 'Local Comercial en San Miguel',
-      precio: 'S/ 3,200',
-      distrito: 'San Miguel',
-      habitaciones: 0,
-      banios: 1,
-      area: '80m²',
-      imagen: 'https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=800&q=60',
-    },
-    {
-      tipo: 'Local Comercial',
-      operacion: 'Alquiler',
-      titulo: 'Local Comercial en San Miguel',
-      precio: 'S/ 3,200',
-      distrito: 'San Miguel',
-      habitaciones: 0,
-      banios: 1,
-      area: '80m²',
-      imagen: 'https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=800&q=60',
-    },
-    {
-      tipo: 'Local Comercial',
-      operacion: 'Alquiler',
-      titulo: 'Local Comercial en San Miguel',
-      precio: 'S/ 3,200',
-      distrito: 'San Miguel',
-      habitaciones: 0,
-      banios: 1,
-      imagen: 'https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=800&q=60',
-    },
-    {
-      tipo: 'Local Comercial',
-      operacion: 'Alquiler',
-      titulo: 'Local Comercial en San Miguel',
-      precio: 'S/ 3,200',
-      distrito: 'San Miguel',
-      habitaciones: 0,
-      banios: 1,
-      area: '80m²',
-      imagen: 'https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=800&q=60',
-    },
-  ];
+  inmuebles = signal<Inmueble[]>([]);
+
+  ngOnInit() {
+    this.loadInmuebles();
+  }
+
+  loadInmuebles() {
+    this.inmuebleService.getInmuebles().subscribe({
+      next: (data) => {
+        this.inmuebles.set(data);
+        console.log('Inmuebles loaded:', this.inmuebles());
+      },
+      error: (err) => console.error('Error loading inmuebles', err)
+    });
+  }
 
   filtrarInmuebles(): Inmueble[] {
-    return this.inmuebles.filter(inmueble => {
-      return (this.filtros.tipo === 'Todos los tipos' || inmueble.tipo === this.filtros.tipo) &&
-             (this.filtros.operacion === 'Todas' || inmueble.operacion === this.filtros.operacion) &&
-             (this.filtros.distrito === 'Todos los distritos' || inmueble.distrito === this.filtros.distrito);
-      // Para precio se puede añadir lógica más compleja si es necesario
+    return this.inmuebles().filter(inmueble => {
+      const cumpleTipo = this.filtros.tipo === 'Todos los tipos' || inmueble.tipo === this.filtros.tipo;
+      const cumpleOperacion = this.filtros.operacion === 'Todas' || inmueble.operacion === this.filtros.operacion;
+      // Note: API returns 'ubicacion', filter uses 'distrito'. We might need to adjust logic or data.
+      // For now, checking if ubicacion includes the distrito string or if it matches exactly if we had strict districts.
+      // Since API returns full address in ubicacion, we might check inclusion.
+      const cumpleDistrito = this.filtros.distrito === 'Todos los distritos' || inmueble.ubicacion.includes(this.filtros.distrito);
+
+      return cumpleTipo && cumpleOperacion && cumpleDistrito;
     });
+  }
+
+  navigateToDetail(id: number) {
+    this.router.navigate(['/inmueble', id]);
   }
 }
