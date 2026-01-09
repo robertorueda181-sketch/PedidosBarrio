@@ -1,0 +1,136 @@
+<main class="container mx-auto px-4 md:px-12 py-8 min-h-screen">
+    @if (loading()) {
+    <div class="flex justify-center items-center h-64">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1A365D]"></div>
+    </div>
+    } @else {
+    @if (servicio(); as item) {
+    <div class="bg-white rounded-2xl shadow-xl overflow-hidden p-6 md:p-10">
+        <div class="flex flex-col lg:flex-row gap-12">
+
+            <!-- Columna Izquierda: Galería -->
+            <div class="lg:w-1/2">
+                <div class="rounded-2xl overflow-hidden mb-6 shadow-md relative group">
+                    <img [src]="activeImage()" [alt]="item.nombre"
+                        class="w-full h-[450px] object-cover transition-transform duration-700 group-hover:scale-105">
+                    <div class="absolute top-4 left-4">
+                        <span class="bg-[#1A365D] text-white px-4 py-1.5 rounded-full text-sm font-bold shadow-lg">
+                            Servicio Profesional
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Miniaturas -->
+                @if (item.imagenes && item.imagenes.length > 0) {
+                <div class="flex space-x-3 overflow-x-auto pb-4 scrollbar-hide">
+                    @for (img of item.imagenes; track img.urlImagen) {
+                    <div (click)="setActiveImage(img.urlImagen)"
+                        class="flex-shrink-0 w-28 h-20 rounded-xl overflow-hidden cursor-pointer border-2 transition-all duration-200"
+                        [class.border-[#1A365D]]="activeImage() === img.urlImagen"
+                        [class.border-transparent]="activeImage() !== img.urlImagen"
+                        [class.opacity-60]="activeImage() !== img.urlImagen">
+                        <img [src]="img.urlImagen" class="w-full h-full object-cover">
+                    </div>
+                    }
+                </div>
+                }
+            </div>
+
+            <!-- Columna Derecha: Información -->
+            <div class="lg:w-1/2">
+                <div class="flex justify-between items-start mb-4">
+                    <h1 class="text-4xl font-extrabold text-[#1A365D] leading-tight">{{ item.nombre || item.descripcion
+                        }}</h1>
+                    @if (item.verificado) {
+                    <span
+                        class="bg-blue-100 text-blue-600 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider shadow-sm">
+                        Verificado
+                    </span>
+                    }
+                </div>
+
+                <p class="text-gray-500 flex items-center mb-8 text-lg">
+                    <i class="pi pi-map-marker mr-2 text-[#1A365D]"></i> Cobertura en: Lima Metropolitana y Callao
+                </p>
+
+                <div class="text-5xl font-black text-[#1A365D] mb-8 flex items-baseline gap-2">
+                    S/. {{ item.precio | number:'1.2-2' }}
+                    <span class="text-base font-medium text-gray-400">/ {{ item.unidadMedida }}</span>
+                </div>
+
+                <!-- Stats -->
+                <div
+                    class="grid grid-cols-3 gap-6 border-y border-gray-100 py-8 mb-8 text-center bg-gray-50/50 rounded-2xl">
+                    <div>
+                        <p class="text-gray-400 text-xs uppercase font-bold tracking-widest mb-1">Experiencia</p>
+                        <p class="font-black text-2xl text-[#1A365D]">{{ item.experiencia }}</p>
+                    </div>
+                    <div class="border-x border-gray-200">
+                        <p class="text-gray-400 text-xs uppercase font-bold tracking-widest mb-1">Garantía</p>
+                        <p class="font-black text-2xl text-[#1A365D]">{{ item.garantia }}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-400 text-xs uppercase font-bold tracking-widest mb-1">Atención</p>
+                        <p class="font-black text-2xl text-[#1A365D]">{{ item.atencion }}</p>
+                    </div>
+                </div>
+
+                <h3 class="text-2xl font-bold text-[#1A365D] mb-4">Descripción</h3>
+                <p class="text-gray-600 leading-relaxed mb-10 text-lg">
+                    {{ item.descripcion }}
+                </p>
+
+                <!-- Acciones -->
+                <div class="flex flex-col sm:flex-row gap-5">
+                    <button
+                        class="bg-[#1A365D] text-white flex-1 py-5 rounded-2xl font-black text-lg flex items-center justify-center hover:bg-[#2C5282] transition-all shadow-xl hover:-translate-y-1">
+                        <i class="pi pi-whatsapp mr-3 text-2xl"></i> Contactar por WhatsApp
+                    </button>
+                    <button
+                        class="border-2 border-gray-200 text-gray-700 flex-1 py-5 rounded-2xl font-black text-lg flex items-center justify-center hover:bg-gray-50 transition-all shadow-sm">
+                        <i class="pi pi-calendar mr-3 text-2xl"></i> Solicitar Presupuesto
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Servicios Detallados -->
+        @if (item.serviciosDetallados && item.serviciosDetallados.length > 0) {
+        <div class="mt-20 pt-16 border-t border-gray-100">
+            <h3 class="text-3xl font-black text-[#1A365D] mb-10">Nuestros Servicios Detallados</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                @for (sub of item.serviciosDetallados; track sub.titulo) {
+                <div
+                    class="bg-[#F0F7FF] p-8 rounded-3xl border border-blue-100 hover:shadow-lg transition-all duration-300 group">
+                    <div class="flex items-center mb-5">
+                        <div
+                            class="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-md mr-4 group-hover:bg-[#1A365D] transition-colors">
+                            <i [class]="sub.icono || 'pi pi-check'"
+                                class="text-[#1A365D] text-2xl group-hover:text-white"></i>
+                        </div>
+                        <h4 class="font-black text-xl text-[#1A365D]">{{ sub.titulo }}</h4>
+                    </div>
+                    <p class="text-gray-600 mb-6 leading-relaxed">{{ sub.descripcion }}</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-[#1A365D] font-black text-lg">Desde S/. {{ sub.precio | number:'1.2-2'
+                            }}</span>
+                        <i class="pi pi-arrow-right text-blue-300 group-hover:text-[#1A365D] transition-colors"></i>
+                    </div>
+                </div>
+                }
+            </div>
+        </div>
+        }
+    </div>
+    } @else {
+    <div class="bg-white rounded-2xl p-20 text-center shadow-lg">
+        <div class="text-8xl mb-6">🔍</div>
+        <h3 class="text-3xl font-black text-[#1A365D] mb-4">Servicio no encontrado</h3>
+        <p class="text-gray-500 text-lg mb-8">El servicio que buscas no está disponible o ha sido retirado.</p>
+        <button routerLink="/servicios" class="bg-[#1A365D] text-white px-10 py-4 rounded-2xl font-bold shadow-xl">
+            Ver todos los servicios
+        </button>
+    </div>
+    }
+    }
+</main>

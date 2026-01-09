@@ -21,6 +21,9 @@ export const routes: Routes = [
       { path: 'registro-inmueble', component: RegisterInmueble, canActivate: [authGuard] },
       { path: 'inmueble', component: InmuebleComponent },
       { path: 'inmueble/:id', loadComponent: () => import('./pages/inmueble-detalle/inmueble-detalle').then(m => m.InmuebleDetalle) },
+      { path: 'negocios', loadComponent: () => import('../pages/negocios/negocios').then(m => m.NegociosComponent) },
+      { path: 'servicios', loadComponent: () => import('../pages/servicios/servicios').then(m => m.ServiciosComponent) },
+      { path: 'servicio/:id', loadComponent: () => import('../pages/servicio-detalle/servicio-detalle').then(m => m.ServicioDetalleComponent) },
       { path: 'company', component: Company },
     ]
   },

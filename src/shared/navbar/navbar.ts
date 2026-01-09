@@ -11,8 +11,13 @@ import { CommonModule } from '@angular/common';
 })
 export class Navbar {
     isSubmenuOpen = false;
+    isMenuOpen = false;
 
     constructor(private router: Router) { }
+
+    toggleMenu() {
+        this.isMenuOpen = !this.isMenuOpen;
+    }
 
     toggleSubmenu() {
         this.isSubmenuOpen = !this.isSubmenuOpen;

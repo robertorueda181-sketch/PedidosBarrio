@@ -92,3 +92,12 @@
     </div>
     }
 </div>
+
+<!-- Botón de Scroll hacia arriba -->
+@if (showScrollButton()) {
+<button (click)="scrollToTop()"
+    class="fixed bottom-8 right-8 bg-[#1A365D] text-white w-12 h-12 rounded-full shadow-lg hover:bg-[#2C5282] transition-all duration-300 flex items-center justify-center z-[1001]"
+    aria-label="Volver arriba">
+    <i class="pi pi-chevron-up text-xl"></i>
+</button>
+}

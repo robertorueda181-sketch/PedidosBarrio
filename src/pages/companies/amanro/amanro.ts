@@ -1,46 +1,43 @@
-import { Component } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Component, OnInit, inject, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { NegocioService, NegocioDetalle } from '../../../shared/services/negocio.service';
 
 @Component({
-  selector: 'app-companies',
-  imports: [],
+  selector: 'app-amanro',
+  standalone: true,
+  imports: [CommonModule],
   templateUrl: './amanro.html',
 })
-export class Amanro {
+export class Amanro implements OnInit {
+  private negocioService = inject(NegocioService);
 
-  //cartItems$!: Observable<CartItem[]>;
-  total$!: Observable<number>; // Puedes crear un observable para el total también
+  negocio = signal<NegocioDetalle | null>(null);
+  loading = signal<boolean>(true);
+
   whatsappPhoneNumber: string = '51954121196';
 
-  sendWhatsAppOrder() {
-    let orderMessage = "\n\n¡Espero su confirmación!";
+  ngOnInit() {
+    this.loadData('amanro');
+  }
 
+  loadData(codigo: string) {
+    this.negocioService.getNegocioByCodigo(codigo).subscribe({
+      next: (data) => {
+        this.negocio.set(data);
+        this.loading.set(false);
+        console.log(data);
+      },
+      error: (err) => {
+        console.error('Error loading negocio detail', err);
+        this.loading.set(false);
+      }
+    });
+  }
+
+  sendWhatsAppOrder() {
+    let orderMessage = "¡Hola! Me gustaría hacer un pedido.\n\n¡Espero su confirmación!";
     const encodedMessage = encodeURIComponent(orderMessage);
     const whatsappUrl = `https://wa.me/${this.whatsappPhoneNumber}?text=${encodedMessage}`;
-
     window.open(whatsappUrl, '_blank');
-    //   this.cartItems$.subscribe(items => {
-    //     if (items.length === 0) {
-    //       alert("Tu carrito está vacío. Por favor, agrega productos antes de enviar el pedido.");
-    //       return;
-    //     }
-
-    //     let orderMessage = "¡Hola! Me gustaría hacer el siguiente pedido:\n\n";
-    //     items.forEach((item, index) => {
-    //       orderMessage += `${index + 1}. ${item.name} x${item.quantity} - S/ ${(item.price * item.quantity).toFixed(2)}\n`;
-    //     });
-
-    //     //orderMessage += `\nTotal: S/ ${this.getTotal().toFixed(2)}`;
-    //     orderMessage += "\n\n¡Espero su confirmación!";
-
-    //     const encodedMessage = encodeURIComponent(orderMessage);
-    //     const whatsappUrl = `https://wa.me/${this.whatsappPhoneNumber}?text=${encodedMessage}`;
-
-    //     window.open(whatsappUrl, '_blank');
-
-    //     // Opcional: limpiar el carrito después de enviar el pedido
-    //     //this.cartService.clearCart();
-    //   }).unsubscribe(); // Importante desuscribirse para evitar memory leaks
-    // }
   }
 }

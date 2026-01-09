@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, HostListener } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Inmueble, InmuebleService } from '../../../shared/services/inmueble.service';
 import { GalleriaModule } from 'primeng/galleria';
@@ -21,8 +21,22 @@ export class InmuebleDetalle implements OnInit {
   inmueble = signal<Inmueble | null>(null);
   images = signal<any[]>([]);
   showMap = signal<boolean>(false);
+  showScrollButton = signal<boolean>(false);
 
   private map: L.Map | null = null;
+
+  @HostListener('window:scroll', [])
+  onWindowScroll() {
+    const scrollOffset = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
+    this.showScrollButton.set(scrollOffset > 300);
+  }
+
+  scrollToTop() {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  }
 
   responsiveOptions = [
     {

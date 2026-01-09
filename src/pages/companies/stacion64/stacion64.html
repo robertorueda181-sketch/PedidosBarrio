@@ -8,9 +8,7 @@
         </div>
         <ul class="hidden md:flex gap-8 font-semibold text-yellow-900">
             <li><a href="#inicio" class="hover:underline hover:text-yellow-800 transition">Inicio</a></li>
-            <li><a href="#pollo" class="hover:underline hover:text-yellow-800 transition">Pollo a la Brasa</a></li>
-            <li><a href="#parrilla" class="hover:underline hover:text-yellow-800 transition">Parrillas</a></li>
-            <li><a href="#postres" class="hover:underline hover:text-yellow-800 transition">Postres</a></li>
+            <li><a href="#menu" class="hover:underline hover:text-yellow-800 transition">Nuestra Carta</a></li>
             <li><a href="#contacto" class="hover:underline hover:text-yellow-800 transition">Contacto</a></li>
         </ul>
     </nav>
@@ -30,129 +28,47 @@
                     Disfruta el mejor Pollo a la Brasa, las jugosas Parrillas y los postres caseros como nuestra famosa
                     torta de chocolate.
                 </p>
-                <a href="#pollo"
+                <a href="#menu"
                     class="inline-block bg-yellow-900 text-yellow-300 px-8 py-3 rounded-md font-semibold hover:bg-yellow-700 transition select-none">
                     Ver Menú
                 </a>
             </div>
             <div class="md:w-1/2 rounded-lg overflow-hidden shadow-xl max-h-96">
-                <img src="https://images.unsplash.com/photo-1600891964599-f61ba0e24092?auto=format&fit=crop&w=800&q=70"
+                <img [src]="negocio()?.urlBanner || 'https://images.unsplash.com/photo-1600891964599-f61ba0e24092?auto=format&fit=crop&w=800&q=70'"
                     alt="Delicioso Pollo a la Brasa" class="w-full h-full object-cover" loading="lazy" />
             </div>
         </div>
     </section>
 
-    <!-- Pollo a la Brasa -->
-    <section id="pollo" class="max-w-7xl mx-auto px-6 md:px-12 py-16">
-        <h3 class="text-3xl font-extrabold text-yellow-900 mb-8 text-center select-none">Pollo a la Brasa</h3>
+    <!-- Menú Dinámico -->
+    <section id="menu" class="max-w-7xl mx-auto px-6 md:px-12 py-16">
+        <h3 class="text-3xl font-extrabold text-yellow-900 mb-8 text-center select-none">Nuestra Carta</h3>
+
+        @if (loading()) {
+        <div class="flex justify-center py-12">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-900"></div>
+        </div>
+        } @else {
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            @for (producto of negocio()?.productos; track producto.productoID) {
             <article
                 class="bg-yellow-100 rounded-xl shadow-lg overflow-hidden hover:scale-105 transition-transform cursor-pointer">
-                <img src="https://images.unsplash.com/photo-1562967916-eb82221dfb27?auto=format&fit=crop&w=600&q=70"
-                    alt="Pollo a la brasa con papas" class="w-full h-52 object-cover" loading="lazy" />
+                <img [src]="producto.urlImagen" [alt]="producto.nombre" class="w-full h-52 object-cover" loading="lazy"
+                    onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=70'" />
                 <div class="p-6">
-                    <h4 class="font-semibold text-yellow-900 mb-2">Pollo a la Brasa Tradicional</h4>
-                    <p class="text-yellow-900/80 mb-4">Acompañado de papas y ensalada fresca.</p>
-                    <p class="font-bold text-yellow-800">$35.00</p>
+                    <h4 class="font-semibold text-yellow-900 mb-2">{{ producto.nombre }}</h4>
+                    <p class="text-yellow-900/80 mb-4 text-sm line-clamp-2">{{ producto.descripcion }}</p>
+                    <p class="font-bold text-yellow-800 text-xl">S/. {{ producto.precio | number:'1.2-2' }}</p>
                 </div>
             </article>
-            <article
-                class="bg-yellow-100 rounded-xl shadow-lg overflow-hidden hover:scale-105 transition-transform cursor-pointer">
-                <img src="https://images.unsplash.com/photo-1600891964386-2e59f4d2b91a?auto=format&fit=crop&w=600&q=70"
-                    alt="Brochetas de pollo" class="w-full h-52 object-cover" loading="lazy" />
-                <div class="p-6">
-                    <h4 class="font-semibold text-yellow-900 mb-2">Brochetas de Pollo</h4>
-                    <p class="text-yellow-900/80 mb-4">Jugosas brochetas marinadas a la parrilla.</p>
-                    <p class="font-bold text-yellow-800">$28.00</p>
-                </div>
-            </article>
-            <article
-                class="bg-yellow-100 rounded-xl shadow-lg overflow-hidden hover:scale-105 transition-transform cursor-pointer">
-                <img src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=600&q=70"
-                    alt="Acompañamientos de pollo" class="w-full h-52 object-cover" loading="lazy" />
-                <div class="p-6">
-                    <h4 class="font-semibold text-yellow-900 mb-2">Combos Familiares</h4>
-                    <p class="text-yellow-900/80 mb-4">Variedad de acompañamientos para toda la familia.</p>
-                    <p class="font-bold text-yellow-800">$65.00</p>
-                </div>
-            </article>
-        </div>
-    </section>
-
-    <!-- Parrillas -->
-    <section id="parrilla" class="bg-yellow-50 py-16">
-        <div class="max-w-7xl mx-auto px-6 md:px-12">
-            <h3 class="text-3xl font-extrabold text-yellow-900 mb-8 text-center select-none">Parrillas</h3>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <article
-                    class="bg-yellow-100 rounded-xl shadow-lg overflow-hidden hover:scale-105 transition-transform cursor-pointer">
-                    <img src="https://images.unsplash.com/photo-1600891964206-85ecf6e14b1b?auto=format&fit=crop&w=600&q=70"
-                        alt="Parrilla mixta" class="w-full h-52 object-cover" loading="lazy" />
-                    <div class="p-6">
-                        <h4 class="font-semibold text-yellow-900 mb-2">Parrilla Mixta</h4>
-                        <p class="text-yellow-900/80 mb-4">Selección de carnes, chorizos y verduras a la parrilla.</p>
-                        <p class="font-bold text-yellow-800">$55.00</p>
-                    </div>
-                </article>
-                <article
-                    class="bg-yellow-100 rounded-xl shadow-lg overflow-hidden hover:scale-105 transition-transform cursor-pointer">
-                    <img src="https://images.unsplash.com/photo-1565299543924-5d56f8ce6d77?auto=format&fit=crop&w=600&q=70"
-                        alt="Parrilla criolla" class="w-full h-52 object-cover" loading="lazy" />
-                    <div class="p-6">
-                        <h4 class="font-semibold text-yellow-900 mb-2">Parrilla Criolla</h4>
-                        <p class="text-yellow-900/80 mb-4">Carnes tradicionales marinadas y ahumadas.</p>
-                        <p class="font-bold text-yellow-800">$50.00</p>
-                    </div>
-                </article>
-                <article
-                    class="bg-yellow-100 rounded-xl shadow-lg overflow-hidden hover:scale-105 transition-transform cursor-pointer">
-                    <img src="https://images.unsplash.com/photo-1564758866812-c2d1e23dfeb8?auto=format&fit=crop&w=600&q=70"
-                        alt="Parrilla vegetariana" class="w-full h-52 object-cover" loading="lazy" />
-                    <div class="p-6">
-                        <h4 class="font-semibold text-yellow-900 mb-2">Parrilla Vegetariana</h4>
-                        <p class="text-yellow-900/80 mb-4">Deliciosas verduras y hongos a la parrilla.</p>
-                        <p class="font-bold text-yellow-800">$40.00</p>
-                    </div>
-                </article>
+            }
+            @if (negocio()?.productos?.length === 0) {
+            <div class="col-span-full text-center py-12">
+                <p class="text-yellow-900 italic">No hay productos disponibles en este momento.</p>
             </div>
+            }
         </div>
-    </section>
-
-    <!-- Postres -->
-    <section id="postres" class="max-w-7xl mx-auto px-6 md:px-12 py-16">
-        <h3 class="text-3xl font-extrabold text-yellow-900 mb-8 text-center select-none">Postres</h3>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            <article
-                class="bg-yellow-100 rounded-xl shadow-lg overflow-hidden hover:scale-105 transition-transform cursor-pointer">
-                <img src="https://images.unsplash.com/photo-1562440499-3e3a86ec97de?auto=format&fit=crop&w=600&q=70"
-                    alt="Torta de chocolate" class="w-full h-52 object-cover" loading="lazy" />
-                <div class="p-6">
-                    <h4 class="font-semibold text-yellow-900 mb-2">Torta de Chocolate Casera</h4>
-                    <p class="text-yellow-900/80 mb-4">Un clásico irresistible, esponjosa y rica en sabor.</p>
-                    <p class="font-bold text-yellow-800">$20.00</p>
-                </div>
-            </article>
-            <article
-                class="bg-yellow-100 rounded-xl shadow-lg overflow-hidden hover:scale-105 transition-transform cursor-pointer">
-                <img src="https://images.unsplash.com/photo-1601904627142-fc05bdbed48c?auto=format&fit=crop&w=600&q=70"
-                    alt="Helado artesanal" class="w-full h-52 object-cover" loading="lazy" />
-                <div class="p-6">
-                    <h4 class="font-semibold text-yellow-900 mb-2">Helado Artesanal</h4>
-                    <p class="text-yellow-900/80 mb-4">Con sabores naturales y texturas cremosas.</p>
-                    <p class="font-bold text-yellow-800">$15.00</p>
-                </div>
-            </article>
-            <article
-                class="bg-yellow-100 rounded-xl shadow-lg overflow-hidden hover:scale-105 transition-transform cursor-pointer">
-                <img src="https://images.unsplash.com/photo-1562440499-9cde86237217?auto=format&fit=crop&w=600&q=70"
-                    alt="Cheesecake de fresa" class="w-full h-52 object-cover" loading="lazy" />
-                <div class="p-6">
-                    <h4 class="font-semibold text-yellow-900 mb-2">Cheesecake de Fresa</h4>
-                    <p class="text-yellow-900/80 mb-4">Dulce y fresco con base crocante.</p>
-                    <p class="font-bold text-yellow-800">$22.00</p>
-                </div>
-            </article>
-        </div>
+        }
     </section>
 
     <!-- Contacto -->
@@ -160,20 +76,18 @@
         <div class="max-w-5xl mx-auto px-6 md:px-12 text-center">
             <h3 class="text-3xl font-extrabold text-yellow-50 mb-6 select-none">Contacto & Ubicación</h3>
             <p class="text-stone-50 text-lg mb-8 max-w-xl mx-auto">
-                Visítanos en Avenida Principal 123, Ciudad. Abierto todos los días de 12:00 pm a 11:00 pm.
+                {{ negocio()?.direccion || 'Visítanos en nuestro local principal.' }}
             </p>
-            <a href="tel:+51123456789"
+            <a [href]="'tel:' + (negocio()?.telefono || '+51123456789')"
                 class="inline-block bg-yellow-100 px-8 py-3 rounded-md font-semibold hover:bg-yellow-700 transition select-none">
-                Llámanos: +51 123 456 789
+                Llámanos: {{ negocio()?.telefono || '+51 123 456 789' }}
             </a>
             <div class="mt-10">
                 <section id="ubicacion" class="max-w-7xl mx-auto px-6 md:px-12 py-8">
-
                     <iframe
                         src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3901.6107094404126!2d-76.7377619!3d-12.5140636!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x910575c3e7043907%3A0xbb547c9c21ee1e12!2sStacion%2064!5e0!3m2!1ses!2spe!4v1686765645000!5m2!1ses!2spe"
-                        width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"
+                        width="100%" height="300" style="border:0;" allowfullscreen="" loading="lazy"
                         referrerpolicy="no-referrer-when-downgrade" title="Ubicación Stacion 64"></iframe>
-
                 </section>
             </div>
         </div>

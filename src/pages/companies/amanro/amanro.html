@@ -11,8 +11,6 @@
           <circle cx="11" cy="11" r="7" stroke-linecap="round" stroke-linejoin="round"></circle>
           <line x1="21" y1="21" x2="16.65" y2="16.65" stroke-linecap="round" stroke-linejoin="round"></line>
         </svg></button>
-      <!-- <button aria-label="Carrito" class="hover:text-brown-dark"><svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="9" cy="21" r="1" stroke-linecap="round" stroke-linejoin="round"></circle><circle cx="20" cy="21" r="1" stroke-linecap="round" stroke-linejoin="round"></circle></svg></button> -->
-      <!-- Hamburguer menu for small screens -->
       <button aria-label="Menú" class="md:hidden hover:text-brown-dark">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round" stroke-linejoin="round"></path>
@@ -33,54 +31,62 @@
   </nav>
 
   <!-- Top section with images -->
-  <section class="grid grid-cols-1 md:grid-cols-3 gap-2 p-4">
-    <img src="assets/makis.png" alt="Makis" class="w-full h-48 object-cover rounded" />
-    <div class="bg-gray-800 text-white flex flex-col justify-center items-center p-4">
-      <h2 class="text-center font-bold uppercase mb-3 text-lg md:text-xl">SABOR PERUANO, FUSION DE TRADICION & FUEGO
-      </h2>
-      <button class="bg-white text-black px-4 py-1 hover:bg-gray-200 uppercase font-semibold text-sm">Explora
-        Menú</button>
+  <div class="relative min-h-160 lg:min-h-0 bg-surface-0 dark:bg-surface-900 flex lg:flex-row flex-col">
+    <div class="flex lg:flex lg:flex-row flex-col justify-center md:justify-normal h-full flex-1">
+      <div class="relative flex-1 z-20 flex items-center justify-center">
+        <div class="flex items-center justify-center h-full">
+          <div class="w-full max-w-2xl px-6 py-12 lg:p-12 xl:p-16 text-center lg:text-left">
+            <h1
+              class="text-4xl xl:text-5xl font-bold text-surface-0 lg:text-surface-900 dark:text-surface-0 mb-6 leading-tight!">
+              <span class="block">Create the screens your</span>
+              <span class="block text-primary">visitors deserve to see</span>
+            </h1>
+
+            <p
+              class="text-surface-0/90 lg:text-surface-700 dark:text-surface-200 text-xl leading-normal mb-8 max-w-xl lg:max-w-none">
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
+              dolore magna aliqua.
+            </p>
+
+            <div class="flex items-center gap-4 justify-center lg:justify-start">
+              <button pButton type="button">
+                <span pButtonLabel>Learn More</span>
+              </button>
+              <button pButton type="button" outlined>
+                <span pButtonLabel>Live Demo</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="absolute lg:relative inset-0 lg:inset-auto flex-1">
+        <div class="absolute lg:hidden inset-0 bg-surface-900/60 dark:bg-surface-900/80 z-10"></div>
+        <img src="assets/restaurante.jpg" alt="hero-1"
+          class="h-full w-full object-cover xl:[clip-path:polygon(12%_0,100%_0%,100%_100%,0_100%)]" />
+      </div>
     </div>
-    <img src="assets/parrilla.png" alt="Parrilla" class="w-full h-48 object-cover rounded" />
-  </section>
+  </div>
 
   <!-- Middle section -->
   <section style="background-color: #fedeb8;"
     class="bg-amber-200 text-amber-950 p-6 grid grid-cols-1 md:grid-cols-12 gap-4">
-    <!-- Left part: makis fusion -->
+    <!-- Left part: Carta dinámica -->
     <div class="col-span-full md:col-span-4 text-center md:text-left">
       <h3 class="font-semibold uppercase mb-4 text-xl">NUESTRA CARTA</h3>
       <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 justify-items-center md:justify-items-start">
-        <div class="relative group">
-          <img src="assets/makis1.png" alt="Maki 1"
-            class="rounded-full border-4 border-white object-cover w-20 h-20 sm:w-24 sm:h-24" />
-          <p class="mt-2 text-center text-xs">ACZSSSMBI0</p>
+        @for (producto of negocio()?.productos; track producto.productoID) {
+        <div class="relative group text-center">
+          <img [src]="producto.urlImagen" [alt]="producto.nombre"
+            class="rounded-full border-4 border-white object-cover w-20 h-20 sm:w-24 sm:h-24 shadow-md hover:scale-105 transition-transform" />
+          <p class="mt-2 text-center text-[10px] font-bold uppercase line-clamp-2 w-20 sm:w-24">{{ producto.nombre }}
+          </p>
+          <p class="text-[#1A365D] font-bold text-xs">S/. {{ producto.precio | number:'1.2-2' }}</p>
         </div>
-        <div class="relative group">
-          <img src="assets/makis2.png" alt="Maki 2"
-            class="rounded-full border-4 border-white object-cover w-20 h-20 sm:w-24 sm:h-24" />
-          <p class="mt-2 text-center text-xs">BS OLLMMILA</p>
-        </div>
-        <div class="relative group">
-          <img src="assets/parrilla.png" alt="Maki 3"
-            class="rounded-full border-4 border-white object-cover w-20 h-20 sm:w-24 sm:h-24" />
-          <p class="mt-2 text-center text-xs">MMES RIUA</p>
-        </div>
-        <div class="relative group">
-          <img src="assets/clubsandwich.png" alt="Maki 4"
-            class="rounded-full border-4 border-white object-cover w-20 h-20 sm:w-24 sm:h-24" />
-          <p class="mt-2 text-center text-xs">MAES RUM</p>
-        </div>
-        <div class="relative group">
-          <img src="assets/chaufa.png" alt="Maki 5"
-            class="rounded-full border-4 border-white object-cover w-20 h-20 sm:w-24 sm:h-24" />
-          <p class="mt-2 text-center text-xs">MAKS RUM</p>
-        </div>
-        <div class="relative group">
-          <img src="assets/torta.png" alt="Maki 6"
-            class="rounded-full border-4 border-white object-cover w-20 h-20 sm:w-24 sm:h-24" />
-          <p class="mt-2 text-center text-xs">MAES HUM</p>
-        </div>
+        }
+        @if (negocio()?.productos?.length === 0 && !loading()) {
+        <p class="text-xs text-gray-500 italic">No hay productos disponibles en este momento.</p>
+        }
       </div>
     </div>
 
@@ -90,8 +96,8 @@
         class="mb-3 rounded w-full max-w-xs md:max-w-none object-cover h-48" />
       <h3 class="text-lg font-semibold uppercase mb-2">Sabores Criollos</h3>
       <p class="text-sm text-opacity-75 text-center max-w-xs">
-        Tradicin aa eada liesalo <br />
-        Delaff can fan desires pestinias
+        Tradición en cada bocado <br />
+        Delicias con los mejores ingredientes
       </p>
     </div>
 
@@ -99,10 +105,11 @@
     <div class="col-span-full md:col-span-4 flex flex-col items-center justify-center mt-6 md:mt-0">
       <img src="assets/parrillafuego.png" alt="Parrillas & Fuego"
         class="mb-3 rounded w-full max-w-xs md:max-w-none object-cover h-48" />
-      <h3 (click)="sendWhatsAppOrder()" class="text-lg font-semibold uppercase mb-2">Parrillas & Fuego</h3>
+      <h3 (click)="sendWhatsAppOrder()" class="text-lg font-semibold uppercase mb-2 cursor-pointer hover:text-brown">
+        Parrillas & Fuego</h3>
       <p class="text-sm text-opacity-75 text-center max-w-xs">
-        Cames a la leress Jugsoes <br />
-        of palltio
+        Carnes a la brasa jugosas <br />
+        al punto
       </p>
     </div>
   </section>
@@ -110,35 +117,34 @@
   <!-- Testimonials section -->
   <section class="p-6 bg-gray-100 flex flex-col md:flex-row space-y-6 md:space-y-0 md:space-x-6">
     <div class="flex-1">
-      <h4 class="text-center font-semibold uppercase mb-4 text-xl">Testimicios</h4>
-      <!-- Map Placeholder -->
+      <h4 class="text-center font-semibold uppercase mb-4 text-xl">Testimonios</h4>
       <img src="assets/mapa.jpg" alt="Mapa Ubicación" class="rounded shadow-md w-full" />
     </div>
 
     <div class="flex-1 space-y-4">
       <div>
         <div class="flex items-center space-x-2 mb-1 justify-center md:justify-start">
-          <span class="text-yellow-400">★★★★★★★</span>
+          <span class="text-yellow-400">★★★★★</span>
           <img src="assets/user1.jpg" class="w-10 h-10 rounded-full" alt="User 1" />
         </div>
-        <p class="text-xs text-gray-700 leading-tight text-center md:text-left">Unaulia pillr piedadet sueures jasbese
-          de palltudictne a diniate parriiate,</p>
+        <p class="text-xs text-gray-700 leading-tight text-center md:text-left">Excelente comida, el sabor es increíble
+          y la atención de primera.</p>
       </div>
       <div>
         <div class="flex items-center space-x-2 mb-1 justify-center md:justify-start">
           <img src="assets/user2.jpg" class="w-10 h-10 rounded-full" alt="User 2" />
         </div>
-        <p class="text-xs text-gray-700 leading-tight text-center md:text-left">Unsla ds sis sas liantes a da pessis a
-        </p>
+        <p class="text-xs text-gray-700 leading-tight text-center md:text-left">Los mejores makis que he probado en la
+          zona. Recomendado!</p>
       </div>
     </div>
 
     <div class="flex-1 md:border-l md:border-gray-300 md:pl-4 pt-6 md:pt-0">
-      <h4 class="font-semibold uppercase mb-4 text-center md:text-left">Testimicios</h4>
-      <p class="text-xs text-gray-700 mb-2 text-center md:text-left">Camas a bross licag linika boescia des siurde.</p>
+      <h4 class="font-semibold uppercase mb-4 text-center md:text-left">Ubicación</h4>
+      <p class="text-xs text-gray-700 mb-2 text-center md:text-left">Visítanos en nuestro local principal.</p>
       <div class="flex items-center space-x-2 justify-center md:justify-start">
         <img src="assets/user3.jpg" class="w-10 h-10 rounded-full" alt="User 3" />
-        <p class="text-xs text-gray-700">la aiddcss da ness de pesstissies dislolres lanode</p>
+        <p class="text-xs text-gray-700">Atención personalizada todos los días.</p>
       </div>
     </div>
   </section>

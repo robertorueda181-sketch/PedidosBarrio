@@ -1,0 +1,69 @@
+<div class="bg-[#E5EDF1] min-h-screen py-12">
+    <div class="max-w-7xl mx-auto px-6">
+        <!-- Header -->
+        <div class="mb-12">
+            <h1 class="text-4xl font-extrabold text-[#1A365D] mb-4">Todos los Negocios</h1>
+            <p class="text-gray-700 text-lg">Descubre la variedad de negocios locales en tu barrio.</p>
+        </div>
+
+        <!-- Grid de Negocios -->
+        @if (loading()) {
+        <div class="flex justify-center items-center h-64">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1A365D]"></div>
+        </div>
+        } @else {
+        @if (negocios().length > 0) {
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            @for (negocio of negocios(); track negocio.negocioID) {
+            <div (click)="goToNegocio(negocio.urlNegocio)"
+                class="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 cursor-pointer border border-transparent hover:border-[#96C2DB] group">
+                <!-- Imagen -->
+                <div class="relative h-56 bg-gray-200 overflow-hidden">
+                    <img [src]="negocio.urlImagen || 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=800&q=60'"
+                        [alt]="negocio.descripcion"
+                        class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        onerror="this.src='https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=800&q=60'" />
+                    <div
+                        class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+                        <span class="text-white font-medium">Visitar sitio web</span>
+                    </div>
+                </div>
+
+                <!-- Contenido -->
+                <div class="p-6">
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="bg-[#E5EDF1] text-[#1A365D] text-xs font-bold px-3 py-1 rounded-full uppercase">
+                            Negocio
+                        </span>
+                    </div>
+
+                    <h3 class="font-bold text-xl text-gray-900 mb-3 capitalize line-clamp-1">
+                        {{ negocio.descripcion }}
+                    </h3>
+
+                    <p class="text-gray-600 text-sm mb-6 line-clamp-2">
+                        Conoce más sobre nuestros productos y servicios exclusivos para la comunidad.
+                    </p>
+
+                    <button
+                        class="w-full bg-[#1A365D] hover:bg-[#2C5282] text-white py-3 rounded-xl font-bold transition-colors flex items-center justify-center gap-2 shadow-md">
+                        Ir al Negocio
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            }
+        </div>
+        } @else {
+        <div class="bg-white rounded-2xl p-12 text-center shadow-md">
+            <div class="text-6xl mb-4">🏢</div>
+            <h3 class="text-2xl font-bold text-gray-900 mb-2">No se encontraron negocios</h3>
+            <p class="text-gray-600">Vuelve más tarde para descubrir nuevos negocios en tu zona.</p>
+        </div>
+        }
+        }
+    </div>
+</div>
