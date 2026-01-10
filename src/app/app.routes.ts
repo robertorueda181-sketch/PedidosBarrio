@@ -24,6 +24,7 @@ export const routes: Routes = [
       { path: 'negocios', loadComponent: () => import('../pages/negocios/negocios').then(m => m.NegociosComponent) },
       { path: 'servicios', loadComponent: () => import('../pages/servicios/servicios').then(m => m.ServiciosComponent) },
       { path: 'servicio/:id', loadComponent: () => import('../pages/servicio-detalle/servicio-detalle').then(m => m.ServicioDetalleComponent) },
+      { path: 'buscar', loadComponent: () => import('../pages/search-results/search-results.component').then(m => m.SearchResultsComponent) },
       { path: 'company', component: Company },
     ]
   },

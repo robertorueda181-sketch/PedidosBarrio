@@ -7,10 +7,13 @@ import { Servicio, ServicioService } from '../services/servicio.service';
 import { TipoService, TipoValor } from '../services/tipo.service';
 
 
+import { FormsModule } from '@angular/forms';
+
+
 @Component({
   selector: 'app-main',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './main.html',
   styleUrls: ['./main.css']
 })
@@ -25,6 +28,7 @@ export class Main implements OnInit {
   negocios = signal<Negocio[]>([]);
   servicios = signal<Servicio[]>([]);
   categorias = signal<any[]>([]);
+  searchQuery = signal<string>('');
   currentSlide = signal<number>(0);
   banners = [
     { url: 'assets/banner1.png', title: 'Descubre lo mejor de tu barrio', subtitle: 'Apoya a los negocios locales y encuentra todo lo que necesitas.' },
@@ -81,6 +85,12 @@ export class Main implements OnInit {
       } else {
         this.prevSlide();
       }
+    }
+  }
+
+  onSearch() {
+    if (this.searchQuery().trim()) {
+      this.router.navigate(['/buscar'], { queryParams: { q: this.searchQuery() } });
     }
   }
 
