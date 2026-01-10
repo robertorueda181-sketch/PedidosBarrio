@@ -21,6 +21,7 @@ export interface Negocio {
 }
 
 export interface NegocioDetalle {
+    empresaID: string;
     nombre: string;
     descripcion: string;
     email: string;
@@ -28,8 +29,29 @@ export interface NegocioDetalle {
     direccion: string;
     referencia: string | null;
     urlBanner?: string;
-    productos: any[];
+    productos: ProductoDetalle[];
+    categorias: Categoria[];
 }
+
+export interface ProductoDetalle {
+    productoID: number;
+    empresaID: string;
+    categoriaID: number;
+    nombre: string;
+    descripcion: string;
+    precio: number;
+    stock: number;
+    urlImagen: string | null;
+    precioAnterior?: number;
+}
+
+export interface Categoria {
+    categoriaID: number;
+    descripcion: string;
+    codigo: string;
+    mostrar: boolean;
+}
+
 
 @Injectable({
     providedIn: 'root'

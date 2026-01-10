@@ -8,7 +8,11 @@
         </div>
         <ul class="hidden md:flex gap-8 font-semibold text-yellow-900">
             <li><a href="#inicio" class="hover:underline hover:text-yellow-800 transition">Inicio</a></li>
-            <li><a href="#menu" class="hover:underline hover:text-yellow-800 transition">Nuestra Carta</a></li>
+            @for(categoria of negocio()?.categorias; track categoria.categoriaID) {
+                @if(categoria.mostrar) {
+                <li><a href="#menu" class="hover:underline hover:text-yellow-800 transition">{{ categoria.descripcion }}</a></li>
+                }
+            }
             <li><a href="#contacto" class="hover:underline hover:text-yellow-800 transition">Contacto</a></li>
         </ul>
     </nav>
