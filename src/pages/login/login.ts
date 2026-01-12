@@ -20,7 +20,7 @@ export class Login {
             if (this.authService.loggedIn()) {
                 const userType = localStorage.getItem('userType');
                 if (userType) {
-                    this.router.navigate(['/empresa/dashboard']);
+                    this.router.navigate(['/empresa/inicio']);
                 } else {
                     this.router.navigate(['/selection']);
                 }

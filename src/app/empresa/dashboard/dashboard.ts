@@ -13,21 +13,61 @@ Chart.register(...registerables);
 })
 export class DashboardComponent implements AfterViewInit {
   userType: string = 'NEGOCIO';
+  businessLabel: string = 'Negocio';
 
-  // Métricas generales
+  // Métricas generales (simuladas por tipo)
   stats = {
-    products: 24,
-    realEstate: 8,
-    services: 12,
-    sales: 2450,
-    contacts: 15,
-    newClients: 8
+    mainCount: 0,
+    mainLabel: 'Items',
+    secondaryCount: 0,
+    secondaryLabel: 'Vistas',
+    leadsCount: 0,
+    revenue: 0
   };
 
   constructor() {
     const storedType = localStorage.getItem('userType');
     if (storedType) {
       this.userType = storedType;
+      this.updateStatsByBusiness();
+    }
+  }
+
+  updateStatsByBusiness() {
+    switch (this.userType) {
+      case 'NEGOCIO':
+        this.businessLabel = 'Negocio';
+        this.stats = {
+          mainCount: 45,
+          mainLabel: 'Productos',
+          secondaryCount: 1250,
+          secondaryLabel: 'Pedidos',
+          leadsCount: 18,
+          revenue: 3450.50
+        };
+        break;
+      case 'SERVICIO':
+        this.businessLabel = 'Servicio';
+        this.stats = {
+          mainCount: 12,
+          mainLabel: 'Servicios',
+          secondaryCount: 850,
+          secondaryLabel: 'Consultas',
+          leadsCount: 24,
+          revenue: 0 // Servicios suelen ser por presupuesto
+        };
+        break;
+      case 'INMUEBLE':
+        this.businessLabel = 'Inmobiliaria';
+        this.stats = {
+          mainCount: 8,
+          mainLabel: 'Propiedades',
+          secondaryCount: 3200,
+          secondaryLabel: 'Visitas',
+          leadsCount: 15,
+          revenue: 0
+        };
+        break;
     }
   }
 

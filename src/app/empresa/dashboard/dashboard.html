@@ -1,151 +1,161 @@
-<div class="space-y-6">
-  <!-- Header -->
-  <div class="flex items-center justify-between">
+<div class="space-y-8 animate-fade-in">
+  <!-- Header Section -->
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
     <div>
-      <h1 class="text-2xl font-black text-gray-900">Dashboard</h1>
-      <p class="text-sm text-gray-500">Panel de {{ userType | titlecase }}</p>
+      <h1 class="text-3xl font-black text-gray-900 tracking-tight">Dashboard</h1>
+      <p class="text-gray-500 font-medium">Resumen general
     </div>
-    <div class="flex items-center space-x-3">
-      <span class="text-sm font-bold text-[#1A365D] bg-blue-50 px-3 py-1 rounded-full">{{ userType }}</span>
+    <div class="flex items-center gap-3">
+      <div class="bg-white px-4 py-2 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-2">
+        <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+        <span class="text-sm font-bold text-gray-700">Sistema Online</span>
+      </div>
+      <button
+        class="bg-gray-900 text-white px-5 py-2.5 rounded-2xl font-bold text-sm hover:bg-gray-800 transition-all shadow-lg shadow-gray-200">
+        Descargar Reporte
+      </button>
     </div>
   </div>
 
-  <!-- Stats Cards (Dynamic based on type) -->
-  <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-    @if (userType === 'NEGOCIO') {
-    <!-- Productos -->
-    <div class="bg-white overflow-hidden shadow-sm rounded-2xl border border-gray-100">
-      <div class="p-5">
-        <div class="flex items-center">
-          <div class="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center">
-            <i class="pi pi-box text-blue-600 text-xl"></i>
-          </div>
-          <div class="ml-5">
-            <dt class="text-sm font-bold text-gray-500 uppercase tracking-wider">Productos</dt>
-            <dd class="text-2xl font-black text-gray-900">{{ stats.products }}</dd>
-          </div>
+  <!-- Stats Grid -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <!-- Main Counter (Products/Services/Properties) -->
+    <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 hover:shadow-md transition-all group">
+      <div class="flex items-center justify-between mb-4">
+        <div
+          class="w-12 h-12 bg-cyan-50 rounded-2xl flex items-center justify-center group-hover:bg-[#06b6d4] transition-colors">
+          <i class="pi pi-briefcase text-[#06b6d4] text-xl group-hover:text-white transition-colors"></i>
         </div>
+        <span class="text-xs font-black text-green-500 bg-green-50 px-2 py-1 rounded-lg">+12%</span>
       </div>
+      <p class="text-sm font-bold text-gray-400 uppercase tracking-widest mb-1">{{ stats.mainLabel }}</p>
+      <h3 class="text-3xl font-black text-gray-900">{{ stats.mainCount }}</h3>
     </div>
-    <div class="bg-white overflow-hidden shadow-sm rounded-2xl border border-gray-100">
-      <div class="p-5">
-        <div class="flex items-center">
-          <div class="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center">
-            <i class="pi pi-money-bill text-green-600 text-xl"></i>
-          </div>
-          <div class="ml-5">
-            <dt class="text-sm font-bold text-gray-500 uppercase tracking-wider">Ventas Mes</dt>
-            <dd class="text-2xl font-black text-gray-900">S/. {{ stats.sales }}</dd>
-          </div>
-        </div>
-      </div>
-    </div>
-    }
 
-    @if (userType === 'INMUEBLE') {
-    <div class="bg-white overflow-hidden shadow-sm rounded-2xl border border-gray-100">
-      <div class="p-5">
-        <div class="flex items-center">
-          <div class="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center">
-            <i class="pi pi-home text-green-600 text-xl"></i>
-          </div>
-          <div class="ml-5">
-            <dt class="text-sm font-bold text-gray-500 uppercase tracking-wider">Inmuebles</dt>
-            <dd class="text-2xl font-black text-gray-900">{{ stats.realEstate }}</dd>
-          </div>
+    <!-- Secondary Counter (Views/Calls/Inquiries) -->
+    <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 hover:shadow-md transition-all group">
+      <div class="flex items-center justify-between mb-4">
+        <div
+          class="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center group-hover:bg-blue-500 transition-colors">
+          <i class="pi pi-chart-bar text-blue-500 text-xl group-hover:text-white transition-colors"></i>
         </div>
+        <span class="text-xs font-black text-blue-500 bg-blue-50 px-2 py-1 rounded-lg">+5.2%</span>
       </div>
+      <p class="text-sm font-bold text-gray-400 uppercase tracking-widest mb-1">{{ stats.secondaryLabel }}</p>
+      <h3 class="text-3xl font-black text-gray-900">{{ stats.secondaryCount }}</h3>
     </div>
-    }
 
-    @if (userType === 'SERVICIO') {
-    <div class="bg-white overflow-hidden shadow-sm rounded-2xl border border-gray-100">
-      <div class="p-5">
-        <div class="flex items-center">
-          <div class="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center">
-            <i class="pi pi-briefcase text-purple-600 text-xl"></i>
-          </div>
-          <div class="ml-5">
-            <dt class="text-sm font-bold text-gray-500 uppercase tracking-wider">Servicios</dt>
-            <dd class="text-2xl font-black text-gray-900">{{ stats.services }}</dd>
-          </div>
+    <!-- Leads/Inquiries -->
+    <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 hover:shadow-md transition-all group">
+      <div class="flex items-center justify-between mb-4">
+        <div
+          class="w-12 h-12 bg-purple-50 rounded-2xl flex items-center justify-center group-hover:bg-purple-500 transition-colors">
+          <i class="pi pi-users text-purple-500 text-xl group-hover:text-white transition-colors"></i>
         </div>
+        <span class="text-xs font-black text-purple-500 bg-purple-50 px-2 py-1 rounded-lg">Hoy</span>
       </div>
+      <p class="text-sm font-bold text-gray-400 uppercase tracking-widest mb-1">Nuevos Leads</p>
+      <h3 class="text-3xl font-black text-gray-900">{{ stats.leadsCount }}</h3>
     </div>
-    }
 
-    <!-- Common Stats -->
-    <div class="bg-white overflow-hidden shadow-sm rounded-2xl border border-gray-100">
-      <div class="p-5">
-        <div class="flex items-center">
-          <div class="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center">
-            <i class="pi pi-envelope text-indigo-600 text-xl"></i>
-          </div>
-          <div class="ml-5">
-            <dt class="text-sm font-bold text-gray-500 uppercase tracking-wider">Contactos</dt>
-            <dd class="text-2xl font-black text-gray-900">{{ stats.contacts }}</dd>
-          </div>
+    <!-- Revenue/Performance -->
+    <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 hover:shadow-md transition-all group">
+      <div class="flex items-center justify-between mb-4">
+        <div
+          class="w-12 h-12 bg-orange-50 rounded-2xl flex items-center justify-center group-hover:bg-orange-500 transition-colors">
+          <i class="pi pi-star text-orange-500 text-xl group-hover:text-white transition-colors"></i>
         </div>
+        <span class="text-xs font-black text-orange-500 bg-orange-50 px-2 py-1 rounded-lg">Top</span>
       </div>
+      @if (userType === 'NEGOCIO') {
+      <p class="text-sm font-bold text-gray-400 uppercase tracking-widest mb-1">Ventas Totales</p>
+      <h3 class="text-3xl font-black text-gray-900">S/. {{ stats.revenue | number:'1.2-2' }}</h3>
+      } @else {
+      <p class="text-sm font-bold text-gray-400 uppercase tracking-widest mb-1">Calificación</p>
+      <h3 class="text-3xl font-black text-gray-900">4.9/5</h3>
+      }
     </div>
   </div>
 
   <!-- Charts Section -->
-  <div class="grid grid-cols-1 gap-5 lg:grid-cols-2">
-    <div class="bg-white shadow-sm rounded-2xl p-6 border border-gray-100">
-      <h3 class="text-lg font-black text-gray-900 mb-4">Vistas por Semana</h3>
-      <div class="relative h-64">
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div class="lg:col-span-2 bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
+      <div class="flex items-center justify-between mb-8">
+        <h3 class="text-xl font-black text-gray-900">Actividad Semanal</h3>
+        <select class="bg-gray-50 border-none text-sm font-bold rounded-xl px-4 py-2 focus:ring-2 focus:ring-[#06b6d4]">
+          <option>Últimos 30 días</option>
+          <option>Último año</option>
+        </select>
+      </div>
+      <div class="h-80 w-full">
         <canvas id="weeklyChart"></canvas>
       </div>
     </div>
-    <div class="bg-white shadow-sm rounded-2xl p-6 border border-gray-100">
-      <h3 class="text-lg font-black text-gray-900 mb-4">Vistas por Día</h3>
-      <div class="relative h-64">
-        <canvas id="dailyChart"></canvas>
-      </div>
-    </div>
-  </div>
 
-  <!-- Quick Actions (Dynamic based on type) -->
-  <div class="bg-white shadow-sm rounded-2xl border border-gray-100">
-    <div class="px-6 py-6">
-      <h3 class="text-lg font-black text-gray-900 mb-6">Acciones Rápidas</h3>
-      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <div class="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 flex flex-col">
+      <h3 class="text-xl font-black text-gray-900 mb-6">Acciones Rápidas</h3>
+      <div class="space-y-3 flex-1 overflow-y-auto pr-2 custom-scrollbar">
 
         @if (userType === 'NEGOCIO') {
         <button routerLink="/empresa/productos"
-          class="flex flex-col items-center p-6 bg-blue-50 rounded-2xl hover:bg-blue-100 transition-all group">
-          <i class="pi pi-plus-circle text-2xl text-blue-600 mb-2 group-hover:scale-110 transition-transform"></i>
-          <span class="font-bold text-blue-900">Agregar Producto</span>
-        </button>
-        <button routerLink="/empresa/sitio"
-          class="flex flex-col items-center p-6 bg-orange-50 rounded-2xl hover:bg-orange-100 transition-all group">
-          <i class="pi pi-palette text-2xl text-orange-600 mb-2 group-hover:scale-110 transition-transform"></i>
-          <span class="font-bold text-orange-900">Personalizar Sitio</span>
+          class="w-full flex items-center p-4 bg-cyan-50 rounded-2xl hover:bg-cyan-100 transition-all group">
+          <div
+            class="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm mr-4 group-hover:scale-110 transition-transform">
+            <i class="pi pi-plus text-[#06b6d4] font-bold"></i>
+          </div>
+          <span class="font-bold text-cyan-900">Subir Producto</span>
         </button>
         }
 
         @if (userType === 'SERVICIO') {
         <button routerLink="/empresa/oficios"
-          class="flex flex-col items-center p-6 bg-purple-50 rounded-2xl hover:bg-purple-100 transition-all group">
-          <i class="pi pi-plus-circle text-2xl text-purple-600 mb-2 group-hover:scale-110 transition-transform"></i>
-          <span class="font-bold text-purple-900">Agregar Servicio</span>
+          class="w-full flex items-center p-4 bg-purple-50 rounded-2xl hover:bg-purple-100 transition-all group">
+          <div
+            class="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm mr-4 group-hover:scale-110 transition-transform">
+            <i class="pi pi-plus text-purple-600 font-bold"></i>
+          </div>
+          <span class="font-bold text-purple-900">Nuevo Servicio</span>
         </button>
         }
 
         @if (userType === 'INMUEBLE') {
         <button routerLink="/empresa/inmuebles"
-          class="flex flex-col items-center p-6 bg-green-50 rounded-2xl hover:bg-green-100 transition-all group">
-          <i class="pi pi-plus-circle text-2xl text-green-600 mb-2 group-hover:scale-110 transition-transform"></i>
-          <span class="font-bold text-green-900">Agregar Inmueble</span>
+          class="w-full flex items-center p-4 bg-green-50 rounded-2xl hover:bg-green-100 transition-all group">
+          <div
+            class="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm mr-4 group-hover:scale-110 transition-transform">
+            <i class="pi pi-plus text-green-600 font-bold"></i>
+          </div>
+          <span class="font-bold text-green-900">Publicar Inmueble</span>
         </button>
         }
 
+        <button routerLink="/empresa/sitio"
+          class="w-full flex items-center p-4 bg-orange-50 rounded-2xl hover:bg-orange-100 transition-all group">
+          <div
+            class="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm mr-4 group-hover:scale-110 transition-transform">
+            <i class="pi pi-palette text-orange-600 font-bold"></i>
+          </div>
+          <span class="font-bold text-orange-900">Personalizar Web</span>
+        </button>
+
         <button routerLink="/empresa/perfil"
-          class="flex flex-col items-center p-6 bg-gray-50 rounded-2xl hover:bg-gray-100 transition-all group">
-          <i class="pi pi-user-edit text-2xl text-gray-600 mb-2 group-hover:scale-110 transition-transform"></i>
+          class="w-full flex items-center p-4 bg-gray-50 rounded-2xl hover:bg-gray-100 transition-all group">
+          <div
+            class="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm mr-4 group-hover:scale-110 transition-transform">
+            <i class="pi pi-user-edit text-gray-600 font-bold"></i>
+          </div>
           <span class="font-bold text-gray-900">Editar Perfil</span>
         </button>
+      </div>
+
+      <div class="mt-6 pt-6 border-t border-gray-100">
+        <div class="bg-gray-900 rounded-2xl p-4 text-white">
+          <p class="text-xs font-bold text-gray-400 uppercase mb-1">Membresía</p>
+          <div class="flex items-center justify-between">
+            <span class="font-black">Plan Premium</span>
+            <span class="text-xs bg-cyan-500 px-2 py-0.5 rounded-lg">Activo</span>
+          </div>
+        </div>
       </div>
     </div>
   </div>

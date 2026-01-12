@@ -64,7 +64,7 @@ export class AuthService {
     signOut() {
         this.socialAuthService.signOut();
         this.clearSession();
-        this.router.navigate(['/login']);
+        this.router.navigate(['/business-auth']);
     }
 
     getToken(): string | null {

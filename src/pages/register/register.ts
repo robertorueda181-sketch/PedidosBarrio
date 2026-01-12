@@ -285,7 +285,7 @@ export class Register implements OnInit {
         console.log('Registro exitoso:', response);
         // Store user info/type in local storage if needed for dashboard
         localStorage.setItem('userType', formData.registrationType || 'NEGOCIO');
-        this.router.navigate(['/empresa/dashboard']);
+        this.router.navigate(['/empresa/inicio']);
       },
       error: (error: any) => {
         console.error('Error en el registro:', error);

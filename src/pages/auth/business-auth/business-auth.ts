@@ -128,7 +128,7 @@ export class BusinessAuth implements OnDestroy {
     handleSuccessfulAuth() {
         // Determine user type if possible, or default
         localStorage.setItem('userType', 'NEGOCIO');
-        this.router.navigate(['/empresa/dashboard']);
+        this.router.navigate(['/empresa/inicio']);
     }
 
     manualLogin() {
@@ -144,13 +144,13 @@ export class BusinessAuth implements OnDestroy {
             idToken: '',
             googleId: ''
         };
-        debugger;
+
         this.authService.login(loginData).subscribe({
             next: (res) => {
-                console.log('Login successful:', res);
+                console.log(res);
                 this.messageService.add({ severity: 'success', summary: 'Bienvenido', detail: 'Inicio de sesión exitoso' });
                 localStorage.setItem('userType', 'NEGOCIO');
-                setTimeout(() => this.router.navigate(['/empresa/dashboard']), 500);
+                setTimeout(() => this.router.navigate(['/empresa/inicio']), 500);
             },
             error: (err) => {
                 console.error('Login failed:', err);
@@ -199,7 +199,7 @@ export class BusinessAuth implements OnDestroy {
                 console.log('Registration successful:', res);
                 localStorage.setItem('userType', 'NEGOCIO');
                 this.messageService.add({ severity: 'success', summary: 'Registro Exitoso', detail: 'Tu cuenta ha sido creada' });
-                setTimeout(() => this.router.navigate(['/empresa/dashboard']), 1000);
+                setTimeout(() => this.router.navigate(['/empresa/inicio']), 1000);
             },
             error: (err) => {
                 console.error('Registration failed:', err);

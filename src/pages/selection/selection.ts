@@ -19,6 +19,6 @@ export class Selection {
 
     selectType(type: 'NEGOCIO' | 'SERVICIO' | 'INMUEBLE') {
         localStorage.setItem('userType', type);
-        this.router.navigate(['/empresa/dashboard']);
+        this.router.navigate(['/empresa/inicio']);
     }
 }

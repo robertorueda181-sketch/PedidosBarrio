@@ -32,8 +32,8 @@ export const routes: Routes = [
     path: 'empresa',
     loadComponent: () => import('./empresa/layout/layout').then(m => m.Layout),
     children: [
-      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-      { path: 'dashboard', loadComponent: () => import('./empresa/dashboard/dashboard').then(m => m.DashboardComponent) },
+      { path: '', redirectTo: 'inicio', pathMatch: 'full' },
+      { path: 'inicio', loadComponent: () => import('./empresa/dashboard/dashboard').then(m => m.DashboardComponent) },
       { path: 'productos', loadComponent: () => import('./empresa/productos/productos').then(m => m.ProductosComponent) },
       { path: 'inmuebles', loadComponent: () => import('./empresa/inmuebles/inmuebles').then(m => m.Inmuebles) },
       { path: 'oficios', loadComponent: () => import('./empresa/oficios/oficios').then(m => m.Oficios) },
