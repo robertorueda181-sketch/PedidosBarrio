@@ -41,7 +41,44 @@
         <div class="h-10 bg-gray-800/50 rounded-xl animate-pulse"></div>
       </div>
       } @else {
-      @for (item of menuItems(); track item.id) {
+      @for (item of getRootMenus(); track item.id) {
+      @if (getMenuChildren(item.id).length > 0) {
+      <!-- Parent with Submenu -->
+      <div class="space-y-1">
+        <button (click)="toggleSubmenu(item.id, $event)"
+          class="w-full group flex items-center justify-between px-3 py-3 text-sm font-semibold rounded-xl transition-all duration-200 hover:bg-gray-800 text-gray-400 hover:text-white"
+          [ngClass]="{'text-white bg-gray-800/50': isExpanded(item.id)}">
+          <div class="flex items-center">
+            <i [class]="item.icono || 'pi pi-chevron-right'"
+              class="text-xl transition-transform duration-200 group-hover:scale-110 mr-3"
+              [ngClass]="isSidebarCollapsed() ? 'mx-auto mr-0' : 'mr-3'"></i>
+            <span class="truncate transition-all duration-300"
+              [ngClass]="isSidebarCollapsed() ? 'opacity-0 scale-95 w-0 invisible' : 'opacity-100 scale-100 visible'">
+              {{ item.nombre }}
+            </span>
+          </div>
+          @if (!isSidebarCollapsed()) {
+          <i class="pi transition-transform duration-200 text-[10px]"
+            [ngClass]="isExpanded(item.id) ? 'pi-chevron-down rotate-180' : 'pi-chevron-right'"></i>
+          }
+        </button>
+
+        <!-- Children List -->
+        @if (isExpanded(item.id) && !isSidebarCollapsed()) {
+        <div class="pl-4 space-y-1 mt-1 animate-fade-in">
+          @for (child of getMenuChildren(item.id); track child.id) {
+          <a [routerLink]="child.url" routerLinkActive="bg-[#06b6d4] text-white shadow-lg shadow-cyan-900/20"
+            (click)="isMobileMenuOpen() ? toggleMobileMenu() : null"
+            class="group flex items-center px-4 py-2 text-xs font-bold rounded-lg transition-all duration-200 hover:bg-gray-800 text-gray-500 hover:text-white">
+            <i [class]="child.icono || 'pi pi-circle-fill'" class="text-[8px] mr-3"></i>
+            <span>{{ child.nombre }}</span>
+          </a>
+          }
+        </div>
+        }
+      </div>
+      } @else {
+      <!-- Single Link -->
       <a [routerLink]="item.url" routerLinkActive="bg-[#06b6d4] text-white shadow-lg shadow-cyan-900/20"
         (click)="isMobileMenuOpen() ? toggleMobileMenu() : null"
         class="group flex items-center px-3 py-3 text-sm font-semibold rounded-xl transition-all duration-200 hover:bg-gray-800 text-gray-400 hover:text-white"
@@ -54,6 +91,7 @@
           {{ item.nombre }}
         </span>
       </a>
+      }
       } @empty {
       <div class="text-center py-10" *ngIf="!isSidebarCollapsed()">
         <i class="pi pi-inbox text-3xl text-gray-700 mb-2"></i>

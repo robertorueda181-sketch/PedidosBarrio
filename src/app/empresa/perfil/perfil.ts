@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { MessageService } from 'primeng/api';
 
 interface CompanyProfile {
   name: string;
@@ -28,6 +29,7 @@ interface CompanyProfile {
   styleUrl: './perfil.css',
 })
 export class Perfil implements OnInit {
+  private messageService = inject(MessageService);
   isEditing = false;
   isLoading = false;
   saveSuccess = false;
@@ -103,6 +105,7 @@ export class Perfil implements OnInit {
 
       this.saveSuccess = true;
       this.isEditing = false;
+      this.messageService.add({ severity: 'success', summary: 'Guardado', detail: 'Perfil actualizado exitosamente' });
 
       // Ocultar mensaje de éxito después de 3 segundos
       setTimeout(() => {
@@ -111,7 +114,7 @@ export class Perfil implements OnInit {
 
     } catch (error) {
       console.error('Error al guardar:', error);
-      alert('Error al guardar los cambios. Inténtalo de nuevo.');
+      this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error al guardar los cambios. Inténtalo de nuevo.' });
     } finally {
       this.isLoading = false;
     }

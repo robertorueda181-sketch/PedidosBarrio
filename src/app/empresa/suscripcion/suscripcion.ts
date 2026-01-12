@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { MessageService } from 'primeng/api';
 
 interface Plan {
   id: string;
@@ -20,6 +21,7 @@ import { FormsModule } from '@angular/forms';
   styleUrl: './suscripcion.css',
 })
 export class Suscripcion {
+  private messageService = inject(MessageService);
   currentPlanId: string = 'free';
   currentPlan: string = 'Gratuito';
 
@@ -73,9 +75,9 @@ export class Suscripcion {
 
   selectPlan(planId: string) {
     if (planId === 'pro') {
-      alert('Redirigiendo al proceso de pago para el Plan Profesional...');
+      this.messageService.add({ severity: 'info', summary: 'Plan Profesional', detail: 'Redirigiendo al proceso de pago para el Plan Profesional...' });
     } else if (planId === 'enterprise') {
-      alert('Contacta a nuestro equipo de ventas para el Plan Empresarial');
+      this.messageService.add({ severity: 'info', summary: 'Plan Empresarial', detail: 'Contacta a nuestro equipo de ventas para el Plan Empresarial' });
     }
   }
 

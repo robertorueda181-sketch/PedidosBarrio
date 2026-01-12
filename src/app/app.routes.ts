@@ -39,7 +39,9 @@ export const routes: Routes = [
       { path: 'oficios', loadComponent: () => import('./empresa/oficios/oficios').then(m => m.Oficios) },
       { path: 'suscripcion', loadComponent: () => import('./empresa/suscripcion/suscripcion').then(m => m.Suscripcion) },
       { path: 'perfil', loadComponent: () => import('./empresa/perfil/perfil').then(m => m.Perfil) },
-      { path: 'sitio', loadComponent: () => import('./empresa/sitio-web/sitio-web').then(m => m.SitioWeb) }
+      { path: 'sitio', loadComponent: () => import('./empresa/sitio-web/sitio-web').then(m => m.SitioWeb) },
+      { path: 'promociones', loadComponent: () => import('./empresa/publicidad/publicidad').then(m => m.Promociones) },
+      { path: 'banner', loadComponent: () => import('./empresa/banner/banner').then(m => m.Banner) }
     ]
   },
   {

@@ -1,8 +1,9 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NgxEditorModule, Editor, Toolbar } from 'ngx-editor';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { MessageService } from 'primeng/api';
 
 interface WebsiteTemplate {
   id: string;
@@ -29,6 +30,7 @@ interface WebsiteSection {
   styleUrl: './sitio-web.css',
 })
 export class SitioWeb implements OnInit, OnDestroy {
+  private messageService = inject(MessageService);
   editor: Editor = new Editor();
   toolbar: Toolbar = [
     ['bold', 'italic'],
@@ -217,9 +219,9 @@ export class SitioWeb implements OnInit, OnDestroy {
     try {
       // Simular guardado
       await new Promise(resolve => setTimeout(resolve, 2000));
-      alert('Sitio web guardado exitosamente');
+      this.messageService.add({ severity: 'success', summary: 'Guardado', detail: 'Sitio web guardado exitosamente' });
     } catch (error) {
-      alert('Error al guardar el sitio web');
+      this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error al guardar el sitio web' });
     } finally {
       this.isSaving = false;
     }
@@ -230,7 +232,7 @@ export class SitioWeb implements OnInit, OnDestroy {
 
     const newWindow = window.open('', '_blank');
     if (!newWindow) {
-      alert('Por favor, permite las ventanas emergentes para ver la previsualización.');
+      this.messageService.add({ severity: 'warn', summary: 'Bloqueador de ventanas', detail: 'Por favor, permite las ventanas emergentes para ver la previsualización.' });
       return;
     }
 
@@ -271,7 +273,7 @@ export class SitioWeb implements OnInit, OnDestroy {
 
   publishWebsite() {
     if (confirm('¿Estás seguro de que quieres publicar los cambios? Esto hará que tu sitio web sea visible para todos.')) {
-      alert('Sitio web publicado exitosamente');
+      this.messageService.add({ severity: 'success', summary: 'Publicado', detail: 'Sitio web publicado exitosamente' });
     }
   }
 

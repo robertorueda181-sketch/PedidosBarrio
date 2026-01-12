@@ -155,7 +155,7 @@ export class RegisterInmueble implements OnInit {
         }
 
         if (this.registerForm.value.password !== this.registerForm.value.confirmPassword) {
-            alert('Las contraseñas no coinciden');
+            this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Las contraseñas no coinciden' });
             return;
         }
 
@@ -183,7 +183,7 @@ export class RegisterInmueble implements OnInit {
         this.registerService.registerBusiness(formData).subscribe({
             next: (response) => {
                 console.log('Registro exitoso:', response);
-                alert(`Gracias por registrar tu inmueble, ${formData.fullname || ''}!`);
+                this.messageService.add({ severity: 'success', summary: 'Registro exitoso', detail: `Gracias por registrar tu inmueble, ${formData.fullname || ''}!` });
                 this.registerForm.reset();
             },
             error: (error: any) => {

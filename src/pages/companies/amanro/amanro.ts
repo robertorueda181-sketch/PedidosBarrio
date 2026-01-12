@@ -7,11 +7,61 @@ export interface CartItem extends ProductoDetalle {
 }
 
 import { DrawerModule } from 'primeng/drawer';
+import { DialogModule } from 'primeng/dialog';
+import { CheckboxModule } from 'primeng/checkbox';
+import { FormsModule } from '@angular/forms';
+
+interface BannerConfig {
+  title: string;
+  subtitle: string;
+  imageUrl: string;
+  ctaText: string;
+  ctaAction: string;
+}
+
+interface AdModuleSection {
+  id: string;
+  type: 'text' | 'image' | 'mixed';
+  content?: string;
+  imageUrl?: string;
+  layout?: 'text-left' | 'text-right';
+}
+
+interface AdImage {
+  url: string;
+  shape: 'circle' | 'square';
+  size: 'sm' | 'md' | 'lg';
+}
+
+interface AdConfig {
+  id?: string;
+  name: string;
+  headerChoice: 'none' | 'title' | 'image';
+  title: string;
+  imageUrl: string;
+  subtitle: string;
+  showSubtitle: boolean;
+  mainContent: string;
+  showMainContent: boolean;
+  showWhatsAppBadge: boolean;
+  moduleSections: AdModuleSection[];
+  footerImage: string;
+  footerImageConfig?: AdImage;
+  startDate: string;
+  endDate: string;
+  bgColor: string;
+  textColor: string;
+  accentColor: string;
+  cardColor: string;
+  extraImages: string[];
+  extraImagesConfig?: AdImage[];
+  isActive?: boolean;
+}
 
 @Component({
   selector: 'app-amanro',
   standalone: true,
-  imports: [CommonModule, DrawerModule],
+  imports: [CommonModule, DrawerModule, DialogModule, CheckboxModule, FormsModule],
   templateUrl: './amanro.html',
   styleUrls: ['./amanro.css']
 })
@@ -24,6 +74,18 @@ export class Amanro implements OnInit {
   cart = signal<CartItem[]>([]);
   isCartOpen = signal<boolean>(false);
   drawerVisible = signal<boolean>(false);
+  showPromo = false;
+  dontShowAgain = false;
+
+  bannerConfig: BannerConfig = {
+    title: 'Amanro: Sabor & Tradición',
+    subtitle: 'Bienvenidos a la mejor experiencia gourmet',
+    imageUrl: 'assets/restaurante.jpg',
+    ctaText: 'Explorar Menú',
+    ctaAction: 'productos'
+  };
+
+  adConfig: AdConfig | null = null;
 
   whatsappPhoneNumber: string = '51954121196';
 
@@ -32,6 +94,74 @@ export class Amanro implements OnInit {
 
   ngOnInit() {
     this.loadData('amanro');
+    this.loadConfigs();
+  }
+
+  loadConfigs() {
+    // Load Banner
+    const savedBanner = localStorage.getItem('hero_banner_config');
+    if (savedBanner) this.bannerConfig = JSON.parse(savedBanner);
+
+    // Load Ad
+    const savedAd = localStorage.getItem('ad_config');
+    if (savedAd) {
+      const config = JSON.parse(savedAd);
+
+      // Migration for old structure
+      if (config.sections && !config.moduleSections) {
+        config.moduleSections = config.sections.map((s: any) => ({
+          id: Date.now().toString() + Math.random(),
+          type: 'text',
+          content: `<h3>${s.title}</h3><ul>` + s.items.map((it: any) => `<li>${it.label}: ${it.value}</li>`).join('') + `</ul>`
+        }));
+        config.headerChoice = config.type === 'image' ? 'image' : 'title';
+        config.showSubtitle = true;
+        config.showMainContent = false;
+        config.showWhatsAppBadge = true;
+      }
+
+      if (!config.footerImageConfig && config.footerImage) {
+        config.footerImageConfig = {
+          url: config.footerImage,
+          shape: 'circle',
+          size: 'md'
+        };
+      }
+
+      if (!config.extraImagesConfig && config.extraImages) {
+        config.extraImagesConfig = config.extraImages.map((img: string) => ({
+          url: img,
+          shape: 'circle',
+          size: 'sm'
+        }));
+      }
+
+      this.adConfig = config;
+      this.checkPopups();
+    }
+  }
+
+  checkPopups() {
+    const promoHidden = localStorage.getItem('hideAmanroPromo');
+    if (!this.adConfig || promoHidden) return;
+
+    const now = new Date();
+    if (this.adConfig.endDate) {
+      const end = new Date(this.adConfig.endDate);
+      end.setHours(23, 59, 59, 999);
+      if (now > end) return;
+    }
+
+    setTimeout(() => {
+      this.showPromo = true;
+    }, 1500);
+  }
+
+  closePromo() {
+    if (this.dontShowAgain) {
+      localStorage.setItem('hideAmanroPromo', 'true');
+    }
+    this.showPromo = false;
   }
 
   loadData(codigo: string) {

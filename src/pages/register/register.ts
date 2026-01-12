@@ -256,7 +256,7 @@ export class Register implements OnInit {
     }
 
     if (this.registerForm.value.password !== this.registerForm.value.confirmPassword) {
-      alert('Las contraseñas no coinciden');
+      this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Las contraseñas no coinciden' });
       return;
     }
 

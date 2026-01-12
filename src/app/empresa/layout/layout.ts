@@ -23,6 +23,7 @@ export class Layout implements OnInit {
   isMobileMenuOpen = signal(false);
   menuItems = signal<any[]>([]);
   loadingItems = signal(true);
+  expandedMenus = signal<Set<string>>(new Set());
 
   ngOnInit() {
     this.loadMenus();
@@ -51,23 +52,47 @@ export class Layout implements OnInit {
         this.loadingItems.set(false);
         console.log('Menus loaded from backend:', data);
         if (!Array.isArray(data)) return;
-
+        console.log('Menus combined and cached:', data);
         const mapped = data.map(item => ({
-          id: item.menuID,
+          id: item.codigo || item.menuID.toString(),
           nombre: item.nombre,
           icono: item.icon,
-          url: `/empresa/${(item.codigo || '').toLowerCase()}`
+          url: item.codigo ? `/empresa/${item.codigo.toLowerCase()}` : null,
+          padre: item.padre
         }));
 
         this.menuItems.set(mapped);
         sessionStorage.setItem(this.MENU_CACHE_KEY, JSON.stringify(mapped));
-        console.log('Menus mapped and cached:', mapped);
+        console.log('Menus loaded and cached:', mapped);
       },
       error: (err) => {
         console.error('Error loading menus:', err);
         this.loadingItems.set(false);
       }
     });
+  }
+
+  toggleSubmenu(menuId: string, event: Event) {
+    event.stopPropagation();
+    const current = new Set(this.expandedMenus());
+    if (current.has(menuId)) {
+      current.delete(menuId);
+    } else {
+      current.add(menuId);
+    }
+    this.expandedMenus.set(current);
+  }
+
+  isExpanded(menuId: string): boolean {
+    return this.expandedMenus().has(menuId);
+  }
+
+  getMenuChildren(padre: string) {
+    return this.menuItems().filter(item => item.padre === padre);
+  }
+
+  getRootMenus() {
+    return this.menuItems().filter(item => !item.padre);
   }
 
   toggleSidebar() {

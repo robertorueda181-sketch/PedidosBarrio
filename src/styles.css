@@ -1,6 +1,8 @@
 /* You can add global styles to this file, and also import other style files */
 @import "primeicons/primeicons.css";
 @import "leaflet/dist/leaflet.css";
+@import "quill/dist/quill.core.css";
+@import "quill/dist/quill.snow.css";
 @import "tailwindcss";
 
 :root {
