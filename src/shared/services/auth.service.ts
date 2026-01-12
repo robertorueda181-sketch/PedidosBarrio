@@ -3,7 +3,9 @@ import { SocialAuthService, SocialUser, GoogleLoginProvider } from '@abacritt/an
 import { Router } from '@angular/router';
 import { RegisterService } from './register.service';
 import { RegisterRequest } from '../interfaces/register.interface';
+import { LoginRequest } from '../interfaces/login.interface';
 import { MessageService } from 'primeng/api';
+import { Observable, tap } from 'rxjs';
 
 @Injectable({
     providedIn: 'root'
@@ -38,6 +40,25 @@ export class AuthService {
                 this.clearSession();
             }
         });
+    }
+
+    login(credentials: LoginRequest): Observable<any> {
+        return this.registerService.login(credentials).pipe(
+            tap(response => {
+                if (response.token) {
+                    const mockSocialUser = {
+                        email: credentials.email,
+                        firstName: response.user?.nombre || '',
+                        lastName: response.user?.apellido || '',
+                        id: credentials.googleId || '',
+                        provider: credentials.provider || 'LOCAL'
+                    } as SocialUser;
+                    this.saveSession(response.token, mockSocialUser);
+                    this.loggedIn.set(true);
+                    this.user.set(mockSocialUser);
+                }
+            })
+        );
     }
 
     signOut() {

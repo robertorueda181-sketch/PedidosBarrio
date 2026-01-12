@@ -6,6 +6,7 @@ import { GoogleSigninButtonModule, SocialAuthService } from '@abacritt/angularx-
 import { AuthService } from '../../../shared/services/auth.service';
 import { RegisterService } from '../../../shared/services/register.service';
 import { RegisterRequest } from '../../../shared/interfaces/register.interface';
+import { LoginRequest } from '../../../shared/interfaces/login.interface';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 
@@ -65,8 +66,28 @@ export class BusinessAuth implements OnDestroy {
                     this.personLastName.set(user.lastName || '');
                     this.nextStep();
                 } else if (!this.isRegistering()) {
-                    // Normal login flow
-                    this.handleSuccessfulAuth();
+                    // Normal login flow (likely already handled by AuthService subscription if autoRegisterSocial is on, 
+                    // but on this page we have it OFF. So we handle it here.)
+                    const gUser = this.authService.user();
+                    if (gUser && !localStorage.getItem('auth_token')) {
+                        const loginData: LoginRequest = {
+                            email: gUser.email || '',
+                            contrasena: '',
+                            provider: 'google',
+                            idToken: gUser.idToken || '',
+                            googleId: gUser.id || ''
+                        };
+                        this.authService.login(loginData).subscribe({
+                            next: () => this.handleSuccessfulAuth(),
+                            error: (err) => {
+                                console.error('Social Login failed:', err);
+                                const msg = err.error?.error || 'Error al iniciar sesión con Google';
+                                this.messageService.add({ severity: 'error', summary: 'Error', detail: msg });
+                            }
+                        });
+                    } else if (localStorage.getItem('auth_token')) {
+                        this.handleSuccessfulAuth();
+                    }
                 }
             }
         });
@@ -115,11 +136,28 @@ export class BusinessAuth implements OnDestroy {
             this.messageService.add({ severity: 'warn', summary: 'Campos requeridos', detail: 'Ingrese correo y contraseña' });
             return;
         }
-        console.log('Manual Login:', this.loginEmail());
-        // Simulate Backend Login
-        localStorage.setItem('userType', 'NEGOCIO');
-        this.messageService.add({ severity: 'success', summary: 'Bienvenido', detail: 'Inicio de sesión exitoso' });
-        setTimeout(() => this.router.navigate(['/empresa/dashboard']), 500);
+
+        const loginData: LoginRequest = {
+            email: this.loginEmail(),
+            contrasena: this.loginPassword(),
+            provider: '',
+            idToken: '',
+            googleId: ''
+        };
+        debugger;
+        this.authService.login(loginData).subscribe({
+            next: (res) => {
+                console.log('Login successful:', res);
+                this.messageService.add({ severity: 'success', summary: 'Bienvenido', detail: 'Inicio de sesión exitoso' });
+                localStorage.setItem('userType', 'NEGOCIO');
+                setTimeout(() => this.router.navigate(['/empresa/dashboard']), 500);
+            },
+            error: (err) => {
+                console.error('Login failed:', err);
+                const errorMessage = err.error?.error || 'Correo o contraseña incorrectos';
+                this.messageService.add({ severity: 'error', summary: 'Error de acceso', detail: errorMessage });
+            }
+        });
     }
 
     completeRegistration() {

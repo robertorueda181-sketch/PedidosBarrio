@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { RegisterRequest, SocialUserRequest } from '../interfaces/register.interface';
+import { LoginRequest } from '../interfaces/login.interface';
 import { AppConfigService } from './app-config.service';
 
 @Injectable({
@@ -21,6 +22,12 @@ export class RegisterService {
 
     registerSocialUser(data: RegisterRequest): Observable<any> {
         return this.http.post(`${this.appConfigService.apiUrl}/Auth/Register/social`, data);
+    }
+
+    login(data: LoginRequest): Observable<any> {
+        const url = `${this.appConfigService.apiUrl}/Auth/Login`;
+        console.log('Sending login request to:', url);
+        return this.http.post(url, data);
     }
 
     getCategories(tipo: string, param: string = ''): Observable<any[]> {
