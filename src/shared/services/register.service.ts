@@ -16,14 +16,18 @@ export class RegisterService {
     }
 
     registerBusiness(data: RegisterRequest): Observable<any> {
-        return this.http.post(this.apiUrl, data);
+        return this.http.post(`${this.appConfigService.apiUrl}/Auth/Register/business`, data);
     }
 
-    registerSocialUser(user: SocialUserRequest): Observable<any> {
-        return this.http.post(`${this.appConfigService.apiUrl}/auth/social-register`, user);
+    registerSocialUser(data: RegisterRequest): Observable<any> {
+        return this.http.post(`${this.appConfigService.apiUrl}/Auth/Register/social`, data);
     }
 
     getCategories(tipo: string, param: string = ''): Observable<any[]> {
         return this.http.get<any[]>(`${this.appConfigService.apiUrl}/Tipos?tipo=${tipo}&param=${param}`);
+    }
+
+    reverseGeocode(lat: number, lng: number): Observable<any> {
+        return this.http.get(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`);
     }
 }

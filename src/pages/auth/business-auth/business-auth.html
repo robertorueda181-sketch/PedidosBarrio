@@ -1,0 +1,330 @@
+<p-toast />
+<div class="min-h-screen bg-[#F3F4F6] flex items-center justify-center p-4">
+    <div
+        class="bg-white rounded-[2rem] shadow-2xl w-full max-w-6xl overflow-hidden flex flex-col md:flex-row min-h-[750px]">
+
+        <!-- Left Side: Image & Text -->
+        <div class="relative w-full md:w-5/12 overflow-hidden bg-[#0F172A]">
+            <img src="assets/fondo.jpg" alt="Background"
+                class="absolute inset-0 w-full h-full object-cover opacity-40 mix-blend-overlay">
+            <div class="absolute inset-0 bg-gradient-to-t from-[#0F172A] via-[#1e293b]/60 to-transparent"></div>
+
+            <div class="relative z-10 h-full flex flex-col p-12 text-white">
+                <!-- Back to website -->
+                <a routerLink="/"
+                    class="text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-white transition-colors flex items-center gap-2 mb-auto">
+                    <i class="pi pi-arrow-left"></i> Volver al Inicio
+                </a>
+
+                <div class="mt-auto">
+                    <h1 class="text-4xl md:text-5xl font-black mb-6 leading-[1.1]">
+                        Vende Más.<br>Crece Rápido.<br>Gestiona en Línea.
+                    </h1>
+                    <p class="text-gray-300 text-lg leading-relaxed mb-8 max-w-sm">
+                        Desde pedidos locales hasta servicios profesionales, nuestra plataforma te permite conectar con
+                        clientes sin complicaciones.
+                    </p>
+
+                    <div class="flex gap-1.5">
+                        <div class="w-10 h-1 bg-white rounded-full"></div>
+                        <div class="w-2 h-1 bg-gray-600 rounded-full"></div>
+                        <div class="w-2 h-1 bg-gray-600 rounded-full"></div>
+                        <div class="w-2 h-1 bg-gray-600 rounded-full"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Side: Form -->
+        <div class="w-full md:w-7/12 p-8 md:p-16 flex flex-col justify-center bg-white relative">
+
+            <div class="max-w-md w-full mx-auto">
+
+                <div class="mb-10 text-center md:text-left">
+                    <h2 class="text-4xl font-black text-gray-900 mb-2">
+                        {{ isRegistering() ? 'Crea tu Cuenta' : '¡Bienvenido de nuevo!' }}
+                    </h2>
+                    <p class="text-gray-500 text-sm">
+                        {{ isRegistering() ? 'Empieza a vender y promocionar tu negocio hoy.' : 'Inicia sesión para
+                        empezar a gestionar tus ventas.' }}
+                    </p>
+                </div>
+
+                <!-- Login View -->
+                @if(!isRegistering()) {
+                <div class="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
+
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-bold text-gray-900 uppercase tracking-widest ml-1">Correo o
+                            Celular</label>
+                        <input [(ngModel)]="loginEmail" type="text" placeholder="Correo o número de celular"
+                            class="w-full px-5 py-4 bg-white border border-gray-200 rounded-2xl focus:border-black focus:ring-1 focus:ring-black outline-none transition-all text-gray-800 placeholder:text-gray-400">
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-bold text-gray-900 uppercase tracking-widest ml-1">Contraseña</label>
+                        <div class="relative">
+                            <input [(ngModel)]="loginPassword" [type]="showPassword() ? 'text' : 'password'"
+                                placeholder="Ingresa tu contraseña"
+                                class="w-full px-5 py-4 bg-white border border-gray-200 rounded-2xl focus:border-black focus:ring-1 focus:ring-black outline-none transition-all text-gray-800 placeholder:text-gray-400">
+                            <button (click)="togglePassword()"
+                                class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black">
+                                <i class="pi" [class.pi-eye]="!showPassword()"
+                                    [class.pi-eye-slash]="showPassword()"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between text-xs px-1">
+                        <label class="flex items-center gap-2 cursor-pointer text-gray-500 hover:text-black">
+                            <input type="checkbox"
+                                class="w-4 h-4 rounded-md border-gray-300 focus:ring-black text-black">
+                            Recuérdame
+                        </label>
+                        <a href="#" class="font-bold text-gray-400 hover:text-black">¿Olvidaste tu contraseña?</a>
+                    </div>
+
+                    <button (click)="manualLogin()" [disabled]="!loginEmail() || !loginPassword()"
+                        class="w-full bg-black text-white py-4.5 rounded-2xl font-bold hover:bg-gray-900 transition-all shadow-xl shadow-gray-200 disabled:opacity-50 disabled:cursor-not-allowed">
+                        Iniciar Sesión
+                    </button>
+
+                    <div class="relative py-2">
+                        <div class="absolute inset-0 flex items-center">
+                            <div class="w-full border-t border-gray-100"></div>
+                        </div>
+                        <div class="relative flex justify-center text-[10px] uppercase font-bold tracking-[0.2em]">
+                            <span class="bg-white px-4 text-gray-300">O continúa con</span>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-center transform scale-105">
+                        <asl-google-signin-button type="standard" size="large" text="continue_with" shape="pill"
+                            theme="outline" [width]="350"></asl-google-signin-button>
+                    </div>
+
+                    <p class="text-center text-sm text-gray-500 mt-8">
+                        ¿No tienes una cuenta?
+                        <button (click)="toggleMode(true)" class="font-bold text-black hover:underline ml-1">Regístrate
+                            aquí</button>
+                    </p>
+                </div>
+                }
+
+                <!-- Register Flow -->
+                @if(isRegistering()) {
+                <!-- Step 1: Credentials -->
+                @if(step() === 1) {
+                <div class="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-bold text-gray-900 uppercase tracking-widest ml-1">Correo
+                            Electrónico</label>
+                        <input [(ngModel)]="email" type="email" placeholder="ejemplo@correo.com"
+                            class="w-full px-5 py-4 bg-white border border-gray-200 rounded-2xl focus:border-black focus:ring-1 focus:ring-black outline-none transition-all text-gray-800 placeholder:text-gray-400">
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-bold text-gray-900 uppercase tracking-widest ml-1">Crea una
+                            Contraseña</label>
+                        <div class="relative">
+                            <input [(ngModel)]="password" [type]="showPassword() ? 'text' : 'password'"
+                                placeholder="Mínimo 8 caracteres"
+                                class="w-full px-5 py-4 bg-white border border-gray-200 rounded-2xl focus:border-black focus:ring-1 focus:ring-black outline-none transition-all text-gray-800 placeholder:text-gray-400">
+                            <button (click)="togglePassword()"
+                                class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black">
+                                <i class="pi" [class.pi-eye]="!showPassword()"
+                                    [class.pi-eye-slash]="showPassword()"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button (click)="nextStep()" [disabled]="!email() || !password()"
+                        class="w-full bg-black text-white py-4.5 rounded-2xl font-bold hover:bg-gray-900 transition-all shadow-xl shadow-gray-200 disabled:opacity-50 disabled:cursor-not-allowed">
+                        Continuar con el Registro
+                    </button>
+
+                    <div class="relative py-2">
+                        <div class="absolute inset-0 flex items-center">
+                            <div class="w-full border-t border-gray-100"></div>
+                        </div>
+                        <div class="relative flex justify-center text-[10px] uppercase font-bold tracking-[0.2em]">
+                            <span class="bg-white px-4 text-gray-300">O regístrate con</span>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-center transform scale-105">
+                        <asl-google-signin-button type="standard" size="large" text="signup_with" shape="pill"
+                            theme="outline" [width]="350"></asl-google-signin-button>
+                    </div>
+
+                    <p class="text-center text-sm text-gray-500 mt-8">
+                        ¿Ya tienes una cuenta?
+                        <button (click)="toggleMode(false)" class="font-bold text-black hover:underline ml-1">Inicia
+                            sesión</button>
+                    </p>
+                </div>
+                }
+
+                <!-- Step 2: Category Selection -->
+                @if(step() === 2) {
+                <div class="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
+                    <p class="text-gray-500 text-sm font-medium mb-4">¿Qué tipo de cuenta deseas crear?</p>
+
+                    <button (click)="setCategory('NEGOCIO')"
+                        class="w-full text-left p-5 bg-white border-2 border-gray-100 hover:border-black rounded-3xl transition-all group hover:shadow-xl">
+                        <div class="flex items-center gap-4 mb-2">
+                            <div
+                                class="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-black group-hover:bg-black group-hover:text-white transition-colors">
+                                <i class="pi pi-shop text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-900 text-lg">Negocio</h3>
+                                <p class="text-[10px] text-gray-400 uppercase tracking-widest font-black">Productos y
+                                    Comida</p>
+                            </div>
+                        </div>
+                        <p class="text-sm text-gray-500 pl-[4rem]">Perfecto para tiendas, restaurantes, bodegas y
+                            cualquier venta de productos.</p>
+                    </button>
+
+                    <button (click)="setCategory('SERVICIO')"
+                        class="w-full text-left p-5 bg-white border-2 border-gray-100 hover:border-black rounded-3xl transition-all group hover:shadow-xl">
+                        <div class="flex items-center gap-4 mb-2">
+                            <div
+                                class="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-black group-hover:bg-black group-hover:text-white transition-colors">
+                                <i class="pi pi-briefcase text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-900 text-lg">Servicio</h3>
+                                <p class="text-[10px] text-gray-400 uppercase tracking-widest font-black">Profesionales
+                                </p>
+                            </div>
+                        </div>
+                        <p class="text-sm text-gray-500 pl-[4rem]">Para técnicos, oficios y profesionales que ofrecen
+                            sus servicios.</p>
+                    </button>
+
+                    <button (click)="setCategory('INMUEBLE')"
+                        class="w-full text-left p-5 bg-white border-2 border-gray-100 hover:border-black rounded-3xl transition-all group hover:shadow-xl">
+                        <div class="flex items-center gap-4 mb-2">
+                            <div
+                                class="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-black group-hover:bg-black group-hover:text-white transition-colors">
+                                <i class="pi pi-home text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-900 text-lg">Inmueble</h3>
+                                <p class="text-[10px] text-gray-400 uppercase tracking-widest font-black">Real Estate
+                                </p>
+                            </div>
+                        </div>
+                        <p class="text-sm text-gray-500 pl-[4rem]">Venta o alquiler de departamentos, casas, terrenos y
+                            locales comerciales.</p>
+                    </button>
+
+                    <button (click)="prevStep()"
+                        class="text-xs text-gray-400 hover:text-black font-black uppercase tracking-widest mt-6 flex items-center gap-2 px-2">
+                        <i class="pi pi-arrow-left"></i> Volver atrás
+                    </button>
+                </div>
+                }
+
+                <!-- Step 3: Details -->
+                @if(step() === 3) {
+                <div class="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
+                    <div class="flex items-center gap-3 p-4 bg-gray-50 rounded-2xl">
+                        <div class="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center">
+                            <i class="pi pi-check"></i>
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-black uppercase text-gray-400 tracking-widest">Rubro seleccionado
+                            </p>
+                            <p class="text-sm font-bold text-black">{{ selectedCategory() }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Persona / Responsable -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="space-y-1.5">
+                            <label class="text-xs font-bold text-gray-900 uppercase tracking-widest ml-1">
+                                {{ selectedCategory() === 'NEGOCIO' ? 'Dueño/Responsable' :
+                                selectedCategory() === 'SERVICIO' ? 'Tu Nombre' :
+                                'Nombre de Contacto' }}
+                            </label>
+                            <input [(ngModel)]="personFirstName" type="text" placeholder="Ej. Juan"
+                                class="w-full px-5 py-4 bg-white border border-gray-200 rounded-2xl focus:border-black focus:ring-1 focus:ring-black outline-none transition-all text-gray-800 placeholder:text-gray-400">
+                        </div>
+                        <div class="space-y-1.5">
+                            <label
+                                class="text-xs font-bold text-gray-900 uppercase tracking-widest ml-1">Apellido</label>
+                            <input [(ngModel)]="personLastName" type="text" placeholder="Ej. Pérez"
+                                class="w-full px-5 py-4 bg-white border border-gray-200 rounded-2xl focus:border-black focus:ring-1 focus:ring-black outline-none transition-all text-gray-800 placeholder:text-gray-400">
+                        </div>
+                    </div>
+
+                    @if(selectedCategory() === 'NEGOCIO') {
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-bold text-gray-900 uppercase tracking-widest ml-1">Nombre de tu
+                            Negocio</label>
+                        <input [(ngModel)]="businessName" type="text" placeholder="Ej. Bodega Don Pepe"
+                            class="w-full px-5 py-4 bg-white border border-gray-200 rounded-2xl focus:border-black focus:ring-1 focus:ring-black outline-none transition-all text-gray-800 placeholder:text-gray-400">
+                    </div>
+                    }
+
+                    @if(selectedCategory() === 'SERVICIO') {
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-bold text-gray-900 uppercase tracking-widest ml-1">Nombre de tu
+                            Empresa / Oficio</label>
+                        <input [(ngModel)]="businessName" type="text"
+                            placeholder="Ej. Limpieza Express o Gasfitería Silva"
+                            class="w-full px-5 py-4 bg-white border border-gray-200 rounded-2xl focus:border-black focus:ring-1 focus:ring-black outline-none transition-all text-gray-800 placeholder:text-gray-400">
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-bold text-gray-900 uppercase tracking-widest ml-1">¿Qué servicio
+                            ofreces?</label>
+                        <input [(ngModel)]="serviceType" type="text"
+                            placeholder="Ej. Gasfitería, Abogado, Electricista..."
+                            class="w-full px-5 py-4 bg-white border border-gray-200 rounded-2xl focus:border-black focus:ring-1 focus:ring-black outline-none transition-all text-gray-800 placeholder:text-gray-400">
+                    </div>
+                    }
+
+                    @if(selectedCategory() === 'INMUEBLE') {
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-bold text-gray-900 uppercase tracking-widest ml-1">Nombre de
+                            Inmobiliaria / Agente</label>
+                        <input [(ngModel)]="businessName" type="text"
+                            placeholder="Ej. Inmobiliaria El Parque o Independiente"
+                            class="w-full px-5 py-4 bg-white border border-gray-200 rounded-2xl focus:border-black focus:ring-1 focus:ring-black outline-none transition-all text-gray-800 placeholder:text-gray-400">
+                    </div>
+                    }
+
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-bold text-gray-900 uppercase tracking-widest ml-1">Celular de
+                            Contacto</label>
+                        <input [(ngModel)]="phoneNumber" type="tel" placeholder="999 999 999"
+                            class="w-full px-5 py-4 bg-white border border-gray-200 rounded-2xl focus:border-black focus:ring-1 focus:ring-black outline-none transition-all text-gray-800 placeholder:text-gray-400">
+                    </div>
+
+                    <div class="flex gap-3 pt-4">
+                        <button (click)="prevStep()"
+                            class="px-6 py-4 border-2 border-gray-100 rounded-2xl font-bold hover:bg-gray-50 transition-colors text-gray-400 hover:text-black">
+                            <i class="pi pi-arrow-left"></i>
+                        </button>
+                        <button (click)="completeRegistration()" [disabled]="!phoneNumber() || !personFirstName()"
+                            class="flex-1 bg-black text-white py-4.5 rounded-2xl font-bold hover:bg-gray-900 transition-all shadow-xl disabled:opacity-50 disabled:cursor-not-allowed">
+                            Finalizar y Empezar
+                        </button>
+                    </div>
+                </div>
+                }
+                }
+
+                <div class="mt-12 text-center">
+                    <p class="text-[10px] text-gray-400 uppercase tracking-widest font-bold">
+                        Al continuar aceptas nuestros <a href="#"
+                            class="underline hover:text-black transition-colors">Términos de servicio</a>
+                    </p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>

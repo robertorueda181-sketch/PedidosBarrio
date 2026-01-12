@@ -18,7 +18,12 @@ export class Login {
     constructor() {
         effect(() => {
             if (this.authService.loggedIn()) {
-                this.router.navigate(['/']);
+                const userType = localStorage.getItem('userType');
+                if (userType) {
+                    this.router.navigate(['/empresa/dashboard']);
+                } else {
+                    this.router.navigate(['/selection']);
+                }
             }
         });
     }

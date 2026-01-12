@@ -6,10 +6,12 @@ export interface CartItem extends ProductoDetalle {
   cantidad: number;
 }
 
+import { DrawerModule } from 'primeng/drawer';
+
 @Component({
   selector: 'app-amanro',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, DrawerModule],
   templateUrl: './amanro.html',
   styleUrls: ['./amanro.css']
 })
@@ -21,6 +23,7 @@ export class Amanro implements OnInit {
   selectedProducto = signal<ProductoDetalle | null>(null);
   cart = signal<CartItem[]>([]);
   isCartOpen = signal<boolean>(false);
+  drawerVisible = signal<boolean>(false);
 
   whatsappPhoneNumber: string = '51954121196';
 
@@ -71,12 +74,15 @@ export class Amanro implements OnInit {
 
   openProducto(producto: ProductoDetalle) {
     this.selectedProducto.set(producto);
-    document.body.style.overflow = 'hidden';
+    this.drawerVisible.set(true);
   }
 
   closeProducto() {
-    this.selectedProducto.set(null);
-    document.body.style.overflow = 'auto';
+    this.drawerVisible.set(false);
+    // Timeout to clear selection after animation if desired, or just keep it
+    setTimeout(() => {
+      this.selectedProducto.set(null);
+    }, 300);
   }
 
   addToCart(producto: ProductoDetalle) {

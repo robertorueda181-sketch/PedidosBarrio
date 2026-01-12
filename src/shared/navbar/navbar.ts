@@ -24,12 +24,12 @@ export class Navbar {
     }
 
     navigateToRegistro(type: string) {
-        this.isSubmenuOpen = false; // Cerrar el submenú después de seleccionar
+        this.isSubmenuOpen = false;
 
         if (type === 'empresa') {
-            this.router.navigate(['/registro-negocio']);
-        } else if (type === 'cliente') {
-            this.router.navigate(['/register-inmueble']);
+            this.router.navigate(['/business-auth']);
+        } else {
+            this.router.navigate(['/login']);
         }
     }
 

@@ -17,7 +17,7 @@ export const routes: Routes = [
     children: [
       { path: '', component: Main },
       { path: 'login', component: Login },
-      { path: 'registro-negocio', component: Register, canActivate: [authGuard] },
+      { path: 'registro-negocio', component: Register },
       { path: 'registro-inmueble', component: RegisterInmueble, canActivate: [authGuard] },
       { path: 'inmueble', component: InmuebleComponent },
       { path: 'inmueble/:id', loadComponent: () => import('./pages/inmueble-detalle/inmueble-detalle').then(m => m.InmuebleDetalle) },
@@ -56,6 +56,8 @@ export const routes: Routes = [
       { path: 'inmueble', component: InmuebleComponent },
     ]
   },
+  { path: 'selection', loadComponent: () => import('../pages/selection/selection').then(m => m.Selection) },
+  { path: 'business-auth', loadComponent: () => import('../pages/auth/business-auth/business-auth').then(m => m.BusinessAuth) },
   { path: 'amanro', component: Amanro },
   { path: 'stacion64', component: Stacion64 },
   { path: '**', redirectTo: '' }

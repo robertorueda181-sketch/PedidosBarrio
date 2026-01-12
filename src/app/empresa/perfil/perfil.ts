@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -27,28 +27,42 @@ interface CompanyProfile {
   templateUrl: './perfil.html',
   styleUrl: './perfil.css',
 })
-export class Perfil {
+export class Perfil implements OnInit {
   isEditing = false;
   isLoading = false;
   saveSuccess = false;
+  userType: string = 'NEGOCIO';
 
-  companyProfile: CompanyProfile = {
+  companyProfile: any = {
     name: 'Mi Empresa S.A.',
-    description: 'Somos una empresa dedicada a ofrecer servicios de calidad en el barrio. Especializados en productos locales y servicios profesionales.',
+    description: 'Somos una empresa dedicada a ofrecer servicios de calidad en el barrio.',
     email: 'contacto@miempresa.com',
-    phone: '+57 300 123 4567',
-    website: 'https://miempresa.com',
-    address: {
-      street: 'Calle 123 #45-67',
-      city: 'Bogotá',
-      state: 'Cundinamarca',
-      zipCode: '110111',
-      country: 'Colombia'
+    phone: '+51 987 654 321',
+    address: 'Calle Principal 123',
+    category: 'Restaurantes',
+    socialMedia: {
+      facebook: '',
+      instagram: '',
+      whatsapp: ''
     },
-    category: 'Servicios Profesionales',
-    foundedYear: 2018,
-    employeeCount: '11-50'
+    banner: {
+      url: '',
+      title: '',
+      description: ''
+    },
+    servicesProvided: [],
+    images: [],
+    propertyDetails: {
+      bathrooms: 0,
+      rooms: 0,
+      area: 0,
+      type: ''
+    }
   };
+
+  ngOnInit() {
+    this.userType = localStorage.getItem('userType') || 'NEGOCIO';
+  }
 
   categories = [
     'Servicios Profesionales',
@@ -107,6 +121,12 @@ export class Perfil {
     // Aquí podrías recargar los datos originales desde el backend
     this.isEditing = false;
     this.saveSuccess = false;
+  }
+
+  removeImage(profile: any, index: number) {
+    if (profile.images) {
+      profile.images.splice(index, 1);
+    }
   }
 
   onLogoChange(event: any) {

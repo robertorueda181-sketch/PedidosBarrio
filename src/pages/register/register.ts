@@ -1,4 +1,5 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { InputMaskModule } from 'primeng/inputmask';
 import { CheckboxModule } from 'primeng/checkbox';
@@ -8,29 +9,39 @@ import { CommonModule } from '@angular/common';
 import * as L from 'leaflet';
 import { RegisterService } from '../../shared/services/register.service';
 import { RegisterRequest } from '../../shared/interfaces/register.interface';
+import { MessageService } from 'primeng/api';
+import { ToastModule } from 'primeng/toast';
 
 @Component({
   selector: 'app-register',
-  imports: [ReactiveFormsModule, CommonModule, MultiSelectModule, InputMaskModule, CheckboxModule, SelectModule],
+  imports: [ReactiveFormsModule, CommonModule, MultiSelectModule, InputMaskModule, CheckboxModule, SelectModule, ToastModule],
   templateUrl: './register.html',
   styleUrl: './register.css',
 })
 export class Register implements OnInit {
   private fb = inject(FormBuilder);
   private registerService = inject(RegisterService);
+  private router = inject(Router);
+  private messageService = inject(MessageService);
   private typeCateg = 'CATEG';
 
   categories = signal<any[]>([]);
   loadingCategories = signal<boolean>(false);
 
   registerForm: FormGroup = this.fb.group({
+    registrationType: ['NEGOCIO', Validators.required],
+    personType: ['NATURAL', Validators.required],
+    idType: ['DNI', Validators.required],
     fullname: ['', Validators.required],
-    dni: ['', [Validators.required, Validators.pattern(/^[0-9]{8}$/)]],
-    businessName: ['', Validators.required],
-    ruc: ['', [Validators.required, Validators.pattern(/^[0-9]{11}$/)]],
-    category: ['', Validators.required],
-    schedules: this.fb.array([], Validators.required),
-    address: ['', Validators.required],
+    dni: ['', [Validators.pattern(/^[0-9]{8}$/)]],
+    ruc: ['', [Validators.pattern(/^[0-9]{11}$/)]],
+    businessName: [''],
+    category: [''],
+    schedules: this.fb.array([]),
+    address: [''],
+    city: [''],
+    province: [''],
+    department: [''],
     reference: [''],
     useMap: [false],
     lat: [''],
@@ -53,7 +64,6 @@ export class Register implements OnInit {
   ];
 
   step = 1;
-  selectedPlan: string | null = null;
   map: L.Map | undefined;
   marker: L.Marker | undefined;
   loadingLocation = false;
@@ -65,6 +75,22 @@ export class Register implements OnInit {
 
   ngOnInit() {
     this.loadCategories();
+
+    // Update validators based on idType
+    this.registerForm.get('idType')?.valueChanges.subscribe(value => {
+      const dniControl = this.registerForm.get('dni');
+      const rucControl = this.registerForm.get('ruc');
+
+      if (value === 'DNI') {
+        dniControl?.setValidators([Validators.required, Validators.pattern(/^[0-9]{8}$/)]);
+        rucControl?.clearValidators();
+      } else {
+        rucControl?.setValidators([Validators.required, Validators.pattern(/^[0-9]{11}$/)]);
+        dniControl?.clearValidators();
+      }
+      dniControl?.updateValueAndValidity();
+      rucControl?.updateValueAndValidity();
+    });
   }
 
   loadCategories() {
@@ -115,9 +141,21 @@ export class Register implements OnInit {
     this.schedules.removeAt(index);
   }
 
-  goToStep2() {
-    if (!this.selectedPlan) return;
-    this.step = 2;
+  nextStep() {
+    if (this.step < 3) {
+      this.step++;
+    }
+  }
+
+  prevStep() {
+    if (this.step > 1) {
+      this.step--;
+    }
+  }
+
+  setRegistrationType(type: 'NEGOCIO' | 'SERVICIO' | 'INMUEBLE') {
+    this.registerForm.patchValue({ registrationType: type });
+    this.nextStep();
   }
 
   toggleMap() {
@@ -125,9 +163,7 @@ export class Register implements OnInit {
     if (useMap) {
       setTimeout(() => {
         this.initMap();
-      }, 100); // Wait for DOM to render map container
-    } else {
-      // Optional: Clear map or reset location?
+      }, 100);
     }
   }
 
@@ -136,7 +172,6 @@ export class Register implements OnInit {
       this.map.remove();
     }
 
-    // Default to a central location (e.g., Lima, Peru) if geolocation fails
     const defaultLat = -12.0464;
     const defaultLng = -77.0428;
 
@@ -146,7 +181,6 @@ export class Register implements OnInit {
       attribution: '© OpenStreetMap contributors'
     }).addTo(this.map);
 
-    // Try to get user location
     if (navigator.geolocation) {
       this.loadingLocation = true;
       navigator.geolocation.getCurrentPosition(
@@ -190,8 +224,29 @@ export class Register implements OnInit {
       lat: lat,
       lng: lng
     });
-    // Optional: Reverse geocoding here to update address field
-    // For now, we just set the coordinates.
+
+    this.registerService.reverseGeocode(lat, lng).subscribe({
+      next: (data) => {
+        if (data && data.address) {
+          const addr = data.address;
+          // Nominatim returns different fields depending on the location
+          const city = addr.city || addr.town || addr.village || addr.suburb || '';
+          const province = addr.county || addr.state_district || '';
+          const department = addr.state || '';
+          const displayAddress = data.display_name || '';
+
+          this.registerForm.patchValue({
+            address: displayAddress,
+            city: city,
+            province: province,
+            department: department
+          });
+        }
+      },
+      error: (err) => {
+        console.error('Error in reverse geocoding', err);
+      }
+    });
   }
 
   onSubmit() {
@@ -200,12 +255,6 @@ export class Register implements OnInit {
       return;
     }
 
-    // if (!this.selectedPlan) {
-    //   alert('Seleccione un plan');
-    //   this.step = 1;
-    //   return;
-    // }
-
     if (this.registerForm.value.password !== this.registerForm.value.confirmPassword) {
       alert('Las contraseñas no coinciden');
       return;
@@ -213,23 +262,39 @@ export class Register implements OnInit {
 
     const formData = {
       ...this.registerForm.value,
-      registrationType: 'PRODUCT'
+      tipoEmpresa: this.registerForm.value.registrationType === 'NEGOCIO' ? 1 : 2,
+      nombre: this.registerForm.value.fullname,
+      apellido: ' ',
+      nombreUsuario: this.registerForm.value.email.split('@')[0],
+      contrasena: this.registerForm.value.password,
+      nombreEmpresa: this.registerForm.value.businessName || this.registerForm.value.fullname,
+      categoria: this.registerForm.value.category,
+      telefono: this.registerForm.value.phone,
+      descripcion: this.registerForm.value.description || '',
+      direccion: this.registerForm.value.address || '',
+      referencia: this.registerForm.value.reference || '',
+      provider: '',
+      socialId: '',
+      idToken: ''
     } as RegisterRequest;
+
     console.log('Datos enviados:', formData);
 
     this.registerService.registerBusiness(formData).subscribe({
-      next: (response) => {
+      next: (response: any) => {
         console.log('Registro exitoso:', response);
-        alert(`Gracias por registrar tu negocio, ${formData.fullname}!`);
-        this.registerForm.reset();
-        this.schedules.clear();
-        this.addSchedule();
-        this.step = 1;
-        this.selectedPlan = null;
+        // Store user info/type in local storage if needed for dashboard
+        localStorage.setItem('userType', formData.registrationType || 'NEGOCIO');
+        this.router.navigate(['/empresa/dashboard']);
       },
-      error: (error) => {
+      error: (error: any) => {
         console.error('Error en el registro:', error);
-        alert('Hubo un error al registrar el negocio. Por favor, inténtalo de nuevo.');
+        const errorMessage = error.error?.message || error.error || 'Hubo un error al registrar. Por favor, inténtalo de nuevo.';
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error en el registro',
+          detail: typeof errorMessage === 'string' ? errorMessage : 'Error de validación (400)'
+        });
       }
     });
   }

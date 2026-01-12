@@ -12,6 +12,8 @@ Chart.register(...registerables);
   styleUrl: './dashboard.css',
 })
 export class DashboardComponent implements AfterViewInit {
+  userType: string = 'NEGOCIO';
+
   // Métricas generales
   stats = {
     products: 24,
@@ -21,6 +23,13 @@ export class DashboardComponent implements AfterViewInit {
     contacts: 15,
     newClients: 8
   };
+
+  constructor() {
+    const storedType = localStorage.getItem('userType');
+    if (storedType) {
+      this.userType = storedType;
+    }
+  }
 
   ngAfterViewInit() {
     this.initWeeklyChart();

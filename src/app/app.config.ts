@@ -1,5 +1,5 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideZonelessChangeDetection, APP_INITIALIZER } from '@angular/core';
-import { provideRouter } from '@angular/router';
+import { provideRouter, withHashLocation } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { providePrimeNG } from 'primeng/config';
@@ -7,6 +7,7 @@ import Aura from '@primeng/themes/aura';
 import { definePreset } from '@primeng/themes';
 import { SocialAuthServiceConfig, SOCIAL_AUTH_CONFIG } from '@abacritt/angularx-social-login';
 import { GoogleLoginProvider } from '@abacritt/angularx-social-login';
+import { MessageService } from 'primeng/api';
 
 import { routes } from './app.routes';
 import { AppConfigService } from '../shared/services/app-config.service';
@@ -38,7 +39,7 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideZonelessChangeDetection(),
-    provideRouter(routes),
+    provideRouter(routes, withHashLocation()),
     provideHttpClient(withInterceptors([authInterceptor])),
     provideAnimationsAsync(),
     {
@@ -89,6 +90,7 @@ export const appConfig: ApplicationConfig = {
         emptyMessage: 'No se encontraron resultados',
         emptyFilterMessage: 'No se encontraron resultados'
       }
-    })
+    }),
+    MessageService
   ]
 };

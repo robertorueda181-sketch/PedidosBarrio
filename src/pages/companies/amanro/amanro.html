@@ -114,10 +114,8 @@
                   <span class="text-[#8B4513] font-bold">S/ {{ producto.precio | number:'1.2-2' }}</span>
                 </div>
                 <button (click)="$event.stopPropagation(); addToCart(producto)"
-                  class="bg-[#fedeb8]/30 hover:bg-[#fedeb8] text-[#8B4513] p-2 rounded-lg transition-colors">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                  </svg>
+                  class="bg-[#fedeb8] text-[#3E1F0A] px-4 py-2 rounded-lg text-sm font-bold uppercase tracking-wider hover:bg-[#3E1F0A] hover:text-[#fedeb8] transition-colors shadow-sm">
+                  Agregar
                 </button>
               </div>
             </div>
@@ -134,41 +132,37 @@
     </main>
   </div>
 
-  <!-- Product Detail Modal -->
-  @if(selectedProducto()) {
-  <div
-    class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
-    <div class="bg-white w-full max-w-2xl rounded-3xl overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300">
-      <div class="relative h-64 md:h-80">
-        <img [src]="selectedProducto()?.urlImagen" [alt]="selectedProducto()?.nombre"
-          class="w-full h-full object-cover">
-        <button (click)="closeProducto()"
-          class="absolute top-4 right-4 bg-black/50 text-white w-10 h-10 rounded-full flex items-center justify-center hover:bg-black transition-colors">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-          </svg>
-        </button>
-      </div>
-      <div class="p-8">
-        <div class="flex justify-between items-start mb-4">
-          <h2 class="serif-font text-3xl text-[#3E1F0A]">{{ selectedProducto()?.nombre }}</h2>
-          <span class="text-2xl font-bold text-[#8B4513]">S/ {{ selectedProducto()?.precio | number:'1.2-2' }}</span>
+  <!-- Product Detail Drawer -->
+  <p-drawer [(visible)]="drawerVisible" position="right" [modal]="true" [style]="{width: '100%', maxWidth: '450px'}"
+    [showCloseIcon]="true" (onHide)="selectedProducto.set(null)">
+    <ng-template pTemplate="content">
+      @if(selectedProducto()) {
+      <div class="flex flex-col h-full">
+        <div class="relative h-48 -mx-5 -mt-5 mb-6">
+          <img [src]="selectedProducto()?.urlImagen" [alt]="selectedProducto()?.nombre"
+            class="w-full h-full object-cover">
         </div>
-        <p class="text-gray-600 leading-relaxed mb-8">
-          {{ selectedProducto()?.descripcion || 'Disfruta de nuestra especialidad preparada con ingredientes frescos y
-          seleccionados para brindarte el mejor sabor tradicional.' }}
-        </p>
+        <div class="flex-1 overflow-y-auto px-1">
+          <div class="flex justify-between items-start mb-4">
+            <h2 class="serif-font text-3xl text-[#3E1F0A]">{{ selectedProducto()?.nombre }}</h2>
+            <span class="text-2xl font-bold text-[#8B4513]">S/ {{ selectedProducto()?.precio | number:'1.2-2' }}</span>
+          </div>
+          <p class="text-gray-600 leading-relaxed mb-8 text-lg">
+            {{ selectedProducto()?.descripcion || 'Disfruta de nuestra especialidad preparada con ingredientes frescos y
+            seleccionados para brindarte el mejor sabor tradicional.' }}
+          </p>
+        </div>
 
-        <div class="flex gap-4">
+        <div class="pt-4 mt-auto sticky bottom-0 bg-white pb-2">
           <button (click)="addToCart(selectedProducto()!); closeProducto()"
-            class="flex-1 bg-[#8B4513] text-white py-4 rounded-xl font-bold uppercase tracking-widest hover:bg-[#3E1F0A] transition-all flex items-center justify-center gap-2">
+            class="w-full bg-[#8B4513] text-white py-6 text-xl rounded-2xl font-bold uppercase tracking-widest hover:bg-[#3E1F0A] transition-all flex items-center justify-center gap-3 shadow-xl hover:shadow-2xl transform active:scale-95">
             Añadir al Carrito
           </button>
         </div>
       </div>
-    </div>
-  </div>
-  }
+      }
+    </ng-template>
+  </p-drawer>
 
   <!-- Shopping Cart Sidebar -->
   <div class="fixed inset-0 z-[110]" [class.pointer-events-none]="!isCartOpen()"

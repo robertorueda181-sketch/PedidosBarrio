@@ -8,16 +8,19 @@ import { CommonModule } from '@angular/common';
 import * as L from 'leaflet';
 import { RegisterService } from '../../shared/services/register.service';
 import { RegisterRequest } from '../../shared/interfaces/register.interface';
+import { MessageService } from 'primeng/api';
+import { ToastModule } from 'primeng/toast';
 
 @Component({
     selector: 'app-register-inmueble',
-    imports: [ReactiveFormsModule, CommonModule, MultiSelectModule, InputMaskModule, CheckboxModule, SelectModule],
+    imports: [ReactiveFormsModule, CommonModule, MultiSelectModule, InputMaskModule, CheckboxModule, SelectModule, ToastModule],
     templateUrl: './register-inmueble.html',
     styleUrl: './register-inmueble.css',
 })
 export class RegisterInmueble implements OnInit {
     private fb = inject(FormBuilder);
     private registerService = inject(RegisterService);
+    private messageService = inject(MessageService);
 
     registerForm: FormGroup = this.fb.group({
         fullname: ['', Validators.required],
@@ -158,7 +161,21 @@ export class RegisterInmueble implements OnInit {
 
         const formData = {
             ...this.registerForm.value,
-            registrationType: 'REAL_ESTATE'
+            registrationType: 'REAL_ESTATE',
+            tipoEmpresa: 3, // INMUEBLE
+            nombre: this.registerForm.value.fullname,
+            apellido: ' ',
+            nombreUsuario: this.registerForm.value.email.split('@')[0],
+            contrasena: this.registerForm.value.password,
+            nombreEmpresa: 'Inmobiliaria',
+            categoria: this.registerForm.value.propertyType,
+            telefono: this.registerForm.value.phone,
+            descripcion: this.registerForm.value.description || '',
+            direccion: this.registerForm.value.address || '',
+            referencia: this.registerForm.value.reference || '',
+            provider: '',
+            socialId: '',
+            idToken: ''
         } as RegisterRequest;
 
         console.log('Datos enviados:', formData);
@@ -166,12 +183,17 @@ export class RegisterInmueble implements OnInit {
         this.registerService.registerBusiness(formData).subscribe({
             next: (response) => {
                 console.log('Registro exitoso:', response);
-                alert(`Gracias por registrar tu inmueble, ${formData.fullname}!`);
+                alert(`Gracias por registrar tu inmueble, ${formData.fullname || ''}!`);
                 this.registerForm.reset();
             },
-            error: (error) => {
+            error: (error: any) => {
                 console.error('Error en el registro:', error);
-                alert('Hubo un error al registrar el inmueble. Por favor, inténtalo de nuevo.');
+                const errorMessage = error.error?.message || error.error || 'Hubo un error al registrar el inmueble. Por favor, inténtalo de nuevo.';
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Error en el registro',
+                    detail: typeof errorMessage === 'string' ? errorMessage : 'Error de validación (400)'
+                });
             }
         });
     }
