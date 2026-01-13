@@ -4,7 +4,7 @@
         class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
         <div>
             <h1 class="text-3xl font-black text-gray-900 tracking-tight">Gestión de <span
-                    class="text-cyan-600">Publicidad</span></h1>
+                    class="text-cyan-600">Promociones</span></h1>
             <p class="text-gray-500 font-medium">Crea anuncios premium y dinámicos para tu tienda</p>
         </div>
         <div class="flex gap-3">
@@ -293,135 +293,6 @@
                 }
             </div>
 
-            <!-- Footer & Extra Images Builder -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <!-- Footer Image -->
-                <div class="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 space-y-6">
-                    <h3 class="text-lg font-black text-gray-800 uppercase tracking-tight">Logo de <span
-                            class="text-cyan-600">Cierre</span></h3>
-                    <div class="space-y-4">
-                        <button (click)="openImageModal('footer')"
-                            class="w-full flex items-center justify-between p-2 hover:bg-gray-50 transition-all group rounded-lg border">
-                            <div class="flex items-center gap-4">
-                                <div class="flex items-center justify-center bg-white border shadow-sm" [ngClass]="{
-                                            'rounded-full': adConfig.footerImageConfig?.shape === 'circle',
-                                            'rounded-lg': adConfig.footerImageConfig?.shape === 'square',
-                                            'w-8 h-8': adConfig.footerImageConfig?.size === 'sm',
-                                            'w-12 h-12': adConfig.footerImageConfig?.size === 'md',
-                                            'w-16 h-16': adConfig.footerImageConfig?.size === 'lg'
-                                        }">
-                                    <img [src]="adConfig.footerImageConfig?.url || adConfig.footerImage"
-                                        class="w-full h-full object-cover"
-                                        [ngClass]="adConfig.footerImageConfig?.shape === 'circle' ? 'rounded-full' : 'rounded-lg'">
-                                </div>
-                                <div class="text-left">
-                                    <span
-                                        class="block text-[10px] font-black text-gray-800 uppercase tracking-widest">Logo
-                                        Central</span>
-                                    <span class="text-[8px] font-bold text-gray-400">Clic para cambiar</span>
-                                </div>
-                            </div>
-                            <i class="pi pi-refresh text-cyan-600"></i>
-                        </button>
-
-                        @if(adConfig.footerImageConfig) {
-                        <div class="grid grid-cols-2 gap-4">
-                            <div class="space-y-1">
-                                <p class="text-[8px] font-black text-gray-400 uppercase">Forma</p>
-                                <div class="flex gap-1">
-                                    <button (click)="adConfig.footerImageConfig.shape = 'circle'"
-                                        class="flex-1 py-1 text-[8px] font-bold rounded"
-                                        [ngClass]="adConfig.footerImageConfig.shape === 'circle' ? 'bg-cyan-600 text-white' : 'bg-white text-gray-400 border'">Círculo</button>
-                                    <button (click)="adConfig.footerImageConfig.shape = 'square'"
-                                        class="flex-1 py-1 text-[8px] font-bold rounded"
-                                        [ngClass]="adConfig.footerImageConfig.shape === 'square' ? 'bg-cyan-600 text-white' : 'bg-white text-gray-400 border'">Cuadrado</button>
-                                </div>
-                            </div>
-                            <div class="space-y-1">
-                                <p class="text-[8px] font-black text-gray-400 uppercase">Tamaño</p>
-                                <div class="flex gap-1">
-                                    <button (click)="adConfig.footerImageConfig.size = 'sm'"
-                                        class="flex-1 py-1 text-[8px] font-bold rounded"
-                                        [ngClass]="adConfig.footerImageConfig.size === 'sm' ? 'bg-cyan-600 text-white' : 'bg-white text-gray-400 border'">Pequeño</button>
-                                    <button (click)="adConfig.footerImageConfig.size = 'md'"
-                                        class="flex-1 py-1 text-[8px] font-bold rounded"
-                                        [ngClass]="adConfig.footerImageConfig.size === 'md' ? 'bg-cyan-600 text-white' : 'bg-white text-gray-400 border'">Mediano</button>
-                                    <button (click)="adConfig.footerImageConfig.size = 'lg'"
-                                        class="flex-1 py-1 text-[8px] font-bold rounded"
-                                        [ngClass]="adConfig.footerImageConfig.size === 'lg' ? 'bg-cyan-600 text-white' : 'bg-white text-gray-400 border'">Grande</button>
-                                </div>
-                            </div>
-                        </div>
-                        }
-                    </div>
-                </div>
-
-                <!-- Extra Support Images -->
-                <div class="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 space-y-6">
-                    <div class="flex items-center justify-between">
-                        <h3 class="text-lg font-black text-gray-800 uppercase tracking-tight">Galería de <span
-                                class="text-cyan-600">Apoyo</span></h3>
-                        <button (click)="addImage()"
-                            class="text-cyan-600 font-black text-[10px] uppercase tracking-widest hover:underline">+
-                            Añadir</button>
-                    </div>
-
-                    <div class="space-y-3 max-h-60 overflow-y-auto pr-2 no-scrollbar">
-                        @for(img of adConfig.extraImagesConfig; track $index) {
-                        <div
-                            class="flex flex-col gap-3 bg-gray-50 p-3 rounded-xl border border-gray-100 group/extra relative">
-                            <button (click)="removeImage($index)"
-                                class="absolute top-2 right-2 text-red-400 opacity-0 group-hover/extra:opacity-100 transition-all hover:scale-125">
-                                <i class="pi pi-trash text-xs"></i>
-                            </button>
-
-                            <div class="flex items-center gap-3">
-                                <div class="flex items-center justify-center bg-white border transition-all" [ngClass]="{
-                                            'rounded-full': img.shape === 'circle',
-                                            'rounded-lg': img.shape === 'square',
-                                            'w-6 h-6': img.size === 'sm',
-                                            'w-8 h-8': img.size === 'md',
-                                            'w-10 h-10': img.size === 'lg'
-                                        }">
-                                    <img [src]="img.url" class="w-full h-full object-cover"
-                                        [ngClass]="img.shape === 'circle' ? 'rounded-full' : 'rounded-lg'">
-                                </div>
-                                <button (click)="openImageModal('extra', $index)"
-                                    class="text-[9px] font-black text-cyan-600 uppercase">Cambiar Imagen</button>
-                            </div>
-
-                            <div class="grid grid-cols-2 gap-4">
-                                <div class="flex gap-1">
-                                    <button (click)="img.shape = 'circle'"
-                                        class="flex-1 py-0.5 text-[7px] font-black rounded uppercase"
-                                        [ngClass]="img.shape === 'circle' ? 'bg-cyan-600 text-white' : 'bg-white text-gray-400 border'">Cir</button>
-                                    <button (click)="img.shape = 'square'"
-                                        class="flex-1 py-0.5 text-[7px] font-black rounded uppercase"
-                                        [ngClass]="img.shape === 'square' ? 'bg-cyan-600 text-white' : 'bg-white text-gray-400 border'">Cua</button>
-                                </div>
-                                <div class="flex gap-1">
-                                    <button (click)="img.size = 'sm'"
-                                        class="flex-1 py-0.5 text-[7px] font-black rounded uppercase"
-                                        [ngClass]="img.size === 'sm' ? 'bg-cyan-600 text-white' : 'bg-white text-gray-400 border'">Peq</button>
-                                    <button (click)="img.size = 'md'"
-                                        class="flex-1 py-0.5 text-[7px] font-black rounded uppercase"
-                                        [ngClass]="img.size === 'md' ? 'bg-cyan-600 text-white' : 'bg-white text-gray-400 border'">Med</button>
-                                    <button (click)="img.size = 'lg'"
-                                        class="flex-1 py-0.5 text-[7px] font-black rounded uppercase"
-                                        [ngClass]="img.size === 'lg' ? 'bg-cyan-600 text-white' : 'bg-white text-gray-400 border'">Gra</button>
-                                </div>
-                            </div>
-                        </div>
-                        }
-                    </div>
-
-                    @if(!adConfig.extraImagesConfig || adConfig.extraImagesConfig.length === 0) {
-                    <div class="text-center py-6 text-gray-300 italic text-[10px]">
-                        No hay imágenes de apoyo añadidas
-                    </div>
-                    }
-                </div>
-            </div>
         </div>
 
         <!-- STYLING AND PREVIEW (Right) -->
@@ -543,43 +414,9 @@
                                 </div>
                                 }
 
-                                <!-- Footer Logo -->
-                                @if(adConfig.footerImageConfig) {
-                                <div class="py-6 flex justify-center w-full">
-                                    <div class="border-2 border-white shadow-xl overflow-hidden transition-all"
-                                        [ngClass]="{
-                                                    'rounded-full': adConfig.footerImageConfig.shape === 'circle',
-                                                    'rounded-lg': adConfig.footerImageConfig.shape === 'square',
-                                                    'w-10 h-10': adConfig.footerImageConfig.size === 'sm',
-                                                    'w-14 h-14': adConfig.footerImageConfig.size === 'md',
-                                                    'w-20 h-20': adConfig.footerImageConfig.size === 'lg'
-                                                }">
-                                        <img [src]="adConfig.footerImageConfig.url || adConfig.footerImage"
-                                            class="w-full h-full object-cover">
-                                    </div>
-                                </div>
-                                }
                             </div>
                         </div>
 
-                        <!-- Gallery Extra (Fixed bottom) -->
-                        @if(adConfig.extraImagesConfig && adConfig.extraImagesConfig.length > 0) {
-                        <div
-                            class="p-3 bg-white/30 backdrop-blur-md flex flex-wrap justify-center gap-2 border-t border-white/20 mt-auto">
-                            @for(img of adConfig.extraImagesConfig; track $index) {
-                            <div class="border border-white/50 overflow-hidden shadow-sm transition-all shrink-0"
-                                [ngClass]="{
-                                            'rounded-full': img.shape === 'circle',
-                                            'rounded-md': img.shape === 'square',
-                                            'w-6 h-6': img.size === 'sm',
-                                            'w-9 h-9': img.size === 'md',
-                                            'w-12 h-12': img.size === 'lg'
-                                        }">
-                                <img [src]="img.url" class="w-full h-full object-cover">
-                            </div>
-                            }
-                        </div>
-                        }
                     </div>
                 </div>
             </div>
@@ -667,43 +504,9 @@
                     </div>
                     }
 
-                    <!-- Footer Logo -->
-                    @if(adConfig.footerImageConfig) {
-                    <div class="py-10 flex justify-center w-full">
-                        <div class="border-4 border-white shadow-2xl transition-all" [ngClass]="{
-                                    'rounded-full': adConfig.footerImageConfig.shape === 'circle',
-                                    'rounded-[2rem]': adConfig.footerImageConfig.shape === 'square',
-                                    'w-16 h-16': adConfig.footerImageConfig.size === 'sm',
-                                    'w-24 h-24': adConfig.footerImageConfig.size === 'md',
-                                    'w-32 h-32': adConfig.footerImageConfig.size === 'lg'
-                                }">
-                            <img [src]="adConfig.footerImageConfig.url || adConfig.footerImage"
-                                class="w-full h-full object-cover">
-                        </div>
-                    </div>
-                    }
-                </div>
-            </div>
 
-            <!-- Extra Images in Full Preview -->
-            @if(adConfig.extraImagesConfig && adConfig.extraImagesConfig.length > 0) {
-            <div
-                class="p-6 bg-white/30 backdrop-blur-md flex flex-wrap justify-center gap-4 border-t border-white/20 mt-auto">
-                @for(img of adConfig.extraImagesConfig; track $index) {
-                <div class="border-4 border-white shadow-lg transition-transform hover:scale-125 duration-300"
-                    [ngClass]="{
-                        'rounded-full': img.shape === 'circle',
-                        'rounded-xl': img.shape === 'square',
-                        'w-12 h-12': img.size === 'sm',
-                        'w-16 h-16': img.size === 'md',
-                        'w-24 h-24': img.size === 'lg'
-                    }">
-                    <img [src]="img.url" class="w-full h-full object-cover"
-                        [ngClass]="img.shape === 'circle' ? 'rounded-full' : 'rounded-lg'">
                 </div>
-                }
             </div>
-            }
         </div>
     </div>
 </p-dialog>

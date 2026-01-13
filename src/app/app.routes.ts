@@ -10,6 +10,7 @@ import { Amanro } from '../pages/companies/amanro/amanro';
 import { Stacion64 } from '../pages/companies/stacion64/stacion64';
 import { authGuard } from '../shared/guards/auth.guard';
 
+
 export const routes: Routes = [
   {
     path: '',
@@ -40,7 +41,7 @@ export const routes: Routes = [
       { path: 'suscripcion', loadComponent: () => import('./empresa/suscripcion/suscripcion').then(m => m.Suscripcion) },
       { path: 'perfil', loadComponent: () => import('./empresa/perfil/perfil').then(m => m.Perfil) },
       { path: 'sitio', loadComponent: () => import('./empresa/sitio-web/sitio-web').then(m => m.SitioWeb) },
-      { path: 'promociones', loadComponent: () => import('./empresa/publicidad/publicidad').then(m => m.Promociones) },
+      { path: 'promociones', loadComponent: () => import('./empresa/promociones/promociones').then(m => m.Promociones) },
       { path: 'banner', loadComponent: () => import('./empresa/banner/banner').then(m => m.Banner) }
     ]
   },

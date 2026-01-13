@@ -37,16 +37,12 @@ interface AdConfig {
     showMainContent: boolean;
     showWhatsAppBadge: boolean;
     moduleSections: AdModuleSection[];
-    footerImage: string;
-    footerImageConfig?: AdImage;
     startDate: string;
     endDate: string;
     bgColor: string;
     textColor: string;
     accentColor: string;
     cardColor: string;
-    extraImages: string[];
-    extraImagesConfig?: AdImage[];
     createdAt?: string;
     isActive?: boolean;
 }
@@ -66,8 +62,8 @@ interface AdConfig {
         EditorModule,
         SelectButtonModule
     ],
-    templateUrl: './publicidad.html',
-    styleUrl: './publicidad.css'
+    templateUrl: './promociones.html',
+    styleUrl: './promociones.css'
 })
 export class Promociones implements OnInit {
     private messageService = inject(MessageService);
@@ -119,20 +115,12 @@ export class Promociones implements OnInit {
             showMainContent: true,
             showWhatsAppBadge: true,
             moduleSections: [],
-            footerImage: 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=400',
-            footerImageConfig: {
-                url: 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=400',
-                shape: 'circle',
-                size: 'md'
-            },
             startDate: new Date().toISOString().split('T')[0],
             endDate: '',
             bgColor: '#ffffff',
             textColor: '#1f2937',
             accentColor: '#0891b2',
             cardColor: '#ffffff',
-            extraImages: [],
-            extraImagesConfig: [],
             isActive: false
         };
     }
@@ -185,19 +173,6 @@ export class Promociones implements OnInit {
 
     removeModuleSection(id: string) {
         this.adConfig.moduleSections = this.adConfig.moduleSections.filter(s => s.id !== id);
-    }
-
-    addImage() {
-        if (!this.adConfig.extraImagesConfig) this.adConfig.extraImagesConfig = [];
-        this.adConfig.extraImagesConfig.push({
-            url: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400',
-            shape: 'circle',
-            size: 'sm'
-        });
-    }
-
-    removeImage(index: number) {
-        this.adConfig.extraImagesConfig?.splice(index, 1);
     }
 
     async saveConfig() {
@@ -290,18 +265,6 @@ export class Promociones implements OnInit {
         if (!this.imageTarget) return;
 
         if (this.imageTarget.type === 'main') this.adConfig.imageUrl = url;
-        else if (this.imageTarget.type === 'footer') {
-            if (!this.adConfig.footerImageConfig) {
-                this.adConfig.footerImageConfig = { url: '', shape: 'circle', size: 'md' };
-            }
-            this.adConfig.footerImageConfig.url = url;
-            this.adConfig.footerImage = url;
-        }
-        else if (this.imageTarget.type === 'extra' && this.imageTarget.index !== undefined) {
-            if (this.adConfig.extraImagesConfig?.[this.imageTarget.index]) {
-                this.adConfig.extraImagesConfig[this.imageTarget.index].url = url;
-            }
-        }
         else if (this.imageTarget.type === 'section' && this.imageTarget.sectionId) {
             const section = this.adConfig.moduleSections.find(s => s.id === this.imageTarget?.sectionId);
             if (section) section.imageUrl = url;
