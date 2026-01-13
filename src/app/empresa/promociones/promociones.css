@@ -94,6 +94,19 @@ input[pInputText]:focus {
     margin-bottom: 0.2rem;
 }
 
+/* Base Quill Sizes */
+:host ::ng-deep .ql-size-small {
+    font-size: 0.75em;
+}
+
+:host ::ng-deep .ql-size-large {
+    font-size: 1.5em;
+}
+
+:host ::ng-deep .ql-size-huge {
+    font-size: 2.5em;
+}
+
 /* Custom SelectButton */
 :host ::ng-deep .header-select .p-button {
     font-size: 10px;
@@ -128,4 +141,15 @@ input[pInputText]:focus {
 
 :host ::ng-deep .p-editor-content {
     border: none !important;
+}
+
+/* Fix ColorPicker Popup Position for right-aligned items */
+:host ::ng-deep .cp-right .p-colorpicker-panel {
+    transform: translateX(-100%);
+    margin-left: 32px;
+}
+
+/* Horizontal scroll fix */
+.max-w-7xl {
+    overflow-x: hidden;
 }

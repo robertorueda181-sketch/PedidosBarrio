@@ -24,7 +24,9 @@ interface AdModuleSection {
   type: 'text' | 'image' | 'mixed';
   content?: string;
   imageUrl?: string;
+  imageUrls?: string[];
   layout?: 'text-left' | 'text-right';
+  size?: 'sm' | 'md' | 'lg';
 }
 
 interface AdImage {
@@ -134,6 +136,15 @@ export class Amanro implements OnInit {
           shape: 'circle',
           size: 'sm'
         }));
+      }
+
+      if (config.moduleSections) {
+        config.moduleSections = config.moduleSections.map((sec: any) => {
+          if (sec.type === 'image' && !sec.imageUrls) {
+            sec.imageUrls = [sec.imageUrl || 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400'];
+          }
+          return sec;
+        });
       }
 
       this.adConfig = config;

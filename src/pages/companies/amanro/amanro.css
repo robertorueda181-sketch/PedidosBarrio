@@ -71,3 +71,16 @@
 .rich-content li {
     margin-bottom: 0.4rem;
 }
+
+/* Quill Text Sizes */
+:host ::ng-deep .ql-size-small {
+    font-size: 0.75em;
+}
+
+:host ::ng-deep .ql-size-large {
+    font-size: 1.5em;
+}
+
+:host ::ng-deep .ql-size-huge {
+    font-size: 2.5em;
+}

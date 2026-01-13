@@ -16,7 +16,9 @@ interface AdModuleSection {
     type: 'text' | 'image' | 'mixed';
     content?: string;
     imageUrl?: string;
+    imageUrls?: string[];
     layout?: 'text-left' | 'text-right';
+    size?: 'sm' | 'md' | 'lg';
 }
 
 interface AdImage {
@@ -160,15 +162,31 @@ export class Promociones implements OnInit {
         this.viewState = 'edit';
     }
 
-    addModuleSection(type: 'text' | 'image' | 'mixed') {
+    addModuleSection(type: 'text' | 'image' | 'mixed', count: number = 1, sizeOverride?: 'sm' | 'md' | 'lg') {
         const newSection: AdModuleSection = {
-            id: Date.now().toString(),
+            id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
             type: type,
             content: type !== 'image' ? '<p>Contenido de la sección...</p>' : '',
-            imageUrl: type !== 'text' ? 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400' : '',
-            layout: 'text-left'
+            imageUrl: type === 'mixed' ? 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400' : '',
+            imageUrls: type === 'image' ? ['https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400'] : [],
+            layout: 'text-left',
+            size: sizeOverride || 'lg'
         };
         this.adConfig.moduleSections.push(newSection);
+    }
+
+    addImageToSection(sectionId: string) {
+        const section = this.adConfig.moduleSections.find(s => s.id === sectionId);
+        if (section && section.imageUrls) {
+            section.imageUrls.push('https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400');
+        }
+    }
+
+    removeImageFromSection(sectionId: string, index: number) {
+        const section = this.adConfig.moduleSections.find(s => s.id === sectionId);
+        if (section && section.imageUrls) {
+            section.imageUrls.splice(index, 1);
+        }
     }
 
     removeModuleSection(id: string) {
@@ -267,7 +285,13 @@ export class Promociones implements OnInit {
         if (this.imageTarget.type === 'main') this.adConfig.imageUrl = url;
         else if (this.imageTarget.type === 'section' && this.imageTarget.sectionId) {
             const section = this.adConfig.moduleSections.find(s => s.id === this.imageTarget?.sectionId);
-            if (section) section.imageUrl = url;
+            if (section) {
+                if (section.type === 'mixed') {
+                    section.imageUrl = url;
+                } else if (section.type === 'image' && section.imageUrls && this.imageTarget.index !== undefined) {
+                    section.imageUrls[this.imageTarget.index] = url;
+                }
+            }
         }
 
         this.showImageModal.set(false);
