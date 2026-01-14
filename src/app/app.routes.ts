@@ -7,6 +7,7 @@ import { InmuebleComponent } from '../pages/inmueble/inmueble';
 import { Company } from '../pages/company/company';
 import { Amanro } from '../pages/companies/amanro/amanro';
 import { Stacion64 } from '../pages/companies/stacion64/stacion64';
+import { PilarComponent } from '../pages/companies/pilar/pilar';
 import { authGuard } from '../shared/guards/auth.guard';
 
 
@@ -60,5 +61,6 @@ export const routes: Routes = [
   { path: 'business-auth', loadComponent: () => import('../pages/auth/business-auth/business-auth').then(m => m.BusinessAuth) },
   { path: 'amanro', component: Amanro },
   { path: 'stacion64', component: Stacion64 },
+  { path: 'pilar', component: PilarComponent },
   { path: '**', redirectTo: '' }
 ];

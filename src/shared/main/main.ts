@@ -30,6 +30,7 @@ export class Main implements OnInit {
   categorias = signal<any[]>([]);
   searchQuery = signal<string>('');
   currentSlide = signal<number>(0);
+  showAllCategories = signal<boolean>(false);
   banners = [
     { url: 'assets/banner1.png', title: 'Descubre lo mejor de tu barrio', subtitle: 'Apoya a los negocios locales y encuentra todo lo que necesitas.' },
     { url: 'assets/banner.png', title: 'Servicios a tu alcance', subtitle: 'Encuentra profesionales calificados para cada necesidad.' },
@@ -44,6 +45,18 @@ export class Main implements OnInit {
     this.loadServicios();
     this.loadCategorias();
     this.startAutoSlide();
+  }
+
+  toggleCategories() {
+    this.showAllCategories.update(v => !v);
+  }
+
+  get visibleCategorias() {
+    if (this.showAllCategories()) {
+      return this.categorias();
+    }
+    // Mostramos 6 en móvil (2 filas de 3) y 6 en desktop
+    return this.categorias().slice(0, 6);
   }
 
   startAutoSlide() {

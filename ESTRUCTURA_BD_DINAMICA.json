@@ -1,0 +1,315 @@
+{
+    "pageInfo": {
+        "slug": "pilar",
+        "title": "Colegio Nuestra Señora del Pilar",
+        "metaDescription": "Institución educativa de excelencia con más de 25 años formando líderes",
+        "metaKeywords": [
+            "colegio",
+            "educación",
+            "pilar",
+            "inicial",
+            "primaria",
+            "secundaria"
+        ]
+    },
+    "theme": {
+        "colors": {
+            "primary": "#1A365D",
+            "secondary": "#2C5282",
+            "accent": "#3182CE",
+            "background": "#F7FAFC",
+            "text": "#1A202C",
+            "textLight": "#718096"
+        },
+        "fonts": {
+            "heading": "Outfit",
+            "body": "Inter"
+        },
+        "borderRadius": "2rem"
+    },
+    "sections": [
+        {
+            "id": "hero-1",
+            "type": "hero",
+            "order": 1,
+            "visible": true,
+            "backgroundColor": "transparent",
+            "data": {
+                "imageUrl": "assets/pilar_hero.png",
+                "title": "Colegio Nuestra Señora del Pilar",
+                "subtitle": "Formando líderes con valores y excelencia académica desde 1999",
+                "badge": {
+                    "text": "Admisiones 2026",
+                    "color": "#3182CE"
+                },
+                "buttons": [
+                    {
+                        "text": "Solicitar Información",
+                        "style": "primary",
+                        "action": "/contacto"
+                    },
+                    {
+                        "text": "Ver Video Institucional",
+                        "style": "outline"
+                    }
+                ],
+                "height": "80vh",
+                "overlay": {
+                    "enabled": true,
+                    "color": "#1A365D",
+                    "opacity": 0.7
+                }
+            }
+        },
+        {
+            "id": "stats-1",
+            "type": "stats",
+            "order": 2,
+            "visible": true,
+            "backgroundColor": "transparent",
+            "padding": {
+                "top": "0",
+                "bottom": "4rem"
+            },
+            "data": {
+                "stats": [
+                    {
+                        "label": "Años de Experiencia",
+                        "value": "25+",
+                        "icon": "pi-calendar"
+                    },
+                    {
+                        "label": "Docentes Calificados",
+                        "value": "50+",
+                        "icon": "pi-users"
+                    },
+                    {
+                        "label": "Estudiantes Felices",
+                        "value": "800+",
+                        "icon": "pi-heart"
+                    },
+                    {
+                        "label": "Talleres Extracurriculares",
+                        "value": "12",
+                        "icon": "pi-star"
+                    }
+                ],
+                "columns": 4,
+                "style": "cards"
+            }
+        },
+        {
+            "id": "text-image-1",
+            "type": "text-image",
+            "order": 3,
+            "visible": true,
+            "backgroundColor": "#FFFFFF",
+            "padding": {
+                "top": "5rem",
+                "bottom": "5rem"
+            },
+            "data": {
+                "title": "Educación Inicial",
+                "description": "Un espacio lleno de color y alegría donde los más pequeños descubren el mundo a través del juego y la exploración.",
+                "imageUrl": "assets/pilar_inicial.png",
+                "imagePosition": "right",
+                "features": [
+                    "Ambientes seguros y estimulantes",
+                    "Aprendizaje lúdico y creativo",
+                    "Docentes especializadas en primera infancia"
+                ],
+                "button": {
+                    "text": "Conocer más",
+                    "action": "/inicial"
+                }
+            }
+        },
+        {
+            "id": "text-image-2",
+            "type": "text-image",
+            "order": 4,
+            "visible": true,
+            "backgroundColor": "#F7FAFC",
+            "padding": {
+                "top": "5rem",
+                "bottom": "5rem"
+            },
+            "data": {
+                "title": "Educación Primaria",
+                "description": "Fomentamos la curiosidad y el pensamiento crítico, sentando las bases sólidas para un futuro académico exitoso.",
+                "imageUrl": "assets/pilar_primaria.png",
+                "imagePosition": "left",
+                "features": [
+                    "Desarrollo del pensamiento lógico",
+                    "Plan lector personalizado",
+                    "Proyectos colaborativos"
+                ],
+                "button": {
+                    "text": "Descubrir más",
+                    "action": "/primaria"
+                }
+            }
+        },
+        {
+            "id": "text-image-3",
+            "type": "text-image",
+            "order": 5,
+            "visible": true,
+            "backgroundColor": "#FFFFFF",
+            "padding": {
+                "top": "5rem",
+                "bottom": "5rem"
+            },
+            "data": {
+                "title": "Educación Secundaria",
+                "description": "Preparamos a nuestros jóvenes para los retos de la vida universitaria y profesional con una formación integral y tecnológica.",
+                "imageUrl": "assets/pilar_secundaria.png",
+                "imagePosition": "right",
+                "features": [
+                    "Orientación vocacional personalizada",
+                    "Laboratorios modernos y equipados",
+                    "Programa intensivo de inglés"
+                ],
+                "button": {
+                    "text": "Explorar",
+                    "action": "/secundaria"
+                }
+            }
+        },
+        {
+            "id": "features-1",
+            "type": "features",
+            "order": 6,
+            "visible": true,
+            "backgroundColor": "#F7FAFC",
+            "padding": {
+                "top": "5rem",
+                "bottom": "5rem"
+            },
+            "data": {
+                "title": "¿Por qué elegirnos?",
+                "description": "Nuestro compromiso con la excelencia educativa",
+                "features": [
+                    {
+                        "icon": "pi-shield",
+                        "title": "Seguridad Integral",
+                        "description": "Protocolos de seguridad y cuidado permanente"
+                    },
+                    {
+                        "icon": "pi-globe",
+                        "title": "Educación Bilingüe",
+                        "description": "Inglés intensivo desde inicial"
+                    },
+                    {
+                        "icon": "pi-desktop",
+                        "title": "Tecnología Educativa",
+                        "description": "Aulas digitales y plataformas modernas"
+                    },
+                    {
+                        "icon": "pi-heart",
+                        "title": "Formación en Valores",
+                        "description": "Educación integral con énfasis en valores"
+                    },
+                    {
+                        "icon": "pi-users",
+                        "title": "Comunidad Activa",
+                        "description": "Participación de padres y familia"
+                    },
+                    {
+                        "icon": "pi-trophy",
+                        "title": "Excelencia Académica",
+                        "description": "Resultados destacados en evaluaciones"
+                    }
+                ],
+                "columns": 3,
+                "style": "cards"
+            }
+        },
+        {
+            "id": "video-gallery-1",
+            "type": "video-gallery",
+            "order": 7,
+            "visible": true,
+            "backgroundColor": "#FFFFFF",
+            "padding": {
+                "top": "5rem",
+                "bottom": "5rem"
+            },
+            "data": {
+                "title": "Vive Nuestra Pasión por la Educación",
+                "description": "Explora más sobre nuestro día a día, eventos y la metodología que nos hace únicos",
+                "videos": [
+                    {
+                        "title": "Nuestra Propuesta Educativa",
+                        "url": "https://www.youtube.com/watch?v=7Ufr_RHsHhI",
+                        "description": "Conoce más sobre nuestro método de enseñanza y valores"
+                    },
+                    {
+                        "title": "Vida Estudiantil",
+                        "url": "https://www.youtube.com/watch?v=KAxh9D1JWwg",
+                        "description": "Un recorrido por las actividades y talleres de nuestros alumnos"
+                    }
+                ],
+                "columns": 2
+            }
+        },
+        {
+            "id": "testimonials-1",
+            "type": "testimonials",
+            "order": 8,
+            "visible": true,
+            "backgroundColor": "#F7FAFC",
+            "padding": {
+                "top": "5rem",
+                "bottom": "5rem"
+            },
+            "data": {
+                "title": "Lo que dicen nuestras familias",
+                "testimonials": [
+                    {
+                        "name": "María González",
+                        "role": "Madre de familia",
+                        "photo": "https://i.pravatar.cc/150?img=1",
+                        "text": "El mejor colegio de la zona. Mis hijos están felices y aprenden cada día.",
+                        "rating": 5
+                    },
+                    {
+                        "name": "Carlos Rodríguez",
+                        "role": "Padre de familia",
+                        "photo": "https://i.pravatar.cc/150?img=2",
+                        "text": "Excelente nivel académico y formación en valores. Totalmente recomendado.",
+                        "rating": 5
+                    },
+                    {
+                        "name": "Ana Martínez",
+                        "role": "Madre de familia",
+                        "photo": "https://i.pravatar.cc/150?img=3",
+                        "text": "Los profesores son muy dedicados y el ambiente es maravilloso.",
+                        "rating": 5
+                    }
+                ],
+                "style": "cards"
+            }
+        },
+        {
+            "id": "cta-1",
+            "type": "cta",
+            "order": 9,
+            "visible": true,
+            "backgroundColor": "#1A365D",
+            "padding": {
+                "top": "5rem",
+                "bottom": "5rem"
+            },
+            "data": {
+                "title": "¿Listo para formar parte de la Familia Pilarina?",
+                "description": "Las inscripciones para el año escolar 2026 ya están abiertas. Cupos limitados.",
+                "button": {
+                    "text": "Empieza tu Proceso de Admisión",
+                    "action": "/admision"
+                },
+                "style": "centered"
+            }
+        }
+    ]
+}

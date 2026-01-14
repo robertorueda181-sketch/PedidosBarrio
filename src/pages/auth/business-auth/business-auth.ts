@@ -1,7 +1,7 @@
 import { Component, inject, effect, signal, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { GoogleSigninButtonModule, SocialAuthService } from '@abacritt/angularx-social-login';
 import { AuthService } from '../../../shared/services/auth.service';
 import { RegisterService } from '../../../shared/services/register.service';
@@ -13,7 +13,7 @@ import { ToastModule } from 'primeng/toast';
 @Component({
     selector: 'app-business-auth',
     standalone: true,
-    imports: [CommonModule, FormsModule, GoogleSigninButtonModule, ToastModule],
+    imports: [CommonModule, FormsModule, GoogleSigninButtonModule, ToastModule, RouterModule],
     templateUrl: './business-auth.html',
 })
 export class BusinessAuth implements OnDestroy {

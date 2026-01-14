@@ -1,5 +1,5 @@
 <!-- Hero Slider Section -->
-<section class="relative h-[500px] md:h-[600px] overflow-hidden" (touchstart)="onTouchStart($event)"
+<section class="relative h-[300px] md:h-[450px] lg:h-[500px] overflow-hidden" (touchstart)="onTouchStart($event)"
   (touchmove)="onTouchMove($event)" (touchend)="onTouchEnd()">
   <!-- Slides -->
   <div class="absolute inset-0 flex transition-transform duration-700 ease-in-out"
@@ -10,12 +10,13 @@
       <div class="absolute inset-0 bg-black/40"></div>
 
       <!-- Banner Text -->
-      <div class="absolute inset-0 flex items-center justify-center text-center px-6">
+      <div class="absolute inset-0 flex items-center justify-center text-center px-4">
         <div class="max-w-4xl">
-          <h1 class="text-4xl md:text-6xl font-black text-white mb-4 drop-shadow-lg animate-slide-in">
+          <h1
+            class="text-2xl md:text-3xl lg:text-5xl font-black text-white mb-2 md:mb-4 drop-shadow-lg animate-slide-in">
             {{ banner.title }}
           </h1>
-          <p class="text-lg md:text-xl text-white/90 font-medium drop-shadow-md animate-slide-in"
+          <p class="text-sm md:text-base lg:text-lg text-white/90 font-medium drop-shadow-md animate-slide-in"
             style="animation-delay: 0.2s">
             {{ banner.subtitle }}
           </p>
@@ -49,23 +50,26 @@
 </section>
 
 <!-- Search Section -->
-<section class="relative z-40 -mt-16 px-6">
-  <div class="max-w-4xl mx-auto">
-    <div class="bg-white rounded-3xl p-6 md:p-8 shadow-2xl border border-gray-100 animate-slide-in">
+<section class="relative z-40 -mt-10 md:-mt-14 px-4 md:px-6">
+  <div class="max-w-3xl mx-auto">
+    <div class="bg-white rounded-2xl md:rounded-3xl p-3 md:p-6 shadow-2xl border border-gray-100 animate-slide-in">
       <form (submit)="onSearch()" class="relative group">
         <div class="relative flex items-center">
-          <div class="absolute left-6 text-gray-400 group-focus-within:text-[#1A365D] transition-colors">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div class="absolute left-4 md:left-6 text-gray-400 group-focus-within:text-[#1A365D] transition-colors">
+            <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
             </svg>
           </div>
-          <input type="search" [(ngModel)]="searchQuery" name="search"
-            placeholder="¿Qué estás buscando? Ej: pizzas, delivery, departamentos..."
-            class="w-full bg-gray-50 rounded-2xl pl-16 pr-36 py-4 md:py-5 text-lg focus:bg-white focus:outline-none focus:ring-4 focus:ring-[#1A365D]/10 transition-all placeholder:text-gray-400" />
+          <input type="search" [(ngModel)]="searchQuery" name="search" placeholder="¿Qué buscas?"
+            class="w-full bg-gray-50 rounded-xl md:rounded-2xl pl-10 md:pl-16 pr-14 md:pr-36 py-3 md:py-5 text-sm md:text-lg focus:bg-white focus:outline-none focus:ring-4 focus:ring-[#1A365D]/10 transition-all placeholder:text-gray-400" />
           <button type="submit"
-            class="absolute right-2 bg-[#1A365D] hover:bg-[#2C5282] text-white px-8 py-3 md:py-4 rounded-xl font-bold transition-all shadow-lg active:scale-95">
-            Buscar
+            class="absolute right-1.5 bg-[#1A365D] hover:bg-[#2C5282] text-white p-2.5 md:px-8 md:py-4 rounded-lg md:rounded-xl font-bold transition-all shadow-lg active:scale-95 flex items-center justify-center">
+            <span class="hidden md:inline">Buscar</span>
+            <svg class="w-5 h-5 md:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
           </button>
         </div>
       </form>
@@ -74,60 +78,76 @@
 </section>
 
 <!-- Categorías Section -->
-<section class="py-16 px-6">
+<section class="py-10 md:py-6 px-4 md:px-6">
   <div class="max-w-7xl mx-auto">
-    <div class="flex flex-wrap gap-4 justify-center">
-      @for (cat of categorias(); track cat.descripcion) {
+    <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2 md:gap-4">
+      @for (cat of visibleCategorias; track cat.descripcion) {
       <button
-        class="bg-white border border-gray-100 shadow-lg px-3 py-1 rounded-2xl flex items-center space-x-4 hover:bg-[#1A365D] hover:text-white transition-all group min-w-[220px] hover:-translate-y-1 active:scale-95">
+        class="bg-white border border-gray-100 shadow-sm hover:shadow-lg p-2 md:p-3 rounded-xl md:rounded-2xl flex flex-col md:flex-row items-center md:space-x-4 hover:bg-[#1A365D] hover:text-white transition-all group hover:-translate-y-1 active:scale-95 w-full">
         <div
-          class="w-12 h-12 bg-[#F0F7FF] group-hover:bg-white/10 rounded-xl flex items-center justify-center transition-colors">
-          <i [class]="'fas fa-' + cat.icono + ' text-[#1A365D] group-hover:text-white text-2xl'"></i>
+          class="w-8 h-8 md:w-12 md:h-12 bg-[#F0F7FF] group-hover:bg-white/10 rounded-lg md:rounded-xl flex items-center justify-center transition-colors mb-1 md:mb-0">
+          <i [class]="'fas fa-' + cat.icono + ' text-[#1A365D] group-hover:text-white text-base md:text-2xl'"></i>
         </div>
-        <span class="font-bold text-lg">{{ cat.descripcion }}</span>
+        <span class="font-bold text-[10px] sm:text-xs md:text-base lg:text-lg text-center md:text-left leading-tight">{{
+          cat.descripcion }}</span>
       </button>
       }
     </div>
+
+    <!-- Toggle Button -->
+    @if (categorias().length > 6) {
+    <div class="mt-8 text-center">
+      <button (click)="toggleCategories()"
+        class="inline-flex items-center gap-2 text-[#1A365D] font-bold text-sm md:text-base hover:underline transition-all">
+        {{ showAllCategories() ? 'Ver menos' : 'Ver todas las categorías (' + categorias().length + ')' }}
+        <svg class="w-4 h-4 transition-transform duration-300" [class.rotate-180]="showAllCategories()" fill="none"
+          stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+        </svg>
+      </button>
+    </div>
+    }
   </div>
 </section>
 
 <!-- Sección de Nuestros Negocios -->
-<section class="max-w-7xl mx-auto px-6 py-24">
-  <div class="flex flex-col md:flex-row justify-between items-end gap-6 mb-12">
+<section class="max-w-7xl mx-auto px-6 py-1 md:py-1">
+  <div class="flex flex-row justify-between items-center gap-4 mb-6 md:mb-10">
     <div>
-      <div class="flex items-center gap-3 mb-2">
+      <div class="hidden md:flex items-center gap-3 mb-2">
         <span
           class="bg-[#F0F7FF] text-[#1A365D] px-4 py-1 rounded-full text-sm font-bold uppercase tracking-wider">Explora</span>
       </div>
-      <h2 class="text-4xl md:text-5xl font-black text-gray-900">
+      <h2 class="text-xl md:text-3xl lg:text-4xl font-black text-gray-900 leading-tight">
         Nuestros <span class="text-[#1A365D]">Negocios</span>
       </h2>
     </div>
     <button (click)="navigateToNegocios()"
-      class="group bg-[#1A365D] hover:bg-[#2C5282] text-white px-8 py-4 rounded-2xl font-bold transition-all flex items-center gap-3 shadow-xl hover:shadow-[#1A365D]/20">
-      Ver todos los negocios
+      class="shrink-0 group bg-[#1A365D] hover:bg-[#2C5282] text-white px-4 py-2.5 md:px-6 md:py-3 rounded-xl md:rounded-2xl font-bold text-xs md:text-sm transition-all flex items-center gap-2 shadow-xl hover:shadow-[#1A365D]/20">
+      Ver todos<span class="hidden md:inline"> los negocios</span>
     </button>
   </div>
 
   @if (negocios().length > 0) {
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+  <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
     @for (negocio of negocios(); track negocio.negocioID) {
     <div (click)="goToNegocio(negocio.urlNegocio)"
-      class="group bg-white rounded-3xl shadow-sm hover:shadow-2xl transition-all duration-500 cursor-pointer border border-gray-100 overflow-hidden hover:-translate-y-2">
-      <div class="relative h-56 overflow-hidden">
+      class="group bg-white rounded-2xl md:rounded-3xl shadow-sm hover:shadow-2xl transition-all duration-500 cursor-pointer border border-gray-100 overflow-hidden hover:-translate-y-2">
+      <div class="relative h-32 md:h-48 overflow-hidden">
         <img
           [src]="negocio.urlImagen || 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=800&q=60'"
           [alt]="negocio.descripcion"
           class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
       </div>
-      <div class="p-6">
-        <h3 class="font-black text-xl text-gray-900 mb-2 capitalize group-hover:text-[#1A365D] transition-colors">
+      <div class="p-3 md:p-5">
+        <h3
+          class="font-black text-sm md:text-lg text-gray-900 mb-1 md:mb-2 capitalize group-hover:text-[#1A365D] transition-colors line-clamp-1">
           {{ negocio.descripcion }}
         </h3>
-        <p class="text-gray-500 text-sm mb-6 line-clamp-2">
+        <p class="hidden md:block text-gray-500 text-sm mb-6 line-clamp-2">
           Visita nuestro sitio web para conocer más sobre nuestros productos y servicios.
         </p>
-        <span class="text-[#1A365D] font-bold text-sm flex items-center gap-2">
+        <span class="text-[#1A365D] font-bold text-[10px] md:text-sm flex items-center gap-2">
           Visitar ahora
         </span>
       </div>
@@ -138,34 +158,35 @@
 </section>
 
 <!-- Servicios Section -->
-<section class="bg-[#F8FAFC] py-24">
+<section class="bg-[#F8FAFC] py-12 md:py-16">
   <div class="max-w-7xl mx-auto px-6">
-    <div class="flex flex-col md:flex-row justify-between items-end gap-6 mb-12">
+    <div class="flex flex-row justify-between items-center gap-4 mb-6 md:mb-10">
       <div>
-        <h2 class="text-4xl md:text-5xl font-black text-gray-900">
+        <h2 class="text-xl md:text-3xl lg:text-4xl font-black text-gray-900 leading-tight">
           Lo que <span class="text-[#1A365D]">Necesitas</span>
         </h2>
       </div>
-      <button (click)="navigateToServicios()" class="text-[#1A365D] font-bold">Ver todos los servicios</button>
+      <button (click)="navigateToServicios()" class="shrink-0 text-[#1A365D] font-bold text-sm md:text-base">Ver
+        todos</button>
     </div>
 
     @if (servicios().length > 0) {
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+    <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-8">
       @for (servicio of servicios(); track servicio.servicioID) {
       <div (click)="navigateToServicioDetail(servicio.servicioID)"
-        class="group bg-white rounded-3xl shadow-sm hover:shadow-xl transition-all duration-500 cursor-pointer overflow-hidden border border-gray-100">
-        <div class="relative h-56">
+        class="group bg-white rounded-2xl md:rounded-3xl shadow-sm hover:shadow-xl transition-all duration-500 cursor-pointer overflow-hidden border border-gray-100">
+        <div class="relative h-32 md:h-48">
           <img [src]="servicio.urlImagen" [alt]="servicio.nombre" class="w-full h-full object-cover" />
         </div>
-        <div class="p-6">
-          <h3 class="font-bold text-lg text-gray-900 mb-2 line-clamp-1">
+        <div class="p-3 md:p-5">
+          <h3 class="font-bold text-sm md:text-base text-gray-900 mb-1 md:mb-2 line-clamp-1">
             {{ servicio.nombre || servicio.descripcion }}
           </h3>
-          <p class="text-gray-500 text-sm mb-6 line-clamp-2">
+          <p class="hidden md:block text-gray-500 text-sm mb-6 line-clamp-2">
             {{ servicio.descripcion }}
           </p>
-          <div class="flex justify-between items-center border-t border-gray-50 pt-4">
-            <span class="text-2xl font-black text-[#1A365D]">S/. {{ servicio.precio | number }}</span>
+          <div class="flex justify-between items-center border-t border-gray-50 pt-2 md:pt-4">
+            <span class="text-sm md:text-2xl font-black text-[#1A365D]">S/. {{ servicio.precio | number }}</span>
           </div>
         </div>
       </div>
@@ -176,30 +197,32 @@
 </section>
 
 <!-- Inmuebles Section -->
-<section class="max-w-7xl mx-auto px-6 py-24">
-  <div class="flex flex-col md:flex-row justify-between items-end gap-6 mb-12">
+<section class="max-w-7xl mx-auto px-6 py-12 md:py-16">
+  <div class="flex flex-row justify-between items-center gap-4 mb-6 md:mb-10">
     <div>
-      <h2 class="text-4xl md:text-5xl font-black text-gray-900">
+      <h2 class="text-xl md:text-3xl lg:text-4xl font-black text-gray-900 leading-tight">
         Tu Próximo <span class="text-[#1A365D]">Hogar</span>
       </h2>
     </div>
-    <button (click)="navigateToInmuebles()" class="bg-gray-900 text-white px-8 py-4 rounded-2xl font-bold">Ver
-      catálogo</button>
+    <button (click)="navigateToInmuebles()"
+      class="shrink-0 bg-gray-900 text-white px-4 py-2.5 md:px-6 md:py-3 rounded-xl md:rounded-2xl font-bold text-xs md:text-sm transition-all active:scale-95">
+      Ver catálogo
+    </button>
   </div>
 
   @if (inmuebles().length > 0) {
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+  <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
     @for (inmueble of inmuebles(); track inmueble.inmuebleID) {
     <div (click)="navigateToInmuebleDetail(inmueble.inmuebleID)"
-      class="group bg-white rounded-3xl shadow-sm hover:shadow-2xl transition-all duration-500 cursor-pointer overflow-hidden border border-gray-100">
-      <div class="relative h-64">
+      class="group bg-white rounded-2xl md:rounded-3xl shadow-sm hover:shadow-2xl transition-all duration-500 cursor-pointer overflow-hidden border border-gray-100">
+      <div class="relative h-32 md:h-56">
         <img [src]="inmueble.urlImagen" [alt]="inmueble.titulo" class="w-full h-full object-cover" />
       </div>
-      <div class="p-6">
-        <h3 class="font-black text-xl text-gray-900 mb-2 line-clamp-1">
+      <div class="p-3 md:p-5">
+        <h3 class="font-black text-sm md:text-lg text-gray-900 mb-1 md:mb-2 line-clamp-1">
           {{ inmueble.titulo }}
         </h3>
-        <p class="text-2xl font-black text-[#1A365D]">
+        <p class="text-sm md:text-2xl font-black text-[#1A365D]">
           S/. {{ inmueble.precio | number }}
         </p>
       </div>
