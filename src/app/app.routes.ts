@@ -1,7 +1,6 @@
 import { Routes } from '@angular/router';
 import { Register } from '../pages/register/register';
 import { RegisterInmueble } from '../pages/register-inmueble/register-inmueble';
-import { Login } from '../pages/login/login';
 import { Main } from '../shared/main/main';
 import { Layout } from '../shared/Layout/layout';
 import { InmuebleComponent } from '../pages/inmueble/inmueble';
@@ -17,7 +16,6 @@ export const routes: Routes = [
     component: Layout,
     children: [
       { path: '', component: Main },
-      { path: 'login', component: Login },
       { path: 'registro-negocio', component: Register },
       { path: 'registro-inmueble', component: RegisterInmueble, canActivate: [authGuard] },
       { path: 'inmueble', component: InmuebleComponent },
@@ -59,7 +57,6 @@ export const routes: Routes = [
       { path: 'inmueble', component: InmuebleComponent },
     ]
   },
-  { path: 'selection', loadComponent: () => import('../pages/selection/selection').then(m => m.Selection) },
   { path: 'business-auth', loadComponent: () => import('../pages/auth/business-auth/business-auth').then(m => m.BusinessAuth) },
   { path: 'amanro', component: Amanro },
   { path: 'stacion64', component: Stacion64 },

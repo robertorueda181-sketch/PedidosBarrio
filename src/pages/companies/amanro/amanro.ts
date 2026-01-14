@@ -74,6 +74,7 @@ export class Amanro implements OnInit {
   loading = signal<boolean>(true);
   selectedProducto = signal<ProductoDetalle | null>(null);
   cart = signal<CartItem[]>([]);
+  searchTerm = signal<string>('');
   isCartOpen = signal<boolean>(false);
   drawerVisible = signal<boolean>(false);
   showPromo = false;
@@ -93,6 +94,13 @@ export class Amanro implements OnInit {
 
   cartCount = computed(() => this.cart().reduce((acc, item) => acc + item.cantidad, 0));
   cartTotal = computed(() => this.cart().reduce((acc, item) => acc + (item.precio * item.cantidad), 0));
+  hasAnyProduct = computed(() => {
+    const term = this.searchTerm().toLowerCase();
+    if (!term) return true;
+    return this.negocio()?.productos.some(p =>
+      p.nombre.toLowerCase().includes(term) || (p.descripcion?.toLowerCase().includes(term) || '')
+    ) ?? false;
+  });
 
   ngOnInit() {
     this.loadData('amanro');
@@ -197,10 +205,8 @@ export class Amanro implements OnInit {
 
     let orderMessage = `*Nuevo Pedido - ${this.negocio()?.nombre}*\n\n`;
     this.cart().forEach(item => {
-      orderMessage += `• ${item.cantidad}x ${item.nombre} - S/ ${(item.precio * item.cantidad).toFixed(2)}\n`;
+      orderMessage += `• ${item.cantidad}x ${item.nombre}\n`;
     });
-    orderMessage += `\n*Total: S/ ${this.cartTotal().toFixed(2)}*\n\n¡Espero su confirmación!`;
-
     const encodedMessage = encodeURIComponent(orderMessage);
     const whatsappUrl = `https://wa.me/${this.whatsappPhoneNumber}?text=${encodedMessage}`;
     window.open(whatsappUrl, '_blank');
@@ -266,6 +272,16 @@ export class Amanro implements OnInit {
   }
 
   getProductosByCategory(categoriaID: number): ProductoDetalle[] {
-    return this.negocio()?.productos.filter((p: ProductoDetalle) => p.categoriaID === categoriaID) || [];
+    const term = this.searchTerm().toLowerCase();
+    const match = (text: string | null) => text ? text.toLowerCase().includes(term) : false;
+
+    return this.negocio()?.productos.filter((p: ProductoDetalle) =>
+      p.categoriaID === categoriaID &&
+      (match(p.nombre) || match(p.descripcion))
+    ) || [];
+  }
+
+  hasProductsInCategory(categoriaID: number): boolean {
+    return this.getProductosByCategory(categoriaID).length > 0;
   }
 }

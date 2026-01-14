@@ -3,8 +3,8 @@
     <div
         class="bg-white rounded-[2rem] shadow-2xl w-full max-w-6xl overflow-hidden flex flex-col md:flex-row min-h-[750px]">
 
-        <!-- Left Side: Image & Text -->
-        <div class="relative w-full md:w-5/12 overflow-hidden bg-[#0F172A]">
+        <!-- Left Side: Image & Text (Hidden on Mobile) -->
+        <div class="hidden md:block relative w-full md:w-5/12 overflow-hidden bg-[#0F172A]">
             <img src="assets/fondo.jpg" alt="Background"
                 class="absolute inset-0 w-full h-full object-cover opacity-40 mix-blend-overlay">
             <div class="absolute inset-0 bg-gradient-to-t from-[#0F172A] via-[#1e293b]/60 to-transparent"></div>
@@ -39,6 +39,12 @@
         <div class="w-full md:w-7/12 p-8 md:p-16 flex flex-col justify-center bg-white relative">
 
             <div class="max-w-md w-full mx-auto">
+
+                <!-- Back to website (Mobile only) -->
+                <a routerLink="/"
+                    class="md:hidden text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-black transition-colors flex items-center gap-2 mb-8">
+                    <i class="pi pi-arrow-left"></i> Volver al Inicio
+                </a>
 
                 <div class="mb-10 text-center md:text-left">
                     <h2 class="text-4xl font-black text-gray-900 mb-2">
@@ -98,9 +104,9 @@
                         </div>
                     </div>
 
-                    <div class="flex justify-center transform scale-105">
+                    <div class="flex justify-center w-full">
                         <asl-google-signin-button type="standard" size="large" text="continue_with" shape="pill"
-                            theme="outline" [width]="350"></asl-google-signin-button>
+                            theme="outline" [width]="320"></asl-google-signin-button>
                     </div>
 
                     <p class="text-center text-sm text-gray-500 mt-8">
@@ -151,9 +157,9 @@
                         </div>
                     </div>
 
-                    <div class="flex justify-center transform scale-105">
+                    <div class="flex justify-center w-full">
                         <asl-google-signin-button type="standard" size="large" text="signup_with" shape="pill"
-                            theme="outline" [width]="350"></asl-google-signin-button>
+                            theme="outline" [width]="320"></asl-google-signin-button>
                     </div>
 
                     <p class="text-center text-sm text-gray-500 mt-8">
