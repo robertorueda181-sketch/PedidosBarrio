@@ -15,6 +15,16 @@ export interface Producto {
     activo: boolean;
 }
 
+export interface Categoria {
+    categoriaID: number;
+    empresaID: string;
+    descripcion: string;
+    color?: string;
+    icono?: string;
+    orden?: number;
+    activo: boolean;
+}
+
 @Injectable({
     providedIn: 'root'
 })
@@ -42,6 +52,22 @@ export class ProductoService {
         return this.http.get<Producto[]>(`${this.config.apiUrl}/Productos/Empresa/${empresaID}`).pipe(
             map(productos => productos.map(p => this.transformProducto(p)))
         );
+    }
+
+    getCategorias(): Observable<Categoria[]> {
+        return this.http.get<Categoria[]>(`${this.config.apiUrl}/Categorias`);
+    }
+
+    crearCategoria(categoria: { descripcion: string; color: string }): Observable<Categoria> {
+        return this.http.post<Categoria>(`${this.config.apiUrl}/Categorias`, categoria);
+    }
+
+    actualizarCategoria(id: number, categoria: { descripcion: string; color: string }): Observable<Categoria> {
+        return this.http.put<Categoria>(`${this.config.apiUrl}/Categorias/${id}`, categoria);
+    }
+
+    eliminarCategoria(id: number): Observable<any> {
+        return this.http.delete(`${this.config.apiUrl}/Categorias/${id}`);
     }
 
     private transformProducto(producto: Producto): Producto {
