@@ -1,28 +1,76 @@
 import { Component, signal, inject } from '@angular/core';
 import { Footer } from "../shared/footer/footer";
 import { Navbar } from '../shared/navbar/navbar';
-import { Router, RouterOutlet } from '@angular/router';
+import { Router, RouterOutlet, NavigationEnd } from '@angular/router';
 
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
+import { AnalyticsService } from '../shared/services/analytics.service';
+import { CookieConsentComponent } from '../shared/components/cookie-consent/cookie-consent';
+import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, ToastModule],
+  imports: [RouterOutlet, ToastModule, CookieConsentComponent],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
 export class App {
   private messageService = inject(MessageService);
+  private analyticsService = inject(AnalyticsService);
 
-  constructor(private router: Router) { }
+  constructor(private router: Router) {
+    // Registrar vistas de página en cada navegación
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe((event: any) => {
+      const pageName = this.getPageName(event.urlAfterRedirects);
+      this.analyticsService.trackPageView(pageName, event.urlAfterRedirects);
+    });
+
+    // Registrar cuando el usuario abandona la página
+    window.addEventListener('beforeunload', () => {
+      this.analyticsService.trackPageLeave();
+    });
+  }
 
   protected readonly title = signal('PedidosBarrio');
   searchQuery = '';
+  
   onSearch() {
     // Aquí puedes agregar la lógica para buscar negocios según searchQuery
     this.messageService.add({ severity: 'info', summary: 'Búsqueda', detail: `Buscando: ${this.searchQuery}` });
+  }
+
+  /**
+   * Obtiene el nombre de la página según la ruta
+   */
+  private getPageName(url: string): string {
+    const routes: Record<string, string> = {
+      '/': 'Inicio',
+      '/negocios': 'Negocios',
+      '/servicios': 'Servicios',
+      '/inmuebles': 'Inmuebles',
+      '/register': 'Registro',
+      '/register-inmueble': 'Registro Inmueble',
+      '/empresa/dashboard': 'Dashboard Empresa',
+      '/empresa/productos': 'Productos',
+      '/empresa/perfil': 'Perfil Empresa',
+    };
+
+    // Buscar coincidencias exactas
+    if (routes[url]) {
+      return routes[url];
+    }
+
+    // Buscar patrones
+    if (url.includes('/company/')) return 'Detalle Negocio';
+    if (url.includes('/inmueble/')) return 'Detalle Inmueble';
+    if (url.includes('/servicio/')) return 'Detalle Servicio';
+    if (url.includes('/search-results')) return 'Resultados de Búsqueda';
+
+    return url;
   }
 
 }

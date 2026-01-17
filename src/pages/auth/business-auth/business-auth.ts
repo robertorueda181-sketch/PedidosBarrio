@@ -25,6 +25,9 @@ export class BusinessAuth implements OnDestroy {
 
     // Social data captured during registration
     socialUser: any = null;
+    
+    // Prevent multiple simultaneous navigations
+    private isNavigating = false;
 
     // State
     isRegistering = signal<boolean>(false);
@@ -54,41 +57,67 @@ export class BusinessAuth implements OnDestroy {
 
         effect(() => {
             // Monitor login state for Google Auth
-            if (this.authService.loggedIn()) {
-                const user = this.authService.user();
+            const isLoggedIn = this.authService.loggedIn();
+            const user = this.authService.user();
+            const currentStep = this.step();
+            const isRegistering = this.isRegistering();
 
-                if (this.isRegistering() && this.step() === 1 && user && !this.socialUser) {
-                    // Capture social data and move to step 2 WITHOUT calling backend
-                    console.log('Google Auth success - Proceeding to step 2');
+            const hasToken = !!localStorage.getItem('auth_token');
+            console.log('Auth effect - LoggedIn:', isLoggedIn, 'Step:', currentStep, 'IsRegistering:', isRegistering, 'HasToken:', hasToken, 'IsNavigating:', this.isNavigating, 'User:', user?.email);
+
+            if (isLoggedIn && user) {
+                // Registration flow: Capture social data and move to step 2
+                if (isRegistering && currentStep === 1 && !this.socialUser) {
+                    console.log('✅ Flow: Registration - Proceeding to step 2');
                     this.socialUser = user;
                     this.email.set(user.email || '');
                     this.personFirstName.set(user.firstName || '');
                     this.personLastName.set(user.lastName || '');
                     this.nextStep();
-                } else if (!this.isRegistering()) {
-                    // Normal login flow (likely already handled by AuthService subscription if autoRegisterSocial is on, 
-                    // but on this page we have it OFF. So we handle it here.)
-                    const gUser = this.authService.user();
-                    if (gUser && !localStorage.getItem('auth_token')) {
-                        const loginData: LoginRequest = {
-                            email: gUser.email || '',
-                            contrasena: '',
-                            provider: 'google',
-                            idToken: gUser.idToken || '',
-                            googleId: gUser.id || ''
-                        };
-                        this.authService.login(loginData).subscribe({
-                            next: (res) => this.handleSuccessfulAuth(res.tipoEmpresa),
-                            error: (err) => {
-                                console.error('Social Login failed:', err);
-                                const msg = err.error?.error || 'Error al iniciar sesión con Google';
-                                this.messageService.add({ severity: 'error', summary: 'Error', detail: msg });
-                            }
-                        });
-                    } else if (localStorage.getItem('auth_token')) {
-                        //this.handleSuccessfulAuth(loginData);
-                    }
+                } 
+                // Login flow: Attempt login if not already authenticated
+                else if (!isRegistering && !hasToken && !this.isNavigating) {
+                    console.log('✅ Flow: Social Login - Authenticating with backend');
+                    this.isNavigating = true;
+                    const loginData: LoginRequest = {
+                        email: user.email || '',
+                        contrasena: '',
+                        provider: 'google',
+                        idToken: user.idToken || '',
+                        googleId: user.id || ''
+                    };
+                    
+                    console.log('Sending login request:', { email: loginData.email, provider: loginData.provider });
+                    
+                    this.authService.login(loginData).subscribe({
+                        next: (res) => {
+                            console.log('✅ Social login successful:', res);
+                            this.handleSuccessfulAuth(res.tipoEmpresa);
+                        },
+                        error: (err) => {
+                            console.error('❌ Social Login failed:', err);
+                            this.isNavigating = false;
+                            const msg = err.error?.error || 'Error al iniciar sesión con Google';
+                            this.messageService.add({ severity: 'error', summary: 'Error', detail: msg });
+                        }
+                    });
                 }
+                // Already authenticated: Redirect to dashboard
+                else if (!isRegistering && hasToken && !this.isNavigating) {
+                    console.log('✅ Flow: Already authenticated - Redirecting');
+                    const userType = localStorage.getItem('userType') || '1';
+                    this.handleSuccessfulAuth(userType);
+                } else {
+                    console.log('⚠️ No matching flow - Conditions:', {
+                        isRegistering,
+                        hasToken,
+                        isNavigating: this.isNavigating,
+                        currentStep,
+                        hasSocialUser: !!this.socialUser
+                    });
+                }
+            } else {
+                console.log('⚠️ Effect triggered but user not ready - LoggedIn:', isLoggedIn, 'HasUser:', !!user);
             }
         });
     }
@@ -96,6 +125,7 @@ export class BusinessAuth implements OnDestroy {
     ngOnDestroy() {
         // Re-enable automatic registration when leaving
         this.authService.autoRegisterSocial = true;
+        this.isNavigating = false;
     }
 
     toggleMode(register: boolean) {
@@ -126,8 +156,29 @@ export class BusinessAuth implements OnDestroy {
     }
 
     handleSuccessfulAuth(userType: string) {
+        console.log('🚀 handleSuccessfulAuth called - UserType:', userType, 'IsNavigating:', this.isNavigating);
         localStorage.setItem('userType', userType);
-        setTimeout(() => this.router.navigate(['/empresa/inicio']), 500);
+        
+        // Navigate immediately using promise-based approach
+        console.log('🔄 Attempting navigation to /empresa/inicio');
+        this.router.navigate(['/empresa/inicio']).then(
+            (success) => {
+                if (success) {
+                    console.log('✅ Navigation successful to /empresa/inicio');
+                    this.isNavigating = false;
+                } else {
+                    console.error('❌ Navigation returned false - route may not exist or guard blocked');
+                    this.isNavigating = false;
+                }
+            },
+            (error) => {
+                console.error('❌ Navigation promise rejected:', error);
+                this.isNavigating = false;
+            }
+        ).catch((err) => {
+            console.error('❌ Navigation exception:', err);
+            this.isNavigating = false;
+        });
     }
 
     manualLogin() {

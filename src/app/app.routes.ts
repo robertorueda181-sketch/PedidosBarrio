@@ -41,7 +41,8 @@ export const routes: Routes = [
       { path: 'perfil', loadComponent: () => import('./empresa/perfil/perfil').then(m => m.Perfil) },
       { path: 'sitio', loadComponent: () => import('./empresa/sitio-web/sitio-web').then(m => m.SitioWeb) },
       { path: 'promociones', loadComponent: () => import('./empresa/promociones/promociones').then(m => m.Promociones) },
-      { path: 'banner', loadComponent: () => import('./empresa/banner/banner').then(m => m.Banner) }
+      { path: 'banner', loadComponent: () => import('./empresa/banner/banner').then(m => m.Banner) },
+      { path: 'actividad', loadComponent: () => import('./empresa/analytics/analytics-dashboard').then(m => m.AnalyticsDashboardComponent) }
     ]
   },
   {

@@ -1,10 +1,28 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ProductoService, Producto } from '../../../shared/services/producto.service';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { DialogModule } from 'primeng/dialog';
+import { TabsModule } from 'primeng/tabs';
+import { InputTextModule } from 'primeng/inputtext';
+import { TextareaModule  } from 'primeng/textarea';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { SelectModule } from 'primeng/select';
+import { CheckboxModule } from 'primeng/checkbox';
+import { ButtonModule } from 'primeng/button';
+import { ToggleSwitchModule } from 'primeng/toggleswitch';
+import { ChipModule } from 'primeng/chip';
+import { TooltipModule } from 'primeng/tooltip';
+import { ImageCropperComponent, ImageCroppedEvent, LoadedImage } from 'ngx-image-cropper';
+import { DomSanitizer } from '@angular/platform-browser';
+import { AnalyticsService } from '../../../shared/services/analytics.service';
+import { TabBasicInfoComponent } from './tabs/tab-basic-info.component';
+import { TabPricesComponent } from './tabs/tab-prices.component';
+import { TabInventoryComponent } from './tabs/tab-inventory.component';
+import { TabModifiersComponent } from './tabs/tab-modifiers.component';
 
 interface Category {
   id: number;
@@ -13,6 +31,20 @@ interface Category {
   productCount: number;
   color?: string;
   expanded?: boolean;
+}
+
+interface Variant {
+  id: string;
+  name: string;
+  price: number;
+}
+
+interface Modifier {
+  id: string;
+  name: string;
+  options: string[];
+  required: boolean;
+  maxSelections?: number;
 }
 
 interface Product {
@@ -25,11 +57,40 @@ interface Product {
   discount?: number;
   image?: string;
   active: boolean;
+  isPrincipal?: boolean;
+  variants?: Variant[];
+  hasStockControl?: boolean;
+  currentStock?: number;
+  minStock?: number;
+  modifiers?: Modifier[];
+  kitchenArea?: string;
 }
 
 @Component({
   selector: 'app-productos',
-  imports: [CommonModule, FormsModule, ToastModule, ConfirmDialogModule],
+  standalone: true,
+  imports: [
+    CommonModule, 
+    FormsModule, 
+    ToastModule, 
+    ConfirmDialogModule,
+    DialogModule,
+    TabsModule,
+    InputTextModule,
+    TextareaModule,
+    InputNumberModule,
+    SelectModule,
+    CheckboxModule,
+    ButtonModule,
+    ToggleSwitchModule,
+    ChipModule,
+    TooltipModule,
+    ImageCropperComponent,
+    TabBasicInfoComponent,
+    TabPricesComponent,
+    TabInventoryComponent,
+    TabModifiersComponent
+  ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './productos.html',
   styleUrl: './productos.css',
@@ -38,11 +99,22 @@ export class ProductosComponent {
   private productoService = inject(ProductoService);
   private messageService = inject(MessageService);
   private confirmationService = inject(ConfirmationService);
+  private analyticsService = inject(AnalyticsService);
+
+  @ViewChild('tabPrices') tabPrices!: TabPricesComponent;
 
   // Estados de modales
   showCategoryModal = false;
   showProductModal = false;
   showPreview = false;
+  showStockInfoDialog = false;
+  isValidatingImage = signal(false);
+  isLoadingImage = signal(false);
+  showImageCropper = signal(false);
+  pendingImageData: { base64: string, file: File } | null = null;
+  currentImageForCrop = signal<string | null>(null);
+  croppedImage: any = '';
+  imageChangedEvent: any = '';
 
   // Categoría seleccionada
   selectedCategoryId: number | null = null;
@@ -64,8 +136,21 @@ export class ProductosComponent {
     price: 0,
     discount: 0 as number | undefined,
     image: '' as string | undefined,
-    active: true
+    active: true,
+    isPrincipal: false,
+    variants: [] as Variant[],
+    hasStockControl: false,
+    currentStock: 0,
+    minStock: 0,
+    modifiers: [] as Modifier[],
+    kitchenArea: 'Cocina principal'
   };
+
+  // Formularios temporales para agregar variantes y modificadores
+  newVariant = { name: '', price: 0 };
+  newModifier = { name: '', options: '', required: false, maxSelections: 1 };
+  
+  kitchenAreas = ['Cocina principal', 'Barra', 'Parrilla', 'Repostería', 'Bebidas'];
 
   categories: Category[] = [
     { id: 1, name: 'Destacados', isFavorite: true, productCount: 0, color: '#fbbf24', expanded: true },
@@ -133,13 +218,6 @@ export class ProductosComponent {
         }
         
         this.updateProductCounts();
-        
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Categorías cargadas',
-          detail: `${this.categories.length} categorías cargadas correctamente`,
-          life: 3000
-        });
       },
       error: (error) => {
         console.error('Error al cargar categorías:', error);
@@ -307,6 +385,12 @@ export class ProductosComponent {
 
   // === GESTIÓN DE PRODUCTOS ===
   openProductModal(product?: Product) {
+    // Registrar evento de abrir modal
+    this.analyticsService.trackEvent(
+      product ? 'Editar Producto' : 'Crear Producto',
+      { categoryId: this.selectedCategoryId }
+    );
+
     if (product) {
       this.productForm = {
         id: product.id,
@@ -316,7 +400,14 @@ export class ProductosComponent {
         price: product.price,
         discount: product.discount,
         image: product.image,
-        active: product.active
+        active: product.active,
+        isPrincipal: product.isPrincipal || false,
+        variants: product.variants ? [...product.variants] : [],
+        hasStockControl: product.hasStockControl || false,
+        currentStock: product.currentStock || 0,
+        minStock: product.minStock || 0,
+        modifiers: product.modifiers ? [...product.modifiers] : [],
+        kitchenArea: product.kitchenArea || 'Cocina principal'
       };
     } else {
       this.productForm = {
@@ -327,9 +418,18 @@ export class ProductosComponent {
         price: 0,
         discount: 0,
         image: '',
-        active: true
+        active: true,
+        isPrincipal: false,
+        variants: [],
+        hasStockControl: false,
+        currentStock: 0,
+        minStock: 0,
+        modifiers: [],
+        kitchenArea: 'Cocina principal'
       };
     }
+    this.newVariant = { name: '', price: 0 };
+    this.newModifier = { name: '', options: '', required: false, maxSelections: 1 };
     this.showProductModal = true;
   }
 
@@ -351,6 +451,11 @@ export class ProductosComponent {
         detail: 'Por favor selecciona una categoría',
         life: 3000
       });
+      return;
+    }
+
+    // Validar precio usando el componente hijo
+    if (this.tabPrices && !this.tabPrices.validatePrice()) {
       return;
     }
 
@@ -430,6 +535,15 @@ export class ProductosComponent {
     this.showProductModal = false;
   }
 
+  showValidationError(errorMessage: string) {
+    this.messageService.add({
+      severity: 'warn',
+      summary: 'Campo requerido',
+      detail: errorMessage,
+      life: 3000
+    });
+  }
+
   // === UTILIDADES ===
   get filteredProducts(): Product[] {
     if (!this.selectedCategoryId) return this.products;
@@ -481,16 +595,243 @@ export class ProductosComponent {
     this.showPreview = !this.showPreview;
   }
 
-  onFileSelected(event: any) {
+  async onFileSelected(event: any) {
     const file = event.target.files[0];
-    if (file) {
-      // Aquí normalmente subirías la imagen a un servidor
-      // Por ahora, creamos una URL temporal
-      const reader = new FileReader();
-      reader.onload = (e: any) => {
-        this.productForm.image = e.target.result;
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+    console.log('Archivo seleccionado:', file);
+    // Validar tamaño (máximo 4MB)
+    if (file.size > 4 * 1024 * 1024) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Archivo muy grande',
+        detail: 'La imagen no debe superar los 4MB',
+        life: 3000
+      });
+      event.target.value = '';
+      return;
     }
+
+    // Validar tipo de archivo
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/bmp', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Tipo de archivo inválido',
+        detail: 'Solo se permiten imágenes (JPG, PNG, GIF, BMP, WEBP)',
+        life: 3000
+      });
+      event.target.value = '';
+      return;
+    }
+
+    // Leer archivo como base64
+    this.isLoadingImage.set(true);
+    const reader = new FileReader();
+    reader.onload = (e: any) => {
+      const base64WithPrefix = e.target.result as string;
+      
+      // Mostrar la imagen en el cropper
+      this.currentImageForCrop.set(base64WithPrefix);
+      this.imageChangedEvent = event;
+      this.pendingImageData = { base64: base64WithPrefix, file: file };
+      this.isLoadingImage.set(false);
+      
+      // Limpiar el input para permitir subir la misma imagen otra vez
+      event.target.value = '';
+    };
+    
+    reader.readAsDataURL(file);
+  }
+
+  // === GESTIÓN DE IMAGEN ===
+  openImageModal() {
+    // Si ya tiene imagen, cargarla en el cropper
+    if (this.productForm.image) {
+      this.currentImageForCrop.set(this.productForm.image);
+      this.croppedImage = '';
+    } else {
+      this.currentImageForCrop.set(null);
+    }
+    this.showImageCropper.set(true);
+  }
+
+  openImageCropper() {
+    if (this.productForm.image) {
+      this.currentImageForCrop.set(this.productForm.image);
+      this.croppedImage = '';
+      this.showImageCropper.set(true);
+    }
+  }
+
+  closeImageCropper() {
+    this.showImageCropper.set(false);
+    this.currentImageForCrop.set(null);
+    this.imageChangedEvent = '';
+    this.croppedImage = '';
+    this.pendingImageData = null;
+    this.isLoadingImage.set(false);
+  }
+
+  imageCropped(event: ImageCroppedEvent) {
+    this.croppedImage = event.blob;
+  }
+
+  imageLoaded(image: LoadedImage) {
+    // Imagen cargada correctamente
+  }
+
+  cropperReady() {
+    // Cropper listo
+  }
+
+  loadImageFailed() {
+    this.messageService.add({
+      severity: 'error',
+      summary: 'Error',
+      detail: 'No se pudo cargar la imagen',
+      life: 3000
+    });
+  }
+
+  saveCroppedImage() {
+    if (this.croppedImage) {
+      // Convertir blob a base64
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        this.productForm.image = reader.result as string;
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Imagen guardada',
+          detail: 'La imagen ha sido recortada y guardada correctamente',
+          life: 3000
+        });
+        this.closeImageCropper();
+      };
+      reader.readAsDataURL(this.croppedImage as Blob);
+    } else {
+      this.closeImageCropper();
+    }
+  }
+
+  addVariant() {
+    if (!this.newVariant.name.trim()) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Campo requerido',
+        detail: 'Ingresa un nombre para la variante',
+        life: 3000
+      });
+      return;
+    }
+
+    const variant: Variant = {
+      id: Date.now().toString(),
+      name: this.newVariant.name,
+      price: this.newVariant.price
+    };
+
+    this.productForm.variants.push(variant);
+    this.newVariant = { name: '', price: 0 };
+    
+    this.messageService.add({
+      severity: 'success',
+      summary: 'Variante agregada',
+      detail: `${variant.name} agregado correctamente`,
+      life: 2000
+    });
+  }
+
+  removeVariant(id: string) {
+    this.productForm.variants = this.productForm.variants.filter(v => v.id !== id);
+  }
+
+  // === GESTIÓN DE MODIFICADORES ===
+  addModifier() {
+    if (!this.newModifier.name.trim()) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Campo requerido',
+        detail: 'Ingresa un nombre para el modificador',
+        life: 3000
+      });
+      return;
+    }
+
+    const options = this.newModifier.options
+      .split(',')
+      .map(opt => opt.trim())
+      .filter(opt => opt.length > 0);
+
+    if (options.length === 0) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Opciones requeridas',
+        detail: 'Ingresa al menos una opción (separadas por comas)',
+        life: 3000
+      });
+      return;
+    }
+
+    const modifier: Modifier = {
+      id: Date.now().toString(),
+      name: this.newModifier.name,
+      options: options,
+      required: this.newModifier.required,
+      maxSelections: this.newModifier.maxSelections
+    };
+
+    this.productForm.modifiers.push(modifier);
+    this.newModifier = { name: '', options: '', required: false, maxSelections: 1 };
+    
+    this.messageService.add({
+      severity: 'success',
+      summary: 'Modificador agregado',
+      detail: `${modifier.name} con ${modifier.options.length} opciones`,
+      life: 2000
+    });
+  }
+
+  removeModifier(id: string) {
+    this.productForm.modifiers = this.productForm.modifiers.filter(m => m.id !== id);
+  }
+
+  // === COPIAR IMAGEN ===
+  copyImageToOtherProducts() {
+    if (!this.productForm.image) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Sin imagen',
+        detail: 'Primero sube una imagen para copiarla',
+        life: 3000
+      });
+      return;
+    }
+
+    this.confirmationService.confirm({
+      message: '¿Deseas usar esta imagen para todos los productos de esta categoría?',
+      header: 'Copiar imagen',
+      icon: 'pi pi-copy',
+      acceptLabel: 'Sí, copiar',
+      rejectLabel: 'Cancelar',
+      accept: () => {
+        const categoryId = this.productForm.categoryId;
+        if (!categoryId) return;
+
+        let count = 0;
+        this.products.forEach(product => {
+          if (product.categoryId === categoryId && product.id !== this.productForm.id) {
+            product.image = this.productForm.image;
+            count++;
+          }
+        });
+
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Imagen copiada',
+          detail: `Imagen aplicada a ${count} productos`,
+          life: 3000
+        });
+      }
+    });
   }
 }

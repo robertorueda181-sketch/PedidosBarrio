@@ -16,9 +16,9 @@ export class PilarComponent implements OnInit {
     pageData: SchoolPageData = {
         theme: {
             colors: {
-                primary: '#2C5282',
-                secondary: 'red',
-                accent: 'red',
+                primary: 'black',
+                secondary: '#2C5282',
+                accent: '#2C5282',
                 background: 'white',
                 text: '#2C5282',
                 textLight: '#718096'

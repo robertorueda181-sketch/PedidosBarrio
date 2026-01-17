@@ -1374,6 +1374,11 @@
   cursor: pointer;
 }
 
+.image-upload-label.disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
 .upload-placeholder {
   border: 2px dashed #d1d5db;
   border-radius: 8px;
@@ -1387,6 +1392,24 @@
   background: #f9fafb;
 }
 
+.upload-placeholder.validating {
+  border-color: #3b82f6;
+  background: #eff6ff;
+}
+
+.upload-placeholder.validating svg.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .upload-placeholder svg {
   width: 48px;
   height: 48px;
@@ -1394,10 +1417,19 @@
   margin: 0 auto 0.75rem;
 }
 
+.upload-placeholder.validating svg {
+  color: #3b82f6;
+}
+
 .upload-placeholder span {
   display: block;
   color: #6b7280;
   font-size: 0.875rem;
+}
+
+.upload-placeholder.validating span {
+  color: #3b82f6;
+  font-weight: 500;
 }
 
 .image-upload-label img {

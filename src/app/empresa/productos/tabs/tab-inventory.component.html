@@ -1,0 +1,61 @@
+<div class="p-2 md:p-4">
+  <!-- Historial de Movimientos -->
+  <div class="surface-card border-round p-3 md:p-4">
+    <div class="flex flex-column md:flex-row md:align-items-center md:justify-content-between gap-3 mb-4">
+      <div>
+        <h3 class="text-900 font-semibold m-0 mb-2">
+          <i class="pi pi-history mr-2"></i>Historial de Movimientos
+        </h3>
+        <p class="text-600 m-0">Registro de entradas y salidas de stock</p>
+      </div>
+      <button 
+        pButton 
+        label="Nuevo Movimiento" 
+        icon="pi pi-plus"
+        class="p-button-sm w-full md:w-auto">
+      </button>
+    </div>
+
+    @if (inventoryMovements.length > 0) {
+      <div class="overflow-auto">
+        <table class="w-full" style="min-width: 600px;">
+          <thead class="border-bottom-1 surface-border">
+            <tr>
+              <th class="text-left py-3 px-2 text-900 font-semibold text-sm">Fecha</th>
+              <th class="text-left py-3 px-2 text-900 font-semibold text-sm">Tipo</th>
+              <th class="text-right py-3 px-2 text-900 font-semibold text-sm">Cantidad</th>
+              <th class="text-left py-3 px-2 text-900 font-semibold text-sm">Motivo</th>
+              <th class="text-right py-3 px-2 text-900 font-semibold text-sm">Stock Final</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (movement of inventoryMovements; track movement.id) {
+              <tr class="border-bottom-1 surface-border hover:surface-50">
+                <td class="py-3 px-2 text-600 text-sm">{{ movement.date | date:'dd/MM/yyyy HH:mm' }}</td>
+                <td class="py-3 px-2">
+                  <p-chip 
+                    [label]="movement.type === 'entry' ? 'Entrada' : 'Salida'" 
+                    [styleClass]="(movement.type === 'entry' ? 'bg-green-500' : 'bg-red-500') + ' text-sm'">
+                  </p-chip>
+                </td>
+                <td class="py-3 px-2 text-right font-semibold text-sm" 
+                    [class.text-green-600]="movement.type === 'entry'"
+                    [class.text-red-600]="movement.type === 'exit'">
+                  {{ movement.type === 'entry' ? '+' : '-' }}{{ movement.quantity }}
+                </td>
+                <td class="py-3 px-2 text-600 text-sm">{{ movement.reason }}</td>
+                <td class="py-3 px-2 text-right font-semibold text-900 text-sm">{{ movement.finalStock }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    } @else {
+      <div class="text-center py-6">
+        <i class="pi pi-inbox text-6xl text-400 mb-3 block"></i>
+        <p class="text-600 mb-0">No hay movimientos registrados</p>
+        <small class="text-500">Los movimientos de entrada y salida aparecerán aquí</small>
+      </div>
+    }
+  </div>
+</div>

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { SearchService } from '../../shared/services/search.service';
+import { AnalyticsService } from '../../shared/services/analytics.service';
 
 export interface SearchResult {
     type: 'NEGOCIO' | 'SERVICIO' | 'INMUEBLE';
@@ -32,6 +33,7 @@ export class SearchResultsComponent implements OnInit {
     private route = inject(ActivatedRoute);
     private router = inject(Router);
     private searchService = inject(SearchService);
+    private analyticsService = inject(AnalyticsService);
 
     searchQuery = signal<string>('');
     activeTab = signal<string>('TODOS');
@@ -59,10 +61,16 @@ export class SearchResultsComponent implements OnInit {
             next: (data) => {
                 this.results.set(data);
                 this.isLoading.set(false);
+                
+                // Registrar búsqueda en cookies
+                this.analyticsService.trackSearch(this.searchQuery(), data.length);
             },
             error: (err) => {
                 console.error('Error performing search', err);
                 this.isLoading.set(false);
+                
+                // Registrar búsqueda fallida
+                this.analyticsService.trackSearch(this.searchQuery(), 0);
             }
         });
     }
