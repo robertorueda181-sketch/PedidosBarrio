@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MessageService } from 'primeng/api';
+import { ToastrService } from 'ngx-toastr';
 
 interface Plan {
   id: string;
@@ -21,7 +21,7 @@ import { FormsModule } from '@angular/forms';
   styleUrl: './suscripcion.css',
 })
 export class Suscripcion {
-  private messageService = inject(MessageService);
+  private toastr = inject(ToastrService);
   currentPlanId: string = 'free';
   currentPlan: string = 'Gratuito';
 
@@ -75,9 +75,9 @@ export class Suscripcion {
 
   selectPlan(planId: string) {
     if (planId === 'pro') {
-      this.messageService.add({ severity: 'info', summary: 'Plan Profesional', detail: 'Redirigiendo al proceso de pago para el Plan Profesional...' });
+      this.toastr.info('Redirigiendo al proceso de pago para el Plan Profesional...', 'Plan Profesional');
     } else if (planId === 'enterprise') {
-      this.messageService.add({ severity: 'info', summary: 'Plan Empresarial', detail: 'Contacta a nuestro equipo de ventas para el Plan Empresarial' });
+      this.toastr.info('Contacta a nuestro equipo de ventas para el Plan Empresarial', 'Plan Empresarial');
     }
   }
 

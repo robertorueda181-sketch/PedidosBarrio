@@ -9,12 +9,12 @@ import { CommonModule } from '@angular/common';
 import * as L from 'leaflet';
 import { RegisterService } from '../../shared/services/register.service';
 import { RegisterRequest } from '../../shared/interfaces/register.interface';
-import { MessageService } from 'primeng/api';
-import { ToastModule } from 'primeng/toast';
+import { ToastrService } from 'ngx-toastr';
+
 
 @Component({
   selector: 'app-register',
-  imports: [ReactiveFormsModule, CommonModule, MultiSelectModule, InputMaskModule, CheckboxModule, SelectModule, ToastModule],
+  imports: [ReactiveFormsModule, CommonModule, MultiSelectModule, InputMaskModule, CheckboxModule, SelectModule],
   templateUrl: './register.html',
   styleUrl: './register.css',
 })
@@ -22,7 +22,7 @@ export class Register implements OnInit {
   private fb = inject(FormBuilder);
   private registerService = inject(RegisterService);
   private router = inject(Router);
-  private messageService = inject(MessageService);
+  private toastr = inject(ToastrService);
   private typeCateg = 'CATEG';
 
   categories = signal<any[]>([]);
@@ -256,7 +256,7 @@ export class Register implements OnInit {
     }
 
     if (this.registerForm.value.password !== this.registerForm.value.confirmPassword) {
-      this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Las contraseñas no coinciden' });
+      this.toastr.error('Las contraseñas no coinciden', 'Error');
       return;
     }
 
@@ -290,11 +290,10 @@ export class Register implements OnInit {
       error: (error: any) => {
         console.error('Error en el registro:', error);
         const errorMessage = error.error?.message || error.error || 'Hubo un error al registrar. Por favor, inténtalo de nuevo.';
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error en el registro',
-          detail: typeof errorMessage === 'string' ? errorMessage : 'Error de validación (400)'
-        });
+        this.toastr.error(
+          typeof errorMessage === 'string' ? errorMessage : 'Error de validación (400)',
+          'Error en el registro'
+        );
       }
     });
   }

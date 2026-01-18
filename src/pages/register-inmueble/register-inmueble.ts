@@ -8,19 +8,19 @@ import { CommonModule } from '@angular/common';
 import * as L from 'leaflet';
 import { RegisterService } from '../../shared/services/register.service';
 import { RegisterRequest } from '../../shared/interfaces/register.interface';
-import { MessageService } from 'primeng/api';
-import { ToastModule } from 'primeng/toast';
+import { ToastrService } from 'ngx-toastr';
+
 
 @Component({
     selector: 'app-register-inmueble',
-    imports: [ReactiveFormsModule, CommonModule, MultiSelectModule, InputMaskModule, CheckboxModule, SelectModule, ToastModule],
+    imports: [ReactiveFormsModule, CommonModule, MultiSelectModule, InputMaskModule, CheckboxModule, SelectModule],
     templateUrl: './register-inmueble.html',
     styleUrl: './register-inmueble.css',
 })
 export class RegisterInmueble implements OnInit {
     private fb = inject(FormBuilder);
     private registerService = inject(RegisterService);
-    private messageService = inject(MessageService);
+    private toastr = inject(ToastrService);
 
     registerForm: FormGroup = this.fb.group({
         fullname: ['', Validators.required],
@@ -155,7 +155,7 @@ export class RegisterInmueble implements OnInit {
         }
 
         if (this.registerForm.value.password !== this.registerForm.value.confirmPassword) {
-            this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Las contraseñas no coinciden' });
+            this.toastr.error('Las contraseñas no coinciden', 'Error');
             return;
         }
 
@@ -183,17 +183,16 @@ export class RegisterInmueble implements OnInit {
         this.registerService.registerBusiness(formData).subscribe({
             next: (response) => {
                 console.log('Registro exitoso:', response);
-                this.messageService.add({ severity: 'success', summary: 'Registro exitoso', detail: `Gracias por registrar tu inmueble, ${formData.fullname || ''}!` });
+                this.toastr.success(`Gracias por registrar tu inmueble, ${formData.fullname || ''}!`, 'Registro exitoso');
                 this.registerForm.reset();
             },
             error: (error: any) => {
                 console.error('Error en el registro:', error);
                 const errorMessage = error.error?.message || error.error || 'Hubo un error al registrar el inmueble. Por favor, inténtalo de nuevo.';
-                this.messageService.add({
-                    severity: 'error',
-                    summary: 'Error en el registro',
-                    detail: typeof errorMessage === 'string' ? errorMessage : 'Error de validación (400)'
-                });
+                this.toastr.error(
+                    typeof errorMessage === 'string' ? errorMessage : 'Error de validación (400)',
+                    'Error en el registro'
+                );
             }
         });
     }

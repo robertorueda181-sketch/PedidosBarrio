@@ -1,0 +1,367 @@
+<div class="min-h-screen bg-gray-50 p-4 md:p-6">
+  <p-confirmDialog />
+
+  <!-- Header -->
+  <div class="bg-white rounded-lg shadow-sm p-4 md:p-6 mb-6">
+    <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div class="flex items-center gap-4">
+        <div class="bg-primary-100 rounded-lg p-3">
+          <i class="pi pi-shopping-cart text-primary text-2xl"></i>
+        </div>
+        <div>
+          <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Pedidos</h1>
+          <p class="text-gray-600 mt-1">Gestiona los pedidos de tus clientes</p>
+        </div>
+      </div>
+
+      <!-- Badges de notificación -->
+      <div class="flex gap-3">
+        <div class="bg-blue-50 rounded-lg px-4 py-3 flex items-center gap-2">
+          <i class="pi pi-bell text-blue-600 text-xl"></i>
+          <div>
+            <div class="text-sm text-gray-600">Nuevos</div>
+            <div class="text-2xl font-bold text-blue-600">{{ receivedOrdersCount }}</div>
+          </div>
+        </div>
+        <div class="bg-orange-50 rounded-lg px-4 py-3 flex items-center gap-2">
+          <i class="pi pi-clock text-orange-600 text-xl"></i>
+          <div>
+            <div class="text-sm text-gray-600">En Proceso</div>
+            <div class="text-2xl font-bold text-orange-600">{{ preparingOrdersCount }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="bg-white rounded-lg shadow-sm p-4 mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          <i class="pi pi-filter mr-2"></i>Filtrar por estado
+        </label>
+        <p-select
+          [(ngModel)]="selectedStatus"
+          [options]="statusOptions"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Selecciona un estado"
+          class="w-full"
+          (onChange)="filterOrders()">
+        </p-select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          <i class="pi pi-search mr-2"></i>Buscar pedido
+        </label>
+        <input
+          pInputText
+          [(ngModel)]="searchTerm"
+          (input)="filterOrders()"
+          placeholder="Número, cliente o teléfono..."
+          class="w-full">
+      </div>
+    </div>
+  </div>
+
+  <!-- Lista de pedidos -->
+  <div class="grid grid-cols-1 gap-4">
+    @if (filteredOrders.length === 0) {
+      <div class="bg-white rounded-lg shadow-sm p-12 text-center">
+        <i class="pi pi-inbox text-6xl text-gray-400 mb-4 block"></i>
+        <h3 class="text-xl font-semibold text-gray-900 mb-2">No hay pedidos</h3>
+        <p class="text-gray-600">
+          @if (selectedStatus !== 'all') {
+            No hay pedidos con el estado seleccionado
+          } @else if (searchTerm) {
+            No se encontraron pedidos que coincidan con tu búsqueda
+          } @else {
+            Los pedidos de tus clientes aparecerán aquí
+          }
+        </p>
+      </div>
+    }
+
+    @for (order of filteredOrders; track order.id) {
+      <div class="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
+        <div class="p-4 md:p-6">
+          <!-- Header del pedido -->
+          <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-4">
+            <div class="flex items-start gap-4 flex-1">
+              <div class="bg-primary-100 rounded-lg p-3 hidden md:block">
+                <i [class]="'pi ' + getOrderTypeIcon(order.orderType) + ' text-primary text-xl'"></i>
+              </div>
+              <div class="flex-1">
+                <div class="flex items-center gap-3 mb-2">
+                  <h3 class="text-xl font-bold text-gray-900">{{ order.orderNumber }}</h3>
+                  <p-chip
+                    [label]="getStatusLabel(order.status)"
+                    [styleClass]="getStatusClass(order.status) + ' text-sm'">
+                  </p-chip>
+                  <span class="text-sm text-gray-500">{{ getTimeAgo(order.createdAt) }}</span>
+                </div>
+                <div class="flex flex-col md:flex-row md:items-center gap-2 text-sm text-gray-600">
+                  <div class="flex items-center gap-2">
+                    <i class="pi pi-user"></i>
+                    <span class="font-medium">{{ order.customerName }}</span>
+                  </div>
+                  @if (order.customerPhone) {
+                    <div class="flex items-center gap-2">
+                      <i class="pi pi-phone"></i>
+                      <span>{{ order.customerPhone }}</span>
+                    </div>
+                  }
+                  <div class="flex items-center gap-2">
+                    <i [class]="'pi ' + getOrderTypeIcon(order.orderType)"></i>
+                    <span>{{ getOrderTypeLabel(order.orderType) }}</span>
+                  </div>
+                </div>
+                @if (order.address) {
+                  <div class="flex items-start gap-2 mt-2 text-sm text-gray-600">
+                    <i class="pi pi-map-marker mt-0.5"></i>
+                    <span>{{ order.address }}</span>
+                  </div>
+                }
+              </div>
+            </div>
+
+            <!-- Total -->
+            <div class="text-right">
+              <div class="text-sm text-gray-600">Total</div>
+              <div class="text-2xl font-bold text-primary">S/. {{ order.total | number:'1.2-2' }}</div>
+              @if (order.paymentMethod) {
+                <div class="text-sm text-gray-500 mt-1">{{ getPaymentMethodLabel(order.paymentMethod) }}</div>
+              }
+            </div>
+          </div>
+
+          <!-- Items del pedido -->
+          <div class="border-t border-gray-200 pt-4 mb-4">
+            <div class="space-y-2">
+              @for (item of order.items; track item.id) {
+                <div class="flex items-center justify-between text-sm">
+                  <div class="flex items-center gap-2">
+                    <span class="bg-gray-100 rounded px-2 py-1 font-medium">{{ item.quantity }}x</span>
+                    <span class="font-medium text-gray-900">{{ item.name }}</span>
+                    @if (item.modifiers && item.modifiers.length > 0) {
+                      <span class="text-gray-500 text-xs">({{ item.modifiers.join(', ') }})</span>
+                    }
+                  </div>
+                  <span class="text-gray-700">S/. {{ (item.price * item.quantity) | number:'1.2-2' }}</span>
+                </div>
+              }
+            </div>
+          </div>
+
+          @if (order.notes) {
+            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
+              <div class="flex items-start gap-2">
+                <i class="pi pi-info-circle text-yellow-600 mt-0.5"></i>
+                <div>
+                  <div class="text-sm font-medium text-yellow-800">Nota del cliente:</div>
+                  <div class="text-sm text-yellow-700">{{ order.notes }}</div>
+                </div>
+              </div>
+            </div>
+          }
+
+          @if (order.estimatedTime && order.status !== 'delivered' && order.status !== 'cancelled') {
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+              <div class="flex items-center gap-2 text-sm text-blue-700">
+                <i class="pi pi-clock"></i>
+                <span>Tiempo estimado: {{ order.estimatedTime }} minutos</span>
+              </div>
+            </div>
+          }
+
+          <!-- Acciones -->
+          <div class="flex flex-wrap gap-2">
+            <button
+              pButton
+              label="Ver Detalle"
+              icon="pi pi-eye"
+              [outlined]="true"
+              class="flex-1 md:flex-none"
+              (click)="viewOrderDetail(order)">
+            </button>
+
+            @if (order.status === 'received') {
+              <button
+                pButton
+                label="Aceptar"
+                icon="pi pi-check"
+                class="flex-1 md:flex-none"
+                (click)="acceptOrder(order)">
+              </button>
+            }
+
+            @if (order.status === 'preparing') {
+              <button
+                pButton
+                label="Marcar Listo"
+                icon="pi pi-check-circle"
+                severity="success"
+                class="flex-1 md:flex-none"
+                (click)="markAsReady(order)">
+              </button>
+            }
+
+            @if (order.status === 'ready') {
+              <button
+                pButton
+                label="Entregado"
+                icon="pi pi-verified"
+                severity="success"
+                class="flex-1 md:flex-none"
+                (click)="markAsDelivered(order)">
+              </button>
+            }
+
+            <button
+              pButton
+              icon="pi pi-print"
+              [outlined]="true"
+              [rounded]="true"
+              pTooltip="Imprimir"
+              (click)="printOrder(order)">
+            </button>
+
+            @if (order.status !== 'delivered' && order.status !== 'cancelled') {
+              <button
+                pButton
+                icon="pi pi-times"
+                severity="danger"
+                [outlined]="true"
+                [rounded]="true"
+                pTooltip="Cancelar pedido"
+                (click)="cancelOrder(order)">
+              </button>
+            }
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</div>
+
+<!-- Dialog de detalle del pedido -->
+<p-dialog
+  [(visible)]="showOrderDetail"
+  [header]="'Detalle del Pedido ' + (selectedOrder?.orderNumber || '')"
+  [modal]="true"
+  [closable]="true"
+  [style]="{width: '90%', 'max-width': '700px'}"
+  [breakpoints]="{'960px': '100vw', '640px': '100vw'}">
+
+  @if (selectedOrder) {
+    <div class="space-y-4">
+      <!-- Información del cliente -->
+      <div class="bg-gray-50 rounded-lg p-4">
+        <h3 class="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+          <i class="pi pi-user"></i>
+          Información del Cliente
+        </h3>
+        <div class="space-y-2 text-sm">
+          <div class="flex justify-between">
+            <span class="text-gray-600">Nombre:</span>
+            <span class="font-medium">{{ selectedOrder.customerName }}</span>
+          </div>
+          @if (selectedOrder.customerPhone) {
+            <div class="flex justify-between">
+              <span class="text-gray-600">Teléfono:</span>
+              <span class="font-medium">{{ selectedOrder.customerPhone }}</span>
+            </div>
+          }
+          @if (selectedOrder.address) {
+            <div class="flex justify-between">
+              <span class="text-gray-600">Dirección:</span>
+              <span class="font-medium">{{ selectedOrder.address }}</span>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Detalles del pedido -->
+      <div class="bg-gray-50 rounded-lg p-4">
+        <h3 class="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+          <i class="pi pi-shopping-cart"></i>
+          Items del Pedido
+        </h3>
+        <div class="space-y-3">
+          @for (item of selectedOrder.items; track item.id) {
+            <div class="flex justify-between items-start">
+              <div class="flex-1">
+                <div class="font-medium">{{ item.quantity }}x {{ item.name }}</div>
+                @if (item.modifiers && item.modifiers.length > 0) {
+                  <div class="text-xs text-gray-500 mt-1">{{ item.modifiers.join(', ') }}</div>
+                }
+              </div>
+              <div class="font-medium">S/. {{ (item.price * item.quantity) | number:'1.2-2' }}</div>
+            </div>
+          }
+          <div class="border-t border-gray-300 pt-3 flex justify-between items-center">
+            <span class="font-bold text-lg">Total</span>
+            <span class="font-bold text-xl text-primary">S/. {{ selectedOrder.total | number:'1.2-2' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Información adicional -->
+      <div class="bg-gray-50 rounded-lg p-4">
+        <h3 class="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+          <i class="pi pi-info-circle"></i>
+          Información Adicional
+        </h3>
+        <div class="space-y-2 text-sm">
+          <div class="flex justify-between">
+            <span class="text-gray-600">Tipo de pedido:</span>
+            <span class="font-medium">{{ getOrderTypeLabel(selectedOrder.orderType) }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-600">Estado:</span>
+            <p-chip
+              [label]="getStatusLabel(selectedOrder.status)"
+              [styleClass]="getStatusClass(selectedOrder.status) + ' text-xs'">
+            </p-chip>
+          </div>
+          @if (selectedOrder.paymentMethod) {
+            <div class="flex justify-between">
+              <span class="text-gray-600">Método de pago:</span>
+              <span class="font-medium">{{ getPaymentMethodLabel(selectedOrder.paymentMethod) }}</span>
+            </div>
+          }
+          <div class="flex justify-between">
+            <span class="text-gray-600">Hora del pedido:</span>
+            <span class="font-medium">{{ selectedOrder.createdAt | date:'short' }}</span>
+          </div>
+        </div>
+      </div>
+
+      @if (selectedOrder.notes) {
+        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+          <h3 class="font-semibold text-yellow-800 mb-2">Nota del cliente:</h3>
+          <p class="text-sm text-yellow-700">{{ selectedOrder.notes }}</p>
+        </div>
+      }
+    </div>
+  }
+
+  <ng-template pTemplate="footer">
+    <div class="flex gap-2 justify-end">
+      <button
+        pButton
+        label="Cerrar"
+        icon="pi pi-times"
+        [text]="true"
+        (click)="closeOrderDetail()">
+      </button>
+      <button
+        pButton
+        label="Imprimir"
+        icon="pi pi-print"
+        (click)="printOrder(selectedOrder!)">
+      </button>
+    </div>
+  </ng-template>
+</p-dialog>

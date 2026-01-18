@@ -5,10 +5,11 @@ import { RegisterService } from '../../../shared/services/register.service';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { AppConfigService } from '../../../shared/services/app-config.service';
+import { ProgressButtonComponent } from '../components/progress-button/progress-button.component';
 
 @Component({
   selector: 'app-layout',
-  imports: [RouterModule, CommonModule],
+  imports: [RouterModule, CommonModule, ProgressButtonComponent],
   templateUrl: './layout.html',
   styleUrl: './layout.css',
 })

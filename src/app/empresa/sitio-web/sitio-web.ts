@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NgxEditorModule, Editor, Toolbar } from 'ngx-editor';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { MessageService } from 'primeng/api';
+import { ToastrService } from 'ngx-toastr';
 
 interface WebsiteTemplate {
   id: string;
@@ -30,7 +30,7 @@ interface WebsiteSection {
   styleUrl: './sitio-web.css',
 })
 export class SitioWeb implements OnInit, OnDestroy {
-  private messageService = inject(MessageService);
+  private toastr = inject(ToastrService);
   editor: Editor = new Editor();
   toolbar: Toolbar = [
     ['bold', 'italic'],
@@ -219,9 +219,9 @@ export class SitioWeb implements OnInit, OnDestroy {
     try {
       // Simular guardado
       await new Promise(resolve => setTimeout(resolve, 2000));
-      this.messageService.add({ severity: 'success', summary: 'Guardado', detail: 'Sitio web guardado exitosamente' });
+      this.toastr.success('Sitio web guardado exitosamente', 'Guardado');
     } catch (error) {
-      this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error al guardar el sitio web' });
+      this.toastr.error('Error al guardar el sitio web', 'Error');
     } finally {
       this.isSaving = false;
     }
@@ -232,7 +232,7 @@ export class SitioWeb implements OnInit, OnDestroy {
 
     const newWindow = window.open('', '_blank');
     if (!newWindow) {
-      this.messageService.add({ severity: 'warn', summary: 'Bloqueador de ventanas', detail: 'Por favor, permite las ventanas emergentes para ver la previsualización.' });
+      this.toastr.warning('Por favor, permite las ventanas emergentes para ver la previsualización.', 'Bloqueador de ventanas');
       return;
     }
 
@@ -273,7 +273,7 @@ export class SitioWeb implements OnInit, OnDestroy {
 
   publishWebsite() {
     if (confirm('¿Estás seguro de que quieres publicar los cambios? Esto hará que tu sitio web sea visible para todos.')) {
-      this.messageService.add({ severity: 'success', summary: 'Publicado', detail: 'Sitio web publicado exitosamente' });
+      this.toastr.success('Sitio web publicado exitosamente', 'Publicado');
     }
   }
 

@@ -1,0 +1,42 @@
+:host {
+  display: block;
+}
+
+/* Animaciones para las tarjetas */
+.hover\:shadow-md {
+  transition: box-shadow 0.3s ease;
+}
+
+/* Estilos para badges de notificación */
+.notification-badge {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* Mejorar la visualización de items */
+.space-y-2 > * + * {
+  margin-top: 0.5rem;
+}
+
+.space-y-3 > * + * {
+  margin-top: 0.75rem;
+}
+
+.space-y-4 > * + * {
+  margin-top: 1rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .flex-1 {
+    width: 100%;
+  }
+}

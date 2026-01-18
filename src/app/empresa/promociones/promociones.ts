@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MessageService } from 'primeng/api';
+import { ToastrService } from 'ngx-toastr';
 import { DialogModule } from 'primeng/dialog';
 import { CheckboxModule } from 'primeng/checkbox';
 import { RadioButtonModule } from 'primeng/radiobutton';
@@ -68,7 +68,7 @@ interface AdConfig {
     styleUrl: './promociones.css'
 })
 export class Promociones implements OnInit {
-    private messageService = inject(MessageService);
+    private toastr = inject(ToastrService);
 
     // States
     isLoading = false;
@@ -195,7 +195,7 @@ export class Promociones implements OnInit {
 
     async saveConfig() {
         if (!this.adConfig.name) {
-            this.messageService.add({ severity: 'warn', summary: 'Faltan datos', detail: 'Por favor, ingresa un nombre para la promoción' });
+            this.toastr.warning('Por favor, ingresa un nombre para la promoción', 'Faltan datos');
             return;
         }
 
@@ -223,10 +223,10 @@ export class Promociones implements OnInit {
 
             localStorage.setItem('ads_history', JSON.stringify(this.promociones));
 
-            this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Promoción guardada' });
+            this.toastr.success('Promoción guardada', 'Éxito');
             this.viewState = 'list';
         } catch (error) {
-            this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo guardar' });
+            this.toastr.error('No se pudo guardar', 'Error');
         } finally {
             this.isLoading = false;
         }
@@ -238,7 +238,7 @@ export class Promociones implements OnInit {
 
         if (promo.isActive) {
             localStorage.setItem('ad_config', JSON.stringify(promo));
-            this.messageService.add({ severity: 'success', summary: 'Activada', detail: `${promo.name} ahora es la promoción actual` });
+            this.toastr.success(`${promo.name} ahora es la promoción actual`, 'Activada');
         } else {
             localStorage.removeItem('ad_config');
         }
@@ -295,7 +295,7 @@ export class Promociones implements OnInit {
         }
 
         this.showImageModal.set(false);
-        this.messageService.add({ severity: 'info', summary: 'Imagen actualizada', detail: 'Se ha cargado la nueva imagen' });
+        this.toastr.info('Se ha cargado la nueva imagen', 'Imagen actualizada');
     }
 
     trackByIndex(index: number, obj: any): any {

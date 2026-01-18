@@ -1,5 +1,4 @@
- <!-- Componentes de PrimeNG -->
-<p-toast position="top-right"></p-toast>
+
 <p-confirmDialog></p-confirmDialog>
 
 <div class="productos-container">
@@ -301,8 +300,9 @@
       <app-tab-modifiers
         [productForm]="productForm"
         [newModifier]="newModifier"
-        (addModifier)="addModifier()"
-        (removeModifier)="removeModifier($event)">
+        (addModifier)="addModifier($event)"
+        (removeModifier)="removeModifier($event)"
+        (validationError)="showValidationError($event)">
       </app-tab-modifiers>
     </p-tabpanel>
   </p-tabpanels>

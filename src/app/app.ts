@@ -3,8 +3,8 @@ import { Footer } from "../shared/footer/footer";
 import { Navbar } from '../shared/navbar/navbar';
 import { Router, RouterOutlet, NavigationEnd } from '@angular/router';
 
-import { ToastModule } from 'primeng/toast';
-import { MessageService } from 'primeng/api';
+
+import { ToastrService } from 'ngx-toastr';
 import { AnalyticsService } from '../shared/services/analytics.service';
 import { CookieConsentComponent } from '../shared/components/cookie-consent/cookie-consent';
 import { filter } from 'rxjs/operators';
@@ -12,12 +12,12 @@ import { filter } from 'rxjs/operators';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, ToastModule, CookieConsentComponent],
+  imports: [RouterOutlet, CookieConsentComponent],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
 export class App {
-  private messageService = inject(MessageService);
+  private toastr = inject(ToastrService);
   private analyticsService = inject(AnalyticsService);
 
   constructor(private router: Router) {
@@ -40,7 +40,7 @@ export class App {
   
   onSearch() {
     // Aquí puedes agregar la lógica para buscar negocios según searchQuery
-    this.messageService.add({ severity: 'info', summary: 'Búsqueda', detail: `Buscando: ${this.searchQuery}` });
+    this.toastr.info(`Buscando: ${this.searchQuery}`, 'Búsqueda');
   }
 
   /**

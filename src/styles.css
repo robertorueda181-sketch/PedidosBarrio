@@ -3,6 +3,7 @@
 @import "leaflet/dist/leaflet.css";
 @import "quill/dist/quill.core.css";
 @import "quill/dist/quill.snow.css";
+@import "ngx-toastr/toastr";
 @import "tailwindcss";
 
 :root {
@@ -57,4 +58,36 @@ button {
 
 .bg-white-custom {
     background-color: var(--white-color);
+}
+
+/* NGX-Toastr custom styles for better mobile support */
+#toast-container > div {
+    opacity: 1;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+#toast-container.toast-top-right {
+    top: 1rem;
+    right: 1rem;
+}
+
+/* Mobile responsive toasts */
+@media (max-width: 767px) {
+    #toast-container > div {
+        width: calc(100vw - 2rem);
+        max-width: calc(100vw - 2rem);
+        margin: 0 0 0.5rem 0;
+    }
+    
+    #toast-container.toast-top-right {
+        right: 1rem;
+        left: 1rem;
+        width: auto;
+    }
+}
+
+@media (min-width: 768px) {
+    #toast-container > div {
+        width: 300px;
+    }
 }

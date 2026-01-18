@@ -7,7 +7,7 @@ import Aura from '@primeng/themes/aura';
 import { definePreset } from '@primeng/themes';
 import { SocialAuthServiceConfig, SOCIAL_AUTH_CONFIG } from '@abacritt/angularx-social-login';
 import { GoogleLoginProvider } from '@abacritt/angularx-social-login';
-import { MessageService } from 'primeng/api';
+import { provideToastr } from 'ngx-toastr';
 
 import { routes } from './app.routes';
 import { AppConfigService } from '../shared/services/app-config.service';
@@ -91,6 +91,16 @@ export const appConfig: ApplicationConfig = {
         emptyFilterMessage: 'No se encontraron resultados'
       }
     }),
-    MessageService
+    provideToastr({
+      timeOut: 3000,
+      positionClass: 'toast-top-right',
+      preventDuplicates: true,
+      progressBar: true,
+      closeButton: true,
+      newestOnTop: true,
+      tapToDismiss: true,
+      maxOpened: 3,
+      autoDismiss: true
+    })
   ]
 };

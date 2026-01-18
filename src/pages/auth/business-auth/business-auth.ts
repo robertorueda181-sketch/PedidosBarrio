@@ -7,13 +7,13 @@ import { AuthService } from '../../../shared/services/auth.service';
 import { RegisterService } from '../../../shared/services/register.service';
 import { RegisterRequest } from '../../../shared/interfaces/register.interface';
 import { LoginRequest } from '../../../shared/interfaces/login.interface';
-import { MessageService } from 'primeng/api';
-import { ToastModule } from 'primeng/toast';
+import { ToastrService } from 'ngx-toastr';
+
 
 @Component({
     selector: 'app-business-auth',
     standalone: true,
-    imports: [CommonModule, FormsModule, GoogleSigninButtonModule, ToastModule, RouterModule],
+    imports: [CommonModule, FormsModule, GoogleSigninButtonModule, RouterModule],
     templateUrl: './business-auth.html',
 })
 export class BusinessAuth implements OnDestroy {
@@ -21,7 +21,7 @@ export class BusinessAuth implements OnDestroy {
     private registerService = inject(RegisterService);
     private socialAuthService = inject(SocialAuthService);
     private router = inject(Router);
-    private messageService = inject(MessageService);
+    private toastr = inject(ToastrService);
 
     // Social data captured during registration
     socialUser: any = null;
@@ -98,7 +98,7 @@ export class BusinessAuth implements OnDestroy {
                             console.error('❌ Social Login failed:', err);
                             this.isNavigating = false;
                             const msg = err.error?.error || 'Error al iniciar sesión con Google';
-                            this.messageService.add({ severity: 'error', summary: 'Error', detail: msg });
+                            this.toastr.error(msg, 'Error');
                         }
                     });
                 }
@@ -183,7 +183,7 @@ export class BusinessAuth implements OnDestroy {
 
     manualLogin() {
         if (!this.loginEmail() || !this.loginPassword()) {
-            this.messageService.add({ severity: 'warn', summary: 'Campos requeridos', detail: 'Ingrese correo y contraseña' });
+            this.toastr.warning('Ingrese correo y contraseña', 'Campos requeridos');
             return;
         }
 
@@ -198,20 +198,20 @@ export class BusinessAuth implements OnDestroy {
         this.authService.login(loginData).subscribe({
             next: (res) => {
                 console.log('Login successful:', res);
-                this.messageService.add({ severity: 'success', summary: 'Bienvenido', detail: 'Inicio de sesión exitoso' });
+                this.toastr.success('Inicio de sesión exitoso', 'Bienvenido');
                 this.handleSuccessfulAuth(res.tipoEmpresa);
             },
             error: (err) => {
                 console.error('Login failed:', err);
                 const errorMessage = err.error?.error || 'Correo o contraseña incorrectos';
-                this.messageService.add({ severity: 'error', summary: 'Error de acceso', detail: errorMessage });
+                this.toastr.error(errorMessage, 'Error de acceso');
             }
         });
     }
 
     completeRegistration() {
         if (!this.personFirstName() || !this.phoneNumber()) {
-            this.messageService.add({ severity: 'warn', summary: 'Atención', detail: 'Por favor completa todos los campos' });
+            this.toastr.warning('Por favor completa todos los campos', 'Atención');
             return;
         }
 
@@ -246,17 +246,16 @@ export class BusinessAuth implements OnDestroy {
         obs.subscribe({
             next: (res) => {
                 console.log('Registration successful:', res);
-                this.messageService.add({ severity: 'success', summary: 'Registro Exitoso', detail: 'Tu cuenta ha sido creada' });
+                this.toastr.success('Tu cuenta ha sido creada', 'Registro Exitoso');
                 this.handleSuccessfulAuth(res.tipoEmpresa);
             },
             error: (err) => {
                 console.error('Registration failed:', err);
                 const errorMessage = err.error.error || 'No se pudo completar el registro';
-                this.messageService.add({
-                    severity: 'error',
-                    summary: 'Error en el registro',
-                    detail: typeof errorMessage === 'string' ? errorMessage : 'Error en los datos enviados (400)'
-                });
+                this.toastr.error(
+                    typeof errorMessage === 'string' ? errorMessage : 'Error en los datos enviados (400)',
+                    'Error en el registro'
+                );
             }
         });
     }

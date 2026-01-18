@@ -12,6 +12,7 @@ export interface Producto {
     precio: number;
     urlImagen?: string;
     categoria?: string;
+    categoriaID?: number;
     activo: boolean;
 }
 
@@ -23,6 +24,11 @@ export interface Categoria {
     icono?: string;
     orden?: number;
     activo: boolean;
+}
+
+export interface CategoriasProductosResponse {
+    categorias: Categoria[];
+    productos: Producto[];
 }
 
 @Injectable({
@@ -56,6 +62,15 @@ export class ProductoService {
 
     getCategorias(): Observable<Categoria[]> {
         return this.http.get<Categoria[]>(`${this.config.apiUrl}/Categorias`);
+    }
+
+    getCategoriasConProductos(): Observable<CategoriasProductosResponse> {
+        return this.http.get<CategoriasProductosResponse>(`${this.config.apiUrl}/Categorias/getAll`).pipe(
+            map(response => ({
+                categorias: response.categorias || [],
+                productos: response.productos?.map(p => this.transformProducto(p)) || []
+            }))
+        );
     }
 
     crearCategoria(categoria: { descripcion: string; color: string }): Observable<Categoria> {

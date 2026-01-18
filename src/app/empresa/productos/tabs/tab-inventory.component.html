@@ -1,7 +1,7 @@
 <div class="p-2 md:p-4">
   <!-- Historial de Movimientos -->
-  <div class="surface-card border-round p-3 md:p-4">
-    <div class="flex flex-column md:flex-row md:align-items-center md:justify-content-between gap-3 mb-4">
+  <div class="surface-card rounded-lg p-3 md:p-4">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
       <div>
         <h3 class="text-900 font-semibold m-0 mb-2">
           <i class="pi pi-history mr-2"></i>Historial de Movimientos
@@ -35,7 +35,7 @@
                 <td class="py-3 px-2">
                   <p-chip 
                     [label]="movement.type === 'entry' ? 'Entrada' : 'Salida'" 
-                    [styleClass]="(movement.type === 'entry' ? 'bg-green-500' : 'bg-red-500') + ' text-sm'">
+                    [styleClass]="(movement.type === 'entry' ? 'bg-green-500 text-white' : 'bg-red-500 text-white') + ' text-sm'">
                   </p-chip>
                 </td>
                 <td class="py-3 px-2 text-right font-semibold text-sm" 

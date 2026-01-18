@@ -42,7 +42,8 @@ export const routes: Routes = [
       { path: 'sitio', loadComponent: () => import('./empresa/sitio-web/sitio-web').then(m => m.SitioWeb) },
       { path: 'promociones', loadComponent: () => import('./empresa/promociones/promociones').then(m => m.Promociones) },
       { path: 'banner', loadComponent: () => import('./empresa/banner/banner').then(m => m.Banner) },
-      { path: 'actividad', loadComponent: () => import('./empresa/analytics/analytics-dashboard').then(m => m.AnalyticsDashboardComponent) }
+      { path: 'actividad', loadComponent: () => import('./empresa/analytics/analytics-dashboard').then(m => m.AnalyticsDashboardComponent) },
+      { path: 'pedidos', loadComponent: () => import('./empresa/pedidos/pedidos').then(m => m.PedidosComponent) },
     ]
   },
   {

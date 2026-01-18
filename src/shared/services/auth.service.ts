@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { RegisterService } from './register.service';
 import { RegisterRequest } from '../interfaces/register.interface';
 import { LoginRequest } from '../interfaces/login.interface';
-import { MessageService } from 'primeng/api';
+import { ToastrService } from 'ngx-toastr';
 import { Observable, tap } from 'rxjs';
 
 @Injectable({
@@ -14,7 +14,7 @@ export class AuthService {
     private socialAuthService = inject(SocialAuthService);
     private router = inject(Router);
     private registerService = inject(RegisterService);
-    private messageService = inject(MessageService);
+    private toastr = inject(ToastrService);
 
     private readonly TOKEN_KEY = 'auth_token';
     private readonly USER_KEY = 'user_data';
@@ -153,11 +153,10 @@ export class AuthService {
             error: (error: any) => {
                 console.error('Error registering/authenticating user:', error);
                 const errorMessage = error.error?.message || error.error || 'Error local al autenticar con Google';
-                this.messageService.add({
-                    severity: 'error',
-                    summary: 'Error de Autenticación',
-                    detail: typeof errorMessage === 'string' ? errorMessage : 'Error en la respuesta del servidor (400)'
-                });
+                this.toastr.error(
+                    typeof errorMessage === 'string' ? errorMessage : 'Error en la respuesta del servidor (400)',
+                    'Error de Autenticación'
+                );
             }
         });
     }

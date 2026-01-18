@@ -2,8 +2,8 @@ import { Component, inject, signal, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ProductoService, Producto } from '../../../shared/services/producto.service';
-import { MessageService, ConfirmationService } from 'primeng/api';
-import { ToastModule } from 'primeng/toast';
+import { ConfirmationService } from 'primeng/api';
+import { ToastrService } from 'ngx-toastr';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { DialogModule } from 'primeng/dialog';
 import { TabsModule } from 'primeng/tabs';
@@ -72,7 +72,6 @@ interface Product {
   imports: [
     CommonModule, 
     FormsModule, 
-    ToastModule, 
     ConfirmDialogModule,
     DialogModule,
     TabsModule,
@@ -91,13 +90,13 @@ interface Product {
     TabInventoryComponent,
     TabModifiersComponent
   ],
-  providers: [MessageService, ConfirmationService],
+  providers: [ConfirmationService],
   templateUrl: './productos.html',
   styleUrl: './productos.css',
 })
 export class ProductosComponent {
   private productoService = inject(ProductoService);
-  private messageService = inject(MessageService);
+  private toastr = inject(ToastrService);
   private confirmationService = inject(ConfirmationService);
   private analyticsService = inject(AnalyticsService);
 
@@ -200,16 +199,29 @@ export class ProductosComponent {
   }
 
   loadCategorias() {
-    this.productoService.getCategorias().subscribe({
-      next: (categorias) => {
-        console.log('Categorías cargadas desde el servicio:', categorias);
-        this.categories = categorias.map(cat => ({
+    this.productoService.getCategoriasConProductos().subscribe({
+      next: (response) => {
+        console.log('Datos cargados desde el servicio:', response);
+        
+        // Cargar categorías
+        this.categories = response.categorias.map(cat => ({
           id: cat.categoriaID,
           name: cat.descripcion,
           isFavorite: false,
           productCount: 0,
           color: cat.color || '#3b82f6',
           expanded: false
+        }));
+        
+        // Cargar productos
+        this.products = response.productos.map(prod => ({
+          id: prod.productoID,
+          name: prod.nombre,
+          description: prod.descripcion,
+          categoryId: prod.categoriaID || 0,
+          price: prod.precio,
+          image: prod.urlImagen,
+          active: prod.activo
         }));
         
         if (this.categories.length > 0) {
@@ -220,13 +232,8 @@ export class ProductosComponent {
         this.updateProductCounts();
       },
       error: (error) => {
-        console.error('Error al cargar categorías:', error);
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'No se pudieron cargar las categorías. Usando datos de ejemplo.',
-          life: 5000
-        });
+        console.error('Error al cargar categorías y productos:', error);
+        this.toastr.error('No se pudieron cargar las categorías y productos. Usando datos de ejemplo.', 'Error');
       }
     });
   }
@@ -257,12 +264,7 @@ export class ProductosComponent {
 
   saveCategoryForm() {
     if (!this.categoryForm.name.trim()) {
-      this.messageService.add({
-        severity: 'warn',
-        summary: 'Campo requerido',
-        detail: 'Por favor ingresa un nombre para la categoría',
-        life: 3000
-      });
+      this.toastr.warning('Por favor ingresa un nombre para la categoría', 'Campo requerido');
       return;
     }
 
@@ -284,22 +286,12 @@ export class ProductosComponent {
               color: this.categoryForm.color
             };
           }
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Categoría actualizada',
-            detail: 'La categoría se ha actualizado correctamente',
-            life: 3000
-          });
+          this.toastr.success('La categoría se ha actualizado correctamente', 'Categoría actualizada');
           this.closeCategoryModal();
         },
         error: (error) => {
           console.error('Error al actualizar categoría:', error);
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: 'No se pudo actualizar la categoría',
-            life: 5000
-          });
+          this.toastr.error('No se pudo actualizar la categoría', 'Error');
         }
       });
     } else {
@@ -314,22 +306,12 @@ export class ProductosComponent {
             color: response.color || this.categoryForm.color,
             expanded: false
           });
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Categoría creada',
-            detail: 'La categoría se ha creado correctamente',
-            life: 3000
-          });
+          this.toastr.success('La categoría se ha creado correctamente', 'Categoría creada');
           this.closeCategoryModal();
         },
         error: (error) => {
           console.error('Error al crear categoría:', error);
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: 'No se pudo crear la categoría',
-            life: 5000
-          });
+          this.toastr.error('No se pudo crear la categoría', 'Error');
         }
       });
     }
@@ -351,21 +333,11 @@ export class ProductosComponent {
               this.selectedCategoryId = this.categories[0]?.id || null;
             }
             this.updateProductCounts();
-            this.messageService.add({
-              severity: 'success',
-              summary: 'Categoría eliminada',
-              detail: 'La categoría se ha eliminado correctamente',
-              life: 3000
-            });
+            this.toastr.success('La categoría se ha eliminado correctamente', 'Categoría eliminada');
           },
           error: (error) => {
             console.error('Error al eliminar categoría:', error);
-            this.messageService.add({
-              severity: 'error',
-              summary: 'Error',
-              detail: 'No se pudo eliminar la categoría',
-              life: 5000
-            });
+            this.toastr.error('No se pudo eliminar la categoría', 'Error');
           }
         });
       }
@@ -435,22 +407,12 @@ export class ProductosComponent {
 
   saveProductForm() {
     if (!this.productForm.name.trim()) {
-      this.messageService.add({
-        severity: 'warn',
-        summary: 'Campo requerido',
-        detail: 'Por favor ingresa un nombre para el producto',
-        life: 3000
-      });
+      this.toastr.warning('Por favor ingresa un nombre para el producto', 'Campo requerido');
       return;
     }
 
     if (!this.productForm.categoryId) {
-      this.messageService.add({
-        severity: 'warn',
-        summary: 'Campo requerido',
-        detail: 'Por favor selecciona una categoría',
-        life: 3000
-      });
+      this.toastr.warning('Por favor selecciona una categoría', 'Campo requerido');
       return;
     }
 
@@ -476,12 +438,7 @@ export class ProductosComponent {
           image: this.productForm.image,
           active: this.productForm.active
         };
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Producto actualizado',
-          detail: 'El producto se ha actualizado correctamente',
-          life: 3000
-        });
+        this.toastr.success('El producto se ha actualizado correctamente', 'Producto actualizado');
       }
     } else {
       // Crear nuevo producto
@@ -498,12 +455,7 @@ export class ProductosComponent {
           image: this.productForm.image,
           active: this.productForm.active
         });
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Producto creado',
-          detail: 'El producto se ha creado correctamente',
-          life: 3000
-        });
+        this.toastr.success('El producto se ha creado correctamente', 'Producto creado');
       }
     }
 
@@ -521,12 +473,7 @@ export class ProductosComponent {
       accept: () => {
         this.products = this.products.filter(p => p.id !== productId);
         this.updateProductCounts();
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Producto eliminado',
-          detail: 'El producto se ha eliminado correctamente',
-          life: 3000
-        });
+        this.toastr.success('El producto se ha eliminado correctamente', 'Producto eliminado');
       }
     });
   }
@@ -536,12 +483,7 @@ export class ProductosComponent {
   }
 
   showValidationError(errorMessage: string) {
-    this.messageService.add({
-      severity: 'warn',
-      summary: 'Campo requerido',
-      detail: errorMessage,
-      life: 3000
-    });
+    this.toastr.warning(errorMessage, 'Campo requerido');
   }
 
   // === UTILIDADES ===
@@ -601,12 +543,7 @@ export class ProductosComponent {
     console.log('Archivo seleccionado:', file);
     // Validar tamaño (máximo 4MB)
     if (file.size > 4 * 1024 * 1024) {
-      this.messageService.add({
-        severity: 'warn',
-        summary: 'Archivo muy grande',
-        detail: 'La imagen no debe superar los 4MB',
-        life: 3000
-      });
+      this.toastr.warning('La imagen no debe superar los 4MB', 'Archivo muy grande');
       event.target.value = '';
       return;
     }
@@ -614,12 +551,7 @@ export class ProductosComponent {
     // Validar tipo de archivo
     const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/bmp', 'image/webp'];
     if (!allowedTypes.includes(file.type)) {
-      this.messageService.add({
-        severity: 'warn',
-        summary: 'Tipo de archivo inválido',
-        detail: 'Solo se permiten imágenes (JPG, PNG, GIF, BMP, WEBP)',
-        life: 3000
-      });
+      this.toastr.warning('Solo se permiten imágenes (JPG, PNG, GIF, BMP, WEBP)', 'Tipo de archivo inválido');
       event.target.value = '';
       return;
     }
@@ -685,12 +617,7 @@ export class ProductosComponent {
   }
 
   loadImageFailed() {
-    this.messageService.add({
-      severity: 'error',
-      summary: 'Error',
-      detail: 'No se pudo cargar la imagen',
-      life: 3000
-    });
+    this.toastr.error('No se pudo cargar la imagen', 'Error');
   }
 
   saveCroppedImage() {
@@ -699,12 +626,7 @@ export class ProductosComponent {
       const reader = new FileReader();
       reader.onloadend = () => {
         this.productForm.image = reader.result as string;
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Imagen guardada',
-          detail: 'La imagen ha sido recortada y guardada correctamente',
-          life: 3000
-        });
+        this.toastr.success('La imagen ha sido recortada y guardada correctamente', 'Imagen guardada');
         this.closeImageCropper();
       };
       reader.readAsDataURL(this.croppedImage as Blob);
@@ -715,12 +637,7 @@ export class ProductosComponent {
 
   addVariant() {
     if (!this.newVariant.name.trim()) {
-      this.messageService.add({
-        severity: 'warn',
-        summary: 'Campo requerido',
-        detail: 'Ingresa un nombre para la variante',
-        life: 3000
-      });
+      this.toastr.warning('Ingresa un nombre para la variante', 'Campo requerido');
       return;
     }
 
@@ -733,12 +650,7 @@ export class ProductosComponent {
     this.productForm.variants.push(variant);
     this.newVariant = { name: '', price: 0 };
     
-    this.messageService.add({
-      severity: 'success',
-      summary: 'Variante agregada',
-      detail: `${variant.name} agregado correctamente`,
-      life: 2000
-    });
+    this.toastr.success(`${variant.name} agregado correctamente`, 'Variante agregada');
   }
 
   removeVariant(id: string) {
@@ -746,14 +658,17 @@ export class ProductosComponent {
   }
 
   // === GESTIÓN DE MODIFICADORES ===
-  addModifier() {
+  addModifier(modifier?: any) {
+    // Si se recibe el modificador completo desde el componente hijo
+    if (modifier) {
+      this.productForm.modifiers.push(modifier);
+      this.toastr.success(`${modifier.name} con ${modifier.options.length} opciones`, 'Modificador agregado');
+      return;
+    }
+
+    // Lógica antigua por si se llama sin parámetro
     if (!this.newModifier.name.trim()) {
-      this.messageService.add({
-        severity: 'warn',
-        summary: 'Campo requerido',
-        detail: 'Ingresa un nombre para el modificador',
-        life: 3000
-      });
+      this.toastr.warning('Ingresa un nombre para el modificador', 'Campo requerido');
       return;
     }
 
@@ -763,16 +678,11 @@ export class ProductosComponent {
       .filter(opt => opt.length > 0);
 
     if (options.length === 0) {
-      this.messageService.add({
-        severity: 'warn',
-        summary: 'Opciones requeridas',
-        detail: 'Ingresa al menos una opción (separadas por comas)',
-        life: 3000
-      });
+      this.toastr.warning('Ingresa al menos una opción (separadas por comas)', 'Opciones requeridas');
       return;
     }
 
-    const modifier: Modifier = {
+    const newModifier: Modifier = {
       id: Date.now().toString(),
       name: this.newModifier.name,
       options: options,
@@ -780,15 +690,10 @@ export class ProductosComponent {
       maxSelections: this.newModifier.maxSelections
     };
 
-    this.productForm.modifiers.push(modifier);
+    this.productForm.modifiers.push(newModifier);
     this.newModifier = { name: '', options: '', required: false, maxSelections: 1 };
     
-    this.messageService.add({
-      severity: 'success',
-      summary: 'Modificador agregado',
-      detail: `${modifier.name} con ${modifier.options.length} opciones`,
-      life: 2000
-    });
+    this.toastr.success(`${newModifier.name} con ${newModifier.options.length} opciones`, 'Modificador agregado');
   }
 
   removeModifier(id: string) {
@@ -798,12 +703,7 @@ export class ProductosComponent {
   // === COPIAR IMAGEN ===
   copyImageToOtherProducts() {
     if (!this.productForm.image) {
-      this.messageService.add({
-        severity: 'warn',
-        summary: 'Sin imagen',
-        detail: 'Primero sube una imagen para copiarla',
-        life: 3000
-      });
+      this.toastr.warning('Primero sube una imagen para copiarla', 'Sin imagen');
       return;
     }
 
@@ -825,12 +725,7 @@ export class ProductosComponent {
           }
         });
 
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Imagen copiada',
-          detail: `Imagen aplicada a ${count} productos`,
-          life: 3000
-        });
+        this.toastr.success(`Imagen aplicada a ${count} productos`, 'Imagen copiada');
       }
     });
   }

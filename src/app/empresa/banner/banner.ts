@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MessageService } from 'primeng/api';
+import { ToastrService } from 'ngx-toastr';
 import { SelectModule } from 'primeng/select';
 import { DialogModule } from 'primeng/dialog';
 
@@ -165,7 +165,7 @@ interface BannerConfig {
   `]
 })
 export class Banner implements OnInit {
-    private messageService = inject(MessageService);
+    private toastr = inject(ToastrService);
     isLoading = false;
     showFullPreview = false;
     showImageModal = signal(false);
@@ -222,9 +222,9 @@ export class Banner implements OnInit {
         try {
             await new Promise(resolve => setTimeout(resolve, 800));
             localStorage.setItem('hero_banner_config', JSON.stringify(this.banner));
-            this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Banner actualizado' });
+            this.toastr.success('Banner actualizado', 'Éxito');
         } catch (e) {
-            this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo guardar' });
+            this.toastr.error('No se pudo guardar', 'Error');
         } finally {
             this.isLoading = false;
         }
