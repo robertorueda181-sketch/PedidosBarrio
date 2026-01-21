@@ -1,4 +1,6 @@
 {
     "apiUrl": "https://www.espacioonline.net/api",
-    "baseUrl": "https://www.espacioonline.net"
+    "baseUrl": "https://www.espacioonline.net",
+    "phoneNumber": "51954121196",
+    "phoneNumberDisplay": "+51 954 121 196"
 }

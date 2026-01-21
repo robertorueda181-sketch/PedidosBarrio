@@ -33,12 +33,6 @@
           },
           "configurations": {
             "production": {
-              "fileReplacements": [
-                {
-                  "replace": "src/assets/config.json",
-                  "with": "src/assets/config.prod.json"
-                }
-              ],
               "budgets": [
                 {
                   "type": "initial",

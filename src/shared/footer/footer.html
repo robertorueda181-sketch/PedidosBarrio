@@ -5,32 +5,49 @@
 
       <!-- Logo & Description -->
       <div class="space-y-6">
-        <div class="flex items-center gap-2">
-          <span class="text-3xl font-bold text-[#96C2DB]">PedidosBarrio.pe</span>
+        <div class="flex items-center gap-3">
+          <svg class="h-8 w-8" viewBox="0 0 24 24" style="transform: rotate(-45deg);">
+            <g fill="#22D3EE">
+              <!-- Cuerpo del cohete -->
+              <ellipse cx="12" cy="12" rx="3" ry="7"/>
+              <!-- Punta -->
+              <ellipse cx="12" cy="5" rx="2" ry="3"/>
+              <!-- Ventana -->
+              <circle cx="12" cy="11" r="1.5" opacity="0.4"/>
+              <!-- Aleta izquierda -->
+              <path d="M9 15 L6 19 L9 18 Z"/>
+              <!-- Aleta derecha -->
+              <path d="M15 15 L18 19 L15 18 Z"/>
+              <!-- Llama -->
+              <ellipse cx="12" cy="20" rx="2" ry="2.5" opacity="0.6"/>
+            </g>
+          </svg>
+          
+          <span class="text-3xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">Espacio Online.net</span>
         </div>
         <p class="text-sm leading-relaxed">
           Conectando negocios locales con la comunidad. Descubre los mejores servicios, productos e inmuebles
-          disponibles en tu barrio.
+          disponibles en tu espacio digital.
         </p>
-        <button
-          class="bg-[#10B981] hover:bg-[#059669] text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2 transition w-full justify-center">
+        <a [href]="whatsappLink" target="_blank"
+          class="bg-[#10B981] hover:bg-[#059669] text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2 transition w-full justify-center shadow-lg">
           <i class="pi pi-whatsapp"></i>
           Contáctanos por WhatsApp
-        </button>
+        </a>
       </div>
 
       <!-- Enlaces Rápidos -->
       <div>
         <h3 class="text-white font-bold text-lg mb-6 relative">
           Enlaces Rápidos
-          <span class="absolute -bottom-2 left-0 w-12 h-1 bg-[#96C2DB]"></span>
+          <span class="absolute -bottom-2 left-0 w-12 h-1 bg-gradient-to-r from-cyan-400 to-blue-400"></span>
         </h3>
         <ul class="space-y-4 text-sm">
-          <li><a href="/" class="hover:text-[#96C2DB] transition">Inicio</a></li>
-          <li><a href="#" class="hover:text-[#96C2DB] transition">Blog</a></li>
-          <li><a href="#" class="hover:text-[#96C2DB] transition">Todos los servicios</a></li>
-          <li><a href="/inmueble" class="hover:text-[#96C2DB] transition">Inmuebles</a></li>
-          <li><a href="/registro-negocio" class="hover:text-[#96C2DB] transition">Registrar Negocio</a></li>
+          <li><a href="/" class="hover:text-cyan-400 transition">Inicio</a></li>
+          <li><a href="#" class="hover:text-cyan-400 transition">Blog</a></li>
+          <li><a href="#" class="hover:text-cyan-400 transition">Todos los servicios</a></li>
+          <li><a href="/inmueble" class="hover:text-cyan-400 transition">Inmuebles</a></li>
+          <li><a href="/registro-negocio" class="hover:text-cyan-400 transition">Registrar Negocio</a></li>
         </ul>
       </div>
 
@@ -38,18 +55,17 @@
       <div>
         <h3 class="text-white font-bold text-lg mb-6 relative">
           Contáctanos
-          <span class="absolute -bottom-2 left-0 w-12 h-1 bg-[#96C2DB]"></span>
+          <span class="absolute -bottom-2 left-0 w-12 h-1 bg-gradient-to-r from-cyan-400 to-blue-400"></span>
         </h3>
         <ul class="space-y-4 text-sm">
           <li class="flex items-center gap-3">
-            <i class="pi pi-envelope text-[#96C2DB]"></i>
-            <a href="mailto:info@tubarrio.pe" class="hover:text-[#96C2DB] transition">info@pedidosbarrio.pe</a>
+            <i class="pi pi-envelope text-cyan-400"></i>
+            <a href="mailto:info@espacioonline.com" class="hover:text-cyan-400 transition">info@espacioonline.com</a>
           </li>
           <li class="flex items-center gap-3">
-            <i class="pi pi-phone text-[#96C2DB]"></i>
-            <a href="https://wa.me/51954121196?text=Hola%20Pedidos%20Barrio,te%20contacto%20desde%20el%20sitio%20web"
-              target="_blank" class="hover:text-[#96C2DB] transition">+51 954 121
-              196</a>
+            <i class="pi pi-phone text-cyan-400"></i>
+            <a [href]="whatsappLink"
+              target="_blank" class="hover:text-cyan-400 transition">{{ phoneNumberDisplay }}</a>
           </li>
         </ul>
       </div>
@@ -58,25 +74,25 @@
       <div>
         <h3 class="text-white font-bold text-lg mb-6 relative">
           Síguenos
-          <span class="absolute -bottom-2 left-0 w-12 h-1 bg-[#96C2DB]"></span>
+          <span class="absolute -bottom-2 left-0 w-12 h-1 bg-gradient-to-r from-cyan-400 to-blue-400"></span>
         </h3>
         <div class="flex gap-4 mb-8">
-          <a href="#" class="bg-gray-800 p-3 rounded-lg hover:bg-[#96C2DB] transition">
+          <a href="#" class="bg-gray-800 p-3 rounded-lg hover:bg-gradient-to-r hover:from-cyan-500 hover:to-blue-600 transition">
             <i class="pi pi-facebook"></i>
           </a>
-          <a href="#" class="bg-gray-800 p-3 rounded-lg hover:bg-[#96C2DB] transition">
+          <a href="#" class="bg-gray-800 p-3 rounded-lg hover:bg-gradient-to-r hover:from-cyan-500 hover:to-blue-600 transition">
             <i class="pi pi-instagram"></i>
           </a>
-          <a href="#" class="bg-gray-800 p-3 rounded-lg hover:bg-[#96C2DB] transition">
+          <a [href]="whatsappLink" target="_blank" class="bg-gray-800 p-3 rounded-lg hover:bg-gradient-to-r hover:from-cyan-500 hover:to-blue-600 transition">
             <i class="pi pi-whatsapp"></i>
           </a>
         </div>
         <p class="text-sm mb-4">Suscríbete a nuestro boletín</p>
         <div class="flex">
           <input type="email" placeholder="Tu correo electrónico"
-            class="bg-gray-800 border-none rounded-l-lg px-4 py-2 text-sm w-full focus:ring-1 focus:ring-[#96C2DB] outline-none" />
+            class="bg-gray-800 border-none rounded-l-lg px-4 py-2 text-sm w-full focus:ring-1 focus:ring-cyan-400 outline-none" />
           <button
-            class="bg-[#96C2DB] hover:bg-[#7AB0C9] text-white px-4 py-2 rounded-r-lg font-semibold text-sm transition">
+            class="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white px-4 py-2 rounded-r-lg font-semibold text-sm transition">
             Enviar
           </button>
         </div>
@@ -87,8 +103,8 @@
     <!-- Bottom Bar -->
     <div class="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs">
       <div class="flex items-center gap-2">
-        <span class="text-[#96C2DB]">©</span>
-        <p>2025 pedidosbarrio.pe - Todos los derechos reservados</p>
+        <span class="text-cyan-400">©</span>
+        <p>{{ currentYear }} espacioonline.net - Todos los derechos reservados</p>
       </div>
       <div class="flex gap-6">
         <a href="#" class="hover:text-white transition">Términos y Condiciones</a>
