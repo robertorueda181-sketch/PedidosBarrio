@@ -56,7 +56,7 @@ export const appConfig: ApplicationConfig = {
           {
             id: GoogleLoginProvider.PROVIDER_ID,
             provider: new GoogleLoginProvider(
-              '116308540819-66p9gn029qukvio92pemkt9aik7n8v5l.apps.googleusercontent.com'
+              '716400943354-5jj3q78qnqbs2guiks9qbs2jp157oc47.apps.googleusercontent.com'
             )
           }
         ],

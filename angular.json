@@ -33,6 +33,12 @@
           },
           "configurations": {
             "production": {
+              "fileReplacements": [
+                {
+                  "replace": "src/assets/config.json",
+                  "with": "src/assets/config.prod.json"
+                }
+              ],
               "budgets": [
                 {
                   "type": "initial",
@@ -42,7 +48,7 @@
                 {
                   "type": "anyComponentStyle",
                   "maximumWarning": "4kB",
-                  "maximumError": "8kB"
+                  "maximumError": "20kB"
                 }
               ],
               "outputHashing": "all"
@@ -63,13 +69,8 @@
             },
             "development": {
               "buildTarget": "PedidosBarrio:build:development"
-            },
-            "allowedHosts": [
-              "localhost",
-              "furthermore-puts-strikes-pubmed.trycloudflare.com",
-              "const-visits-state-origin.trycloudflare.com",
-              "*.trycloudflare.com"
-            ]
+            }
+            
           },
           "defaultConfiguration": "development"
         },

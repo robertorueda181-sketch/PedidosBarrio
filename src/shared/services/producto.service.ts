@@ -3,33 +3,12 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, map, switchMap, of } from 'rxjs';
 import { AppConfigService } from './app-config.service';
 import { NegocioService } from './negocio.service';
-
-export interface Producto {
-    productoID: number;
-    empresaID: string;
-    nombre: string;
-    descripcion: string;
-    precio: number;
-    urlImagen?: string;
-    categoria?: string;
-    categoriaID?: number;
-    activo: boolean;
-}
-
-export interface Categoria {
-    categoriaID: number;
-    empresaID: string;
-    descripcion: string;
-    color?: string;
-    icono?: string;
-    orden?: number;
-    activo: boolean;
-}
-
-export interface CategoriasProductosResponse {
-    categorias: Categoria[];
-    productos: Producto[];
-}
+import { 
+    Producto, 
+    ProductoCreateRequest, 
+    Categoria, 
+    CategoriasProductosResponse 
+} from '../models/producto.model';
 
 @Injectable({
     providedIn: 'root'
@@ -83,6 +62,18 @@ export class ProductoService {
 
     eliminarCategoria(id: number): Observable<any> {
         return this.http.delete(`${this.config.apiUrl}/Categorias/${id}`);
+    }
+
+    crearProducto(producto: ProductoCreateRequest): Observable<Producto> {
+        return this.http.post<Producto>(`${this.config.apiUrl}/Categorias/productos`, producto);
+    }
+
+    actualizarProducto(id: number, producto: ProductoCreateRequest): Observable<Producto> {
+        return this.http.put<Producto>(`${this.config.apiUrl}/Categorias/productos/${id}`, producto);
+    }
+
+    eliminarProducto(id: number): Observable<any> {
+        return this.http.delete(`${this.config.apiUrl}/Categorias/productos/${id}`);
     }
 
     private transformProducto(producto: Producto): Producto {

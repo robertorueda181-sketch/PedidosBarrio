@@ -48,7 +48,7 @@
 
                 <div class="mb-10 text-center md:text-left">
                     <h2 class="text-4xl font-black text-gray-900 mb-2">
-                        {{ isRegistering() ? 'Crea tu Cuenta' : '¡Bienvenido de nuevo!' }}
+                        {{ isRegistering() ? 'Crea tu Cuenta' : '¡Bienvenido nuevo!' }}
                     </h2>
                     <p class="text-gray-500 text-sm">
                         {{ isRegistering() ? 'Empieza a vender y promocionar tu negocio hoy.' : 'Inicia sesión para
@@ -63,7 +63,8 @@
                     <div class="space-y-1.5">
                         <label class="text-xs font-bold text-gray-900 uppercase tracking-widest ml-1">Correo o
                             Celular</label>
-                        <input [(ngModel)]="loginEmail" type="text" placeholder="Correo o número de celular"
+                        <input [(ngModel)]="loginEmail" type="email" placeholder="ejemplo@correo.com"
+                         autocomplete="email" 
                             class="w-full px-5 py-4 bg-white border border-gray-200 rounded-2xl focus:border-black focus:ring-1 focus:ring-black outline-none transition-all text-gray-800 placeholder:text-gray-400">
                     </div>
 
@@ -125,7 +126,7 @@
                     <div class="space-y-1.5">
                         <label class="text-xs font-bold text-gray-900 uppercase tracking-widest ml-1">Correo
                             Electrónico</label>
-                        <input [(ngModel)]="email" type="email" placeholder="ejemplo@correo.com"
+                        <input [(ngModel)]="email"  autocomplete="email"  type="email" placeholder="ejemplo@correo.com"
                             class="w-full px-5 py-4 bg-white border border-gray-200 rounded-2xl focus:border-black focus:ring-1 focus:ring-black outline-none transition-all text-gray-800 placeholder:text-gray-400">
                     </div>
                     <div class="space-y-1.5">

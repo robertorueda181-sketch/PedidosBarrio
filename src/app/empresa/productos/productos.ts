@@ -1,7 +1,8 @@
 import { Component, inject, signal, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ProductoService, Producto } from '../../../shared/services/producto.service';
+import { ProductoService } from '../../../shared/services/producto.service';
+import { Producto } from '../../../shared/models/producto.model';
 import { ConfirmationService } from 'primeng/api';
 import { ToastrService } from 'ngx-toastr';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
@@ -53,17 +54,16 @@ interface Product {
   description: string;
   categoryId: number;
   categoryName?: string;
-  price: number;
+  precioActual: number;
   discount?: number;
   image?: string;
-  active: boolean;
+  visible: boolean;
   isPrincipal?: boolean;
   variants?: Variant[];
   hasStockControl?: boolean;
   currentStock?: number;
   minStock?: number;
   modifiers?: Modifier[];
-  kitchenArea?: string;
 }
 
 @Component({
@@ -135,14 +135,13 @@ export class ProductosComponent {
     price: 0,
     discount: 0 as number | undefined,
     image: '' as string | undefined,
-    active: true,
+    visible: true,
     isPrincipal: false,
     variants: [] as Variant[],
     hasStockControl: false,
     currentStock: 0,
     minStock: 0,
-    modifiers: [] as Modifier[],
-    kitchenArea: 'Cocina principal'
+    modifiers: [] as Modifier[]
   };
 
   // Formularios temporales para agregar variantes y modificadores
@@ -151,50 +150,13 @@ export class ProductosComponent {
   
   kitchenAreas = ['Cocina principal', 'Barra', 'Parrilla', 'Repostería', 'Bebidas'];
 
-  categories: Category[] = [
-    { id: 1, name: 'Destacados', isFavorite: true, productCount: 0, color: '#fbbf24', expanded: true },
-    { id: 2, name: 'Platos', isFavorite: false, productCount: 2, color: '#ef4444', expanded: false },
-    { id: 3, name: 'Postres', isFavorite: false, productCount: 2, color: '#8b5cf6', expanded: false },
-    { id: 4, name: 'Bebidas', isFavorite: false, productCount: 2, color: '#06b6d4', expanded: false },
-  ];
+  categories = signal<Category[]>([]);
 
-  products: Product[] = [
-    {
-      id: 1,
-      name: 'Hamburguesa',
-      description: 'Hamburguesa con cebolla, tomate y lechuga',
-      categoryId: 2,
-      categoryName: 'Platos',
-      price: 30.00,
-      discount: 16,
-      image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400',
-      active: true
-    },
-    {
-      id: 2,
-      name: 'Pizza Margarita',
-      description: 'Tomate, mozzarella y albahaca',
-      categoryId: 2,
-      categoryName: 'Platos',
-      price: 10.00,
-      image: 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=400',
-      active: true
-    },
-    {
-      id: 3,
-      name: 'Torta de chocolate',
-      description: 'Especial de la casa',
-      categoryId: 3,
-      categoryName: 'Postres',
-      price: 15.00,
-      image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400',
-      active: true
-    }
-  ];
+  products = signal<Product[]>([]);
 
   ngOnInit() {
     this.loadCategorias();
-    this.selectedCategoryId = this.categories[0]?.id || null;
+    this.selectedCategoryId = this.categories()[0]?.id || null;
     this.updateProductCounts();
   }
 
@@ -204,29 +166,32 @@ export class ProductosComponent {
         console.log('Datos cargados desde el servicio:', response);
         
         // Cargar categorías
-        this.categories = response.categorias.map(cat => ({
+        this.categories.set(response.categorias.map(cat => ({
           id: cat.categoriaID,
           name: cat.descripcion,
           isFavorite: false,
           productCount: 0,
           color: cat.color || '#3b82f6',
           expanded: false
-        }));
+        })));
         
         // Cargar productos
-        this.products = response.productos.map(prod => ({
+        this.products.set(response.productos.map(prod => ({
           id: prod.productoID,
           name: prod.nombre,
           description: prod.descripcion,
           categoryId: prod.categoriaID || 0,
-          price: prod.precio,
+          precioActual: prod.precioActual,
           image: prod.urlImagen,
-          active: prod.activo
-        }));
+          visible: prod.visible
+        })));
         
-        if (this.categories.length > 0) {
-          this.categories[0].expanded = true;
-          this.selectedCategoryId = this.categories[0].id;
+        if (this.categories().length > 0) {
+          this.categories.update(cats => {
+            cats[0].expanded = true;
+            return [...cats];
+          });
+          this.selectedCategoryId = this.categories()[0].id;
         }
         
         this.updateProductCounts();
@@ -277,15 +242,18 @@ export class ProductosComponent {
       // Actualizar categoría existente
       this.productoService.actualizarCategoria(this.categoryForm.id, categoriaData).subscribe({
         next: (response) => {
-          const index = this.categories.findIndex(c => c.id === this.categoryForm.id);
-          if (index !== -1) {
-            this.categories[index] = {
-              ...this.categories[index],
-              name: this.categoryForm.name,
-              isFavorite: this.categoryForm.isFavorite,
-              color: this.categoryForm.color
-            };
-          }
+          this.categories.update(cats => {
+            const index = cats.findIndex(c => c.id === this.categoryForm.id);
+            if (index !== -1) {
+              cats[index] = {
+                ...cats[index],
+                name: this.categoryForm.name,
+                isFavorite: this.categoryForm.isFavorite,
+                color: this.categoryForm.color
+              };
+            }
+            return [...cats];
+          });
           this.toastr.success('La categoría se ha actualizado correctamente', 'Categoría actualizada');
           this.closeCategoryModal();
         },
@@ -298,14 +266,14 @@ export class ProductosComponent {
       // Crear nueva categoría
       this.productoService.crearCategoria(categoriaData).subscribe({
         next: (response) => {
-          this.categories.push({
+          this.categories.update(cats => [...cats, {
             id: response.categoriaID,
             name: response.descripcion,
             isFavorite: false,
             productCount: 0,
             color: response.color || this.categoryForm.color,
             expanded: false
-          });
+          }]);
           this.toastr.success('La categoría se ha creado correctamente', 'Categoría creada');
           this.closeCategoryModal();
         },
@@ -328,9 +296,9 @@ export class ProductosComponent {
       accept: () => {
         this.productoService.eliminarCategoria(categoryId).subscribe({
           next: () => {
-            this.categories = this.categories.filter(c => c.id !== categoryId);
+            this.categories.update(cats => cats.filter(c => c.id !== categoryId));
             if (this.selectedCategoryId === categoryId) {
-              this.selectedCategoryId = this.categories[0]?.id || null;
+              this.selectedCategoryId = this.categories()[0]?.id || null;
             }
             this.updateProductCounts();
             this.toastr.success('La categoría se ha eliminado correctamente', 'Categoría eliminada');
@@ -345,10 +313,13 @@ export class ProductosComponent {
   }
 
   toggleFavorite(categoryId: number) {
-    const category = this.categories.find(c => c.id === categoryId);
-    if (category) {
-      category.isFavorite = !category.isFavorite;
-    }
+    this.categories.update(cats => {
+      const category = cats.find(c => c.id === categoryId);
+      if (category) {
+        category.isFavorite = !category.isFavorite;
+      }
+      return [...cats];
+    });
   }
 
   closeCategoryModal() {
@@ -369,17 +340,16 @@ export class ProductosComponent {
         name: product.name,
         description: product.description,
         categoryId: product.categoryId,
-        price: product.price,
+        price: product.precioActual,
         discount: product.discount,
         image: product.image,
-        active: product.active,
+        visible: product.visible,
         isPrincipal: product.isPrincipal || false,
         variants: product.variants ? [...product.variants] : [],
         hasStockControl: product.hasStockControl || false,
         currentStock: product.currentStock || 0,
         minStock: product.minStock || 0,
-        modifiers: product.modifiers ? [...product.modifiers] : [],
-        kitchenArea: product.kitchenArea || 'Cocina principal'
+        modifiers: product.modifiers ? [...product.modifiers] : []
       };
     } else {
       this.productForm = {
@@ -390,14 +360,13 @@ export class ProductosComponent {
         price: 0,
         discount: 0,
         image: '',
-        active: true,
+        visible: true,
         isPrincipal: false,
         variants: [],
         hasStockControl: false,
         currentStock: 0,
         minStock: 0,
-        modifiers: [],
-        kitchenArea: 'Cocina principal'
+        modifiers: []
       };
     }
     this.newVariant = { name: '', price: 0 };
@@ -421,46 +390,107 @@ export class ProductosComponent {
       return;
     }
 
-    const category = this.categories.find(c => c.id === this.productForm.categoryId);
+    // Preparar los precios según el formato de la API
+    const precios = [{
+      precio: this.productForm.price,
+      descripcion: this.productForm.variants.length > 0 ? 'Precio base' : 'Precio único',
+      cantidadMinima: 1,
+      modalidad: 'Unidad',
+      esPrincipal: true
+    }];
+
+    // Agregar variantes como precios adicionales
+    this.productForm.variants.forEach(variant => {
+      precios.push({
+        precio: variant.price,
+        descripcion: variant.name,
+        cantidadMinima: 1,
+        modalidad: 'Variante',
+        esPrincipal: false
+      });
+    });
+
+    const productoData = {
+      categoriaID: this.productForm.categoryId as number,
+      nombre: this.productForm.name,
+      descripcion: this.productForm.description,
+      stock: this.productForm.currentStock || 0,
+      stockMinimo: this.productForm.minStock || 0,
+      inventario: this.productForm.hasStockControl || false,
+      precios: precios,
+      imagenUrl: this.productForm.image || '',
+      imagenDescripcion: this.productForm.name
+    };
 
     if (this.productForm.id) {
       // Editar producto existente
-      const index = this.products.findIndex(p => p.id === this.productForm.id);
-      if (index !== -1 && this.productForm.categoryId) {
-        this.products[index] = {
-          id: this.productForm.id,
-          name: this.productForm.name,
-          description: this.productForm.description,
-          categoryId: this.productForm.categoryId,
-          categoryName: category?.name,
-          price: this.productForm.price,
-          discount: this.productForm.discount || 0,
-          image: this.productForm.image,
-          active: this.productForm.active
-        };
-        this.toastr.success('El producto se ha actualizado correctamente', 'Producto actualizado');
-      }
+      this.productoService.actualizarProducto(this.productForm.id, productoData).subscribe({
+        next: (response) => {
+          this.products.update(prods => {
+            const index = prods.findIndex(p => p.id === this.productForm.id);
+            if (index !== -1) {
+              const category = this.categories().find(c => c.id === this.productForm.categoryId);
+              prods[index] = {
+                id: response.productoID,
+                name: response.nombre,
+                description: response.descripcion,
+                categoryId: response.categoriaID || 0,
+                categoryName: category?.name,
+                precioActual: response.precioActual,
+                image: response.urlImagen,
+                visible: response.visible
+              };
+            }
+            return [...prods];
+          });
+          this.toastr.success('El producto se ha actualizado correctamente', 'Producto actualizado');
+          this.updateProductCounts();
+          this.closeProductModal();
+        },
+        error: (error) => {
+          console.error('Error al actualizar producto:', error);
+          this.toastr.error('No se pudo actualizar el producto', 'Error');
+        }
+      });
     } else {
       // Crear nuevo producto
-      if (this.productForm.categoryId) {
-        const newId = Math.max(...this.products.map(p => p.id), 0) + 1;
-        this.products.push({
-          id: newId,
-          name: this.productForm.name,
-          description: this.productForm.description,
-          categoryId: this.productForm.categoryId,
-          categoryName: category?.name,
-          price: this.productForm.price,
-          discount: this.productForm.discount || 0,
-          image: this.productForm.image,
-          active: this.productForm.active
-        });
-        this.toastr.success('El producto se ha creado correctamente', 'Producto creado');
-      }
+      this.productoService.crearProducto(productoData).subscribe({
+        next: (response) => {
+          const category = this.categories().find(c => c.id === this.productForm.categoryId);
+          this.products.update(prods => [...prods, {
+            id: response.productoID,
+            name: response.nombre,
+            description: response.descripcion,
+            categoryId: response.categoriaID || 0,
+            categoryName: category?.name,
+            precioActual: response.precioActual,
+            image: response.urlImagen,
+            visible: response.visible
+          }]);
+          this.toastr.success('El producto se ha creado correctamente', 'Producto creado');
+          this.updateProductCounts();
+          this.closeProductModal();
+        },
+        error: (error) => {
+          console.error('Error al crear producto:', error);
+          this.toastr.error('No se pudo crear el producto', 'Error');
+        }
+      });
     }
+  }
 
-    this.updateProductCounts();
-    this.closeProductModal();
+  toggleProductVisibility(productId: number) {
+    this.products.update(prods => {
+      const product = prods.find(p => p.id === productId);
+      if (product) {
+        product.visible = !product.visible;
+        this.toastr.success(
+          product.visible ? 'Producto visible para los clientes' : 'Producto oculto para los clientes',
+          product.visible ? 'Producto activado' : 'Producto desactivado'
+        );
+      }
+      return [...prods];
+    });
   }
 
   deleteProduct(productId: number) {
@@ -471,9 +501,17 @@ export class ProductosComponent {
       acceptLabel: 'Sí, eliminar',
       rejectLabel: 'Cancelar',
       accept: () => {
-        this.products = this.products.filter(p => p.id !== productId);
-        this.updateProductCounts();
-        this.toastr.success('El producto se ha eliminado correctamente', 'Producto eliminado');
+        this.productoService.eliminarProducto(productId).subscribe({
+          next: () => {
+            this.products.update(prods => prods.filter(p => p.id !== productId));
+            this.updateProductCounts();
+            this.toastr.success('El producto se ha eliminado correctamente', 'Producto eliminado');
+          },
+          error: (error) => {
+            console.error('Error al eliminar producto:', error);
+            this.toastr.error('No se pudo eliminar el producto', 'Error');
+          }
+        });
       }
     });
   }
@@ -488,16 +526,16 @@ export class ProductosComponent {
 
   // === UTILIDADES ===
   get filteredProducts(): Product[] {
-    if (!this.selectedCategoryId) return this.products;
-    return this.products.filter(p => p.categoryId === this.selectedCategoryId);
+    if (!this.selectedCategoryId) return this.products();
+    return this.products().filter(p => p.categoryId === this.selectedCategoryId);
   }
 
   getSelectedCategoryName(): string {
-    return this.categories.find(c => c.id === this.selectedCategoryId)?.name || 'Productos';
+    return this.categories().find(c => c.id === this.selectedCategoryId)?.name || 'Productos';
   }
 
   getProductsByCategory(categoryId: number): Product[] {
-    let filtered = this.products.filter(p => p.categoryId === categoryId);
+    let filtered = this.products().filter(p => p.categoryId === categoryId);
     
     if (this.searchTerm.trim()) {
       const search = this.searchTerm.toLowerCase();
@@ -512,24 +550,30 @@ export class ProductosComponent {
 
   get filteredCategories(): Category[] {
     if (!this.searchTerm.trim()) {
-      return this.categories;
+      return this.categories();
     }
     
-    return this.categories.filter(category => 
+    return this.categories().filter(category => 
       this.getProductsByCategory(category.id).length > 0
     );
   }
 
   toggleCategory(categoryId: number) {
-    const category = this.categories.find(c => c.id === categoryId);
-    if (category) {
-      category.expanded = !category.expanded;
-    }
+    this.categories.update(cats => {
+      const category = cats.find(c => c.id === categoryId);
+      if (category) {
+        category.expanded = !category.expanded;
+      }
+      return [...cats];
+    });
   }
 
   updateProductCounts() {
-    this.categories.forEach(category => {
-      category.productCount = this.products.filter(p => p.categoryId === category.id).length;
+    this.categories.update(cats => {
+      cats.forEach(category => {
+        category.productCount = this.products().filter(p => p.categoryId === category.id).length;
+      });
+      return [...cats];
     });
   }
 
@@ -718,11 +762,14 @@ export class ProductosComponent {
         if (!categoryId) return;
 
         let count = 0;
-        this.products.forEach(product => {
-          if (product.categoryId === categoryId && product.id !== this.productForm.id) {
-            product.image = this.productForm.image;
-            count++;
-          }
+        this.products.update(prods => {
+          prods.forEach(product => {
+            if (product.categoryId === categoryId && product.id !== this.productForm.id) {
+              product.image = this.productForm.image;
+              count++;
+            }
+          });
+          return [...prods];
         });
 
         this.toastr.success(`Imagen aplicada a ${count} productos`, 'Imagen copiada');

@@ -25,7 +25,7 @@ export const routes: Routes = [
       { path: 'servicios', loadComponent: () => import('../pages/servicios/servicios').then(m => m.ServiciosComponent) },
       { path: 'servicio/:id', loadComponent: () => import('../pages/servicio-detalle/servicio-detalle').then(m => m.ServicioDetalleComponent) },
       { path: 'buscar', loadComponent: () => import('../pages/search-results/search-results.component').then(m => m.SearchResultsComponent) },
-      { path: 'company', component: Company },
+      { path: 'negocio/:codigoempresa', component: Company },
     ]
   },
   {
@@ -50,16 +50,7 @@ export const routes: Routes = [
     path: 'inicio',
     component: Layout,
   },
-  {
-    path: 'companies',
-    component: Layout,
-    children: [
-      { path: '', component: Main },
-      { path: 'registro-negocio', component: Register, canActivate: [authGuard] },
-      { path: 'registro-inmueble', component: RegisterInmueble, canActivate: [authGuard] },
-      { path: 'inmueble', component: InmuebleComponent },
-    ]
-  },
+ 
   { path: 'business-auth', loadComponent: () => import('../pages/auth/business-auth/business-auth').then(m => m.BusinessAuth) },
   { path: 'amanro', component: Amanro },
   { path: 'stacion64', component: Stacion64 },
