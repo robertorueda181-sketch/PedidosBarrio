@@ -6,6 +6,12 @@
 @import "ngx-toastr/toastr";
 @import "tailwindcss";
 
+@theme {
+    --color-space-primary: #0F172A;
+    --color-space-secondary-from: #06B6D4;
+    --color-space-secondary-to: #2563EB;
+}
+
 :root {
     --primary-color: #96C2DB;
     --secondary-color: #E5EDF1;
