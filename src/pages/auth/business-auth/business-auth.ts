@@ -50,6 +50,7 @@ export class BusinessAuth implements OnDestroy {
 
     personFirstName = signal<string>('');
     personLastName = signal<string>('');
+    acceptTerms = signal<boolean>(false);
 
     constructor() {
         // Disable automatic registration globally while on this page
@@ -136,6 +137,7 @@ export class BusinessAuth implements OnDestroy {
         this.password.set('');
         this.loginEmail.set('');
         this.loginPassword.set('');
+        this.acceptTerms.set(false);
     }
 
     togglePassword() {
