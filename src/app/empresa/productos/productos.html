@@ -371,7 +371,7 @@
       <input 
         #imageInputModal
         type="file" 
-        (change)="onFileSelected($event)"
+        (change)="onFileSelected($event, productForm.id ?? 0)"
         accept="image/*"
         style="display: none">
     </div>

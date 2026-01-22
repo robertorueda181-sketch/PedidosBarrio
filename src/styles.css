@@ -97,3 +97,18 @@ button {
         width: 300px;
     }
 }
+
+/* Tailwind custom theme colors for Espacio Online */
+@layer utilities {
+  .bg-space-primary {
+    background-color: #0F172A !important;
+  }
+  .from-space-secondary-from {
+    --tw-gradient-from: #06B6D4 var(--tw-gradient-from-position);
+    --tw-gradient-to: rgb(6 182 212 / 0) var(--tw-gradient-to-position);
+    --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+  }
+  .to-space-secondary-to {
+    --tw-gradient-to: #2563EB var(--tw-gradient-to-position);
+  }
+}

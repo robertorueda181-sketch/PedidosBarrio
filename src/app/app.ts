@@ -1,18 +1,17 @@
-import { Component, signal, inject } from '@angular/core';
-import { Footer } from "../shared/footer/footer";
-import { Navbar } from '../shared/navbar/navbar';
+import { Component, signal, inject, effect } from '@angular/core';
 import { Router, RouterOutlet, NavigationEnd } from '@angular/router';
 
 
 import { ToastrService } from 'ngx-toastr';
 import { AnalyticsService } from '../shared/services/analytics.service';
 import { CookieConsentComponent } from '../shared/components/cookie-consent/cookie-consent';
+import { LoaderComponent } from '../shared/components/loader/loader';
 import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, CookieConsentComponent],
+  imports: [RouterOutlet, CookieConsentComponent, LoaderComponent],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
@@ -21,6 +20,11 @@ export class App {
   private analyticsService = inject(AnalyticsService);
 
   constructor(private router: Router) {
+    // Mostrar loader por 5 segundos al iniciar
+    setTimeout(() => {
+      this.isLoading.set(false);
+    }, 500);
+
     // Registrar vistas de página en cada navegación
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
@@ -35,8 +39,9 @@ export class App {
     });
   }
 
-  protected readonly title = signal('PedidosBarrio');
+  protected readonly title = signal('Espacio Online');
   searchQuery = '';
+  isLoading = signal(true);
   
   onSearch() {
     // Aquí puedes agregar la lógica para buscar negocios según searchQuery

@@ -76,6 +76,15 @@ export class ProductoService {
         return this.http.delete(`${this.config.apiUrl}/Categorias/productos/${id}`);
     }
 
+    uploadImagen(file: File, productoId: number, descripcion: string = '', setAsPrincipal: boolean = false): Observable<any> {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('productoId', productoId.toString());
+        formData.append('descripcion', descripcion);
+        formData.append('setAsPrincipal', setAsPrincipal ? 'true' : 'false');
+        return this.http.post(`${this.config.apiUrl}/Imagenes/upload`, formData);
+    }
+
     private transformProducto(producto: Producto): Producto {
         const nombreArchivo = producto.urlImagen ? producto.urlImagen.split(/[/\\]/).pop() : '';
         const urlImagen = nombreArchivo

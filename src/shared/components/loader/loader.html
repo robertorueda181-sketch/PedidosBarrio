@@ -1,0 +1,44 @@
+<div class="loader-container">
+  <div class="space-background">
+    <!-- Estrellas decorativas -->
+    <div class="star star-1"></div>
+    <div class="star star-2"></div>
+    <div class="star star-3"></div>
+    <div class="star star-4"></div>
+    <div class="star star-5"></div>
+    <div class="star star-6"></div>
+  </div>
+
+  <div class="rocket-container">
+    <!-- Cohete SVG -->
+    <svg class="rocket" viewBox="0 0 24 24">
+      <g class="rocket-body">
+        <!-- Cuerpo del cohete -->
+        <ellipse cx="12" cy="12" rx="3" ry="7" fill="#22D3EE"/>
+        <!-- Punta -->
+        <ellipse cx="12" cy="5" rx="2" ry="3" fill="#06B6D4"/>
+        <!-- Ventana -->
+        <circle cx="12" cy="11" r="1.5" fill="white" opacity="0.6"/>
+        <!-- Aleta izquierda -->
+        <path d="M9 15 L6 19 L9 18 Z" fill="#2563EB"/>
+        <!-- Aleta derecha -->
+        <path d="M15 15 L18 19 L15 18 Z" fill="#2563EB"/>
+      </g>
+      <!-- Llama animada -->
+      <g class="flame">
+        <ellipse cx="12" cy="20" rx="2" ry="2.5" fill="#F59E0B" opacity="0.8"/>
+        <ellipse cx="12" cy="21" rx="1.5" ry="2" fill="#EF4444" opacity="0.6"/>
+      </g>
+    </svg>
+
+    <!-- Texto de carga -->
+    <p class="loading-text">
+      <span class="dot">.</span>
+      <span class="dot">.</span>
+      <span class="dot">.</span>
+    </p>
+  </div>
+
+  <!-- Mensaje opcional -->
+  <p class="loading-message">Cargando</p>
+</div>

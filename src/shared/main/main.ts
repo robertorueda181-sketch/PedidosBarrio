@@ -29,7 +29,8 @@ export class Main implements OnInit {
   servicios = signal<Servicio[]>([]);
   categorias = signal<any[]>([]);
   searchQuery = signal<string>('');
-  currentSlide = signal<number>(0);
+  currentSlide = signal<number>(1); // Empieza en el primero real
+  isTransitioning = signal<boolean>(false);
   showAllCategories = signal<boolean>(false);
   banners = [
     { url: 'assets/banner1.png', title: 'Descubre lo mejor de tu barrio', subtitle: 'Apoya a los negocios locales y encuentra todo lo que necesitas.' },
@@ -59,6 +60,11 @@ export class Main implements OnInit {
     return this.categorias().slice(0, 6);
   }
 
+  get infiniteBanners() {
+    // Clona el último al inicio y el primero al final
+    return [this.banners[this.banners.length - 1], ...this.banners, this.banners[0]];
+  }
+
   startAutoSlide() {
     setInterval(() => {
       this.nextSlide();
@@ -66,15 +72,37 @@ export class Main implements OnInit {
   }
 
   nextSlide() {
-    this.currentSlide.update(prev => (prev + 1) % this.banners.length);
+    if (this.isTransitioning()) return;
+    this.isTransitioning.set(true);
+    this.currentSlide.update(prev => prev + 1);
+    setTimeout(() => {
+      if (this.currentSlide() === this.banners.length + 1) {
+        // Sin transición, vuelve al primero real
+        this.isTransitioning.set(false);
+        this.currentSlide.set(1);
+      } else {
+        this.isTransitioning.set(false);
+      }
+    }, 700); // igual a la duración de la transición
   }
 
   prevSlide() {
-    this.currentSlide.update(prev => (prev - 1 + this.banners.length) % this.banners.length);
+    if (this.isTransitioning()) return;
+    this.isTransitioning.set(true);
+    this.currentSlide.update(prev => prev - 1);
+    setTimeout(() => {
+      if (this.currentSlide() === 0) {
+        // Sin transición, vuelve al último real
+        this.isTransitioning.set(false);
+        this.currentSlide.set(this.banners.length);
+      } else {
+        this.isTransitioning.set(false);
+      }
+    }, 700);
   }
 
   setSlide(index: number) {
-    this.currentSlide.set(index);
+    this.currentSlide.set(index + 1);
   }
 
   private startX: number = 0;

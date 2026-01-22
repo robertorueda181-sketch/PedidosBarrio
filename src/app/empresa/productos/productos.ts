@@ -581,42 +581,19 @@ export class ProductosComponent {
     this.showPreview = !this.showPreview;
   }
 
-  async onFileSelected(event: any) {
-    const file = event.target.files[0];
-    if (!file) return;
-    console.log('Archivo seleccionado:', file);
-    // Validar tamaño (máximo 4MB)
-    if (file.size > 4 * 1024 * 1024) {
-      this.toastr.warning('La imagen no debe superar los 4MB', 'Archivo muy grande');
-      event.target.value = '';
-      return;
+  onFileSelected(event: Event, productoId: number) {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      // Solo preparar la imagen para el cropper, no subir todavía
+      const file = input.files[0];
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.currentImageForCrop.set(e.target.result);
+        this.croppedImage = '';
+        this.showImageCropper.set(true);
+      };
+      reader.readAsDataURL(file);
     }
-
-    // Validar tipo de archivo
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/bmp', 'image/webp'];
-    if (!allowedTypes.includes(file.type)) {
-      this.toastr.warning('Solo se permiten imágenes (JPG, PNG, GIF, BMP, WEBP)', 'Tipo de archivo inválido');
-      event.target.value = '';
-      return;
-    }
-
-    // Leer archivo como base64
-    this.isLoadingImage.set(true);
-    const reader = new FileReader();
-    reader.onload = (e: any) => {
-      const base64WithPrefix = e.target.result as string;
-      
-      // Mostrar la imagen en el cropper
-      this.currentImageForCrop.set(base64WithPrefix);
-      this.imageChangedEvent = event;
-      this.pendingImageData = { base64: base64WithPrefix, file: file };
-      this.isLoadingImage.set(false);
-      
-      // Limpiar el input para permitir subir la misma imagen otra vez
-      event.target.value = '';
-    };
-    
-    reader.readAsDataURL(file);
   }
 
   // === GESTIÓN DE IMAGEN ===
@@ -666,14 +643,30 @@ export class ProductosComponent {
 
   saveCroppedImage() {
     if (this.croppedImage) {
-      // Convertir blob a base64
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        this.productForm.image = reader.result as string;
-        this.toastr.success('La imagen ha sido recortada y guardada correctamente', 'Imagen guardada');
+      // Convertir blob a File
+      const croppedBlob = this.croppedImage as Blob;
+      const productoId = this.productForm.id;
+      if (!productoId) {
+        this.toastr.error('No se encontró el ID del producto para subir la imagen', 'Error');
         this.closeImageCropper();
-      };
-      reader.readAsDataURL(this.croppedImage as Blob);
+        return;
+      }
+      const croppedFile = new File([croppedBlob], 'producto_' + productoId + '_cropped.png', { type: croppedBlob.type || 'image/png' });
+      this.productoService.uploadImagen(croppedFile, productoId, '', true).subscribe({
+        next: (res) => {
+          console.log('Imagen subida correctamente:', res);
+          this.toastr.success('La imagen recortada ha sido subida correctamente', 'Imagen guardada');
+          // Usar urlCompleta si está disponible, si no urlImagen
+          if (res && (res.urlCompleta || res.urlImagen)) {
+            this.productForm.image = res.urlCompleta || res.urlImagen;
+          }
+          this.closeImageCropper();
+        },
+        error: () => {
+          this.toastr.error('Error al subir la imagen recortada', 'Error');
+          this.closeImageCropper();
+        }
+      });
     } else {
       this.closeImageCropper();
     }
