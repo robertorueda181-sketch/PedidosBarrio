@@ -10,8 +10,7 @@
     </div>
 
     <div class="max-w-md w-full mx-auto mt-12 md:mt-0">
-{{step()}}
-{{registroMetodo()}}
+
       <!-- STEP 1: LOGIN / GMAIL -->
       @if (step() === 1) {
       <div class="animate-fade-in">
@@ -190,16 +189,16 @@
         <!-- Grid Categories -->
         @if (!loadingCategories()) {
         <div
-          class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+          class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[400px] overflow-y-auto custom-scrollbar">
           @for (cat of categories(); track cat.descripcion) {
           <div (click)="selectCategory(cat.descripcion)" [class.border-[#1A365D]]="selectedCategory() === cat.descripcion"
             [class.bg-blue-50]="selectedCategory() === cat.descripcion"
-            class="cursor-pointer border-2 border-gray-100 rounded-xl p-4 flex flex-col items-center justify-center text-center hover:border-[#1A365D] hover:shadow-md transition-all h-[110px] group">
+            class="cursor-pointer border-2 border-gray-100 rounded-xl p-2 flex flex-col items-center justify-center text-center hover:border-[#1A365D] hover:shadow-md transition-all h-[70px] group">
 
             <!-- Icon logic simulated by first letter or generic -->
             <div
               class="w-10 h-10 mb-2 rounded-full bg-gray-50 group-hover:bg-white flex items-center justify-center text-[#1A365D] text-lg font-bold shadow-sm transition-colors">
-              <i class="pi {{cat.icono}}"></i>
+              <i class="fa fa-{{cat.icono}}"></i>
             </div>
             <span class="text-sm font-bold text-gray-700 leading-tight">{{ cat.descripcion }}</span>
           </div>

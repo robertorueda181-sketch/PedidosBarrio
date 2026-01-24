@@ -37,4 +37,12 @@ export class RegisterService {
     reverseGeocode(lat: number, lng: number): Observable<any> {
         return this.http.get(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`);
     }
+
+    sendVerificationCode(correo: string): Observable<any> {
+        return this.http.post(`${this.appConfigService.apiUrl}/Verificacion/enviar-codigo`, { correo });
+    }
+
+    verifyCode(correo: string, codigo: string): Observable<any> {
+        return this.http.post(`${this.appConfigService.apiUrl}/Verificacion/verificar-codigo`, { correo, codigo });
+    }
 }

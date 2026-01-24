@@ -8,6 +8,7 @@ import { ReactiveFormsModule, FormBuilder, Validators, FormGroup, FormArray } fr
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { RegisterService } from '../../../shared/services/register.service';
+import { RegisterRequest } from '../../../shared/interfaces/register.interface';
 import { ToastrService } from 'ngx-toastr';
 import { GoogleSigninButtonModule, SocialAuthService, SocialUser } from '@abacritt/angularx-social-login';
 
@@ -228,22 +229,50 @@ export class BusinessRegisterComponent implements OnInit, OnDestroy {
 
   // --- STEP 2: VERIFICATION ---
   enviarCodigoVerificacion() {
-    // Simular envío
-    // TODO: Llamar al backend para enviar email
-    this.startTimer();
-    this.toastr.info(`Se ha enviado un código a ${this.registerForm.get('email')?.value}`, 'Código Enviado');
+    const email = this.registerForm.get('email')?.value;
+    if (!email) return;
+
+    this.registerService.sendVerificationCode(email).subscribe({
+      next: (res) => {
+        if(res.success) {
+           this.startTimer();
+           this.toastr.info(res.message || `Se ha enviado un código a ${email}`, 'Código Enviado');
+        } else {
+           this.toastr.error(res.message || 'Error al enviar código. Intenta nuevamente.', 'Error');
+        }
+      },
+      error: (err) => {
+        console.error(err);
+        this.toastr.error('No se pudo conectar con el servidor de correos', 'Error');
+      }
+    });
   }
 
   verificarCodigo() {
-    // Mock verificación
-    if (this.codigoVerificacion() === '123456') {
-      this.emailVerificado.set(true);
-      clearInterval(this.timerInterval);
-      this.toastr.success('Correo verificado éxitosamente', 'Éxito');
-      this.nextStep(); // Ir a paso 3
-    } else {
-      this.toastr.error('Código incorrecto (prueba 123456)', 'Error');
+    const email = this.registerForm.get('email')?.value;
+    const code = this.codigoVerificacion();
+    
+    if (!code || code.length < 6) {
+        this.toastr.warning('El código debe tener 6 dígitos', 'Código incompleto');
+        return;
     }
+
+    this.registerService.verifyCode(email, code).subscribe({
+      next: (res) => {
+        if (res.success) {
+           this.emailVerificado.set(true);
+           clearInterval(this.timerInterval);
+           this.toastr.success(res.message || 'Correo verificado correctamente', 'Éxito');
+           this.nextStep(); 
+        } else {
+           this.toastr.error(res.message || 'Código inválido o expirado', 'Error de Verificación');
+        }
+      },
+      error: (err) => {
+         console.error(err);
+         this.toastr.error(err.error?.message || 'Ocurrió un error al verificar', 'Error'); 
+      }
+    });
   }
 
   reenviarCodigo() {
@@ -315,17 +344,81 @@ export class BusinessRegisterComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Preparar objeto para enviar
-    const formVal = this.registerForm.value;
-    // Mapear campos nuevos a estructura vieja si es necesario
-    formVal.fullname = formVal.ownerName; 
+    const form = this.registerForm.value;
+    const typeMap: any = { 'NEGOCIO': 1, 'SERVICIO': 2, 'INMUEBLE': 3 };
+    const tipoId = typeMap[form.registrationType] || 1;
 
-    // TODO: Llamar al servicio de registro real
-    console.log('Registrando:', formVal);
-    
-    // Simulación
-    this.toastr.success('Registro completado con éxito', 'Bienvenido');
-    this.clearState(); // Limpiar cache al finalizar
-    this.router.navigate(['/auth/business-auth']); // O dashboard
+    // Split nombre
+    const parts = (form.ownerName || '').trim().split(' ');
+    const nombre = parts[0] || '';
+    const apellido = parts.slice(1).join(' ') || '';
+
+    const req: RegisterRequest = {
+        email: form.email,
+        contrasena: form.password, // Nota: Si es Google, la password es dummy 'GOOGLE_AUTH_USER'
+        
+        nombre: this.user ? this.user.firstName : nombre,
+        apellido: this.user ? this.user.lastName : apellido,
+        nombreUsuario: form.email.split('@')[0],
+
+        nombreEmpresa: form.businessName,
+        tipoEmpresa: tipoId,
+        categoria: form.category,
+        telefono: form.phone || '',
+        
+        descripcion: form.description || '',
+        direccion: form.address || '',
+        referencia: form.reference || '',
+        
+        provider: this.user ? 'google' : '',
+        socialId: this.user?.id || '',
+        idToken: this.user?.idToken || '',
+        
+        // Legacy/compatibility fields if needed by backend (interface defines them)
+        fullname: form.ownerName
+    };
+
+    console.log('Enviando registro:', req);
+
+    this.registerService.registerBusiness(req).subscribe({
+        next: (res) => {
+            console.log('Registro exitoso:', res);
+            this.toastr.success('Registro completado con éxito', 'Bienvenido');
+            this.clearState();
+            this.router.navigate(['/business-auth']); 
+        },
+        error: (err) => {
+            console.error('Error en registro:', err);
+            
+            // Si es error 400 y tiene lista de errores (formato estándar API)
+            if (err.status === 400 && err.error?.errors) {
+                const validationErrors = err.error.errors;
+                
+                // Caso 1: Array de objetos [{field, message}, ...]
+                if (Array.isArray(validationErrors)) {
+                    validationErrors.forEach((errObj: any) => {
+                        const msg = errObj.message || String(errObj);
+                        const title = errObj.field ? `Error en ${errObj.field}` : 'Validación';
+                        this.toastr.error(msg, title);
+                    });
+                    return;
+                }
+                
+                // Caso 2: Objeto mapa { "Field": ["Error"] }
+                if (typeof validationErrors === 'object') {
+                    Object.keys(validationErrors).forEach(key => {
+                        const messages = validationErrors[key];
+                        if (Array.isArray(messages)) {
+                            messages.forEach(msg => this.toastr.error(msg, 'Error de validación'));
+                        }
+                    });
+                    return;
+                }
+            }
+
+            const msg = err.error?.message || err.message || 'Error al registrar';
+            this.toastr.error(msg, 'Intente nuevamente');
+        }
+    });
   }
 }
