@@ -5,6 +5,7 @@ import { InputMaskModule } from 'primeng/inputmask';
 import { CheckboxModule } from 'primeng/checkbox';
 import { SelectModule } from 'primeng/select';
 import { ReactiveFormsModule, FormBuilder, Validators, FormGroup, FormArray } from '@angular/forms';
+import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import * as L from 'leaflet';
 import { RegisterService } from '../../shared/services/register.service';
@@ -14,16 +15,64 @@ import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-register',
-  imports: [ReactiveFormsModule, CommonModule, MultiSelectModule, InputMaskModule, CheckboxModule, SelectModule],
+  imports: [ReactiveFormsModule, CommonModule, MultiSelectModule, InputMaskModule, CheckboxModule, SelectModule, FormsModule],
   templateUrl: './register.html',
   styleUrl: './register.css',
 })
 export class Register implements OnInit {
+        tiposRegistro = { negocio: true, servicio: true, inmueble: true };
+      aceptaTerminos: boolean = false;
+      aceptaDatos: boolean = false;
+    registroMetodo: 'EMAIL' | 'GOOGLE' | null = null;
+    codigoVerificacion: string = '';
+    emailVerificado: boolean = false;
+    // Simulación de servicio de envío/verificación de código
+    enviarCodigoVerificacion() {
+      // Aquí deberías llamar a tu servicio real
+      this.toastr.info('Se ha enviado un código de verificación a tu correo.','Verificación');
+    }
+
+    verificarCodigo() {
+      // Aquí deberías llamar a tu servicio real para validar el código
+      if (this.codigoVerificacion === '123456') { // Simulación
+        this.emailVerificado = true;
+        this.toastr.success('Correo verificado correctamente.','Éxito');
+        this.nextStep();
+      } else {
+        this.toastr.error('Código incorrecto.','Error');
+      }
+    }
+
+    reenviarCodigo() {
+      this.enviarCodigoVerificacion();
+      this.toastr.info('Código reenviado.','Verificación');
+    }
+
+    nextStep(metodo?: 'EMAIL' | 'GOOGLE') {
+      if (metodo) {
+        this.registroMetodo = metodo;
+        if (metodo === 'EMAIL') {
+          this.step = 2;
+          this.enviarCodigoVerificacion();
+          return;
+        }
+        if (metodo === 'GOOGLE') {
+          // Aquí iría la lógica de Google
+          this.step = 3;
+          return;
+        }
+      }
+      this.step++;
+    }
+
+    registerWithGoogle() {
+      this.nextStep('GOOGLE');
+    }
   private fb = inject(FormBuilder);
   private registerService = inject(RegisterService);
   private router = inject(Router);
   private toastr = inject(ToastrService);
-  private typeCateg = 'CATEG';
+  private typeCateg = 'Tipo_Neg'; // Por defecto NEGOCIO (Tipo_Neg)
 
   categories = signal<any[]>([]);
   loadingCategories = signal<boolean>(false);
@@ -69,6 +118,11 @@ export class Register implements OnInit {
   loadingLocation = false;
 
   constructor() {
+        // Leer flags de config.json
+        const config = (window as any).appConfig || {};
+        if (config.registroTipos) {
+          this.tiposRegistro = { ...this.tiposRegistro, ...config.registroTipos };
+        }
     this.addSchedule();
     this.fixLeafletIcon();
   }
@@ -139,12 +193,6 @@ export class Register implements OnInit {
 
   removeSchedule(index: number) {
     this.schedules.removeAt(index);
-  }
-
-  nextStep() {
-    if (this.step < 3) {
-      this.step++;
-    }
   }
 
   prevStep() {

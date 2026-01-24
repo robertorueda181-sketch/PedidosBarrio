@@ -16,6 +16,7 @@ export interface Producto {
     categoria?: string;
     categoriaID?: number;
     visible: boolean;
+    aprobado: boolean;
 }
 
 export interface ProductoCreateRequest {

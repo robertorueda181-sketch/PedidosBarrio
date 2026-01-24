@@ -5,7 +5,7 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
 import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeng/themes/aura';
 import { definePreset } from '@primeng/themes';
-import { SocialAuthServiceConfig, SOCIAL_AUTH_CONFIG } from '@abacritt/angularx-social-login';
+import { SocialAuthServiceConfig, SOCIAL_AUTH_CONFIG, SocialAuthService } from '@abacritt/angularx-social-login';
 import { GoogleLoginProvider } from '@abacritt/angularx-social-login';
 import { provideToastr } from 'ngx-toastr';
 
@@ -48,6 +48,7 @@ export const appConfig: ApplicationConfig = {
       deps: [AppConfigService],
       multi: true
     },
+    SocialAuthService,
     {
       provide: SOCIAL_AUTH_CONFIG,
       useValue: {

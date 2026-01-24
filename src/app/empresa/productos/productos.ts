@@ -48,23 +48,6 @@ interface Modifier {
   maxSelections?: number;
 }
 
-interface Product {
-  id: number;
-  name: string;
-  description: string;
-  categoryId: number;
-  categoryName?: string;
-  precioActual: number;
-  discount?: number;
-  image?: string;
-  visible: boolean;
-  isPrincipal?: boolean;
-  variants?: Variant[];
-  hasStockControl?: boolean;
-  currentStock?: number;
-  minStock?: number;
-  modifiers?: Modifier[];
-}
 
 @Component({
   selector: 'app-productos',
@@ -95,6 +78,7 @@ interface Product {
   styleUrl: './productos.css',
 })
 export class ProductosComponent {
+  isMobile = false;
   private productoService = inject(ProductoService);
   private toastr = inject(ToastrService);
   private confirmationService = inject(ConfirmationService);
@@ -131,7 +115,7 @@ export class ProductosComponent {
     id: null as number | null,
     name: '',
     description: '',
-    categoryId: null as number | null,
+    categoryId: null as number | undefined | null,
     price: 0,
     discount: 0 as number | undefined,
     image: '' as string | undefined,
@@ -152,12 +136,22 @@ export class ProductosComponent {
 
   categories = signal<Category[]>([]);
 
-  products = signal<Product[]>([]);
+  products = signal<Producto[]>([]);
 
   ngOnInit() {
+    this.checkMobile();
     this.loadCategorias();
     this.selectedCategoryId = this.categories()[0]?.id || null;
     this.updateProductCounts();
+  }
+
+  checkMobile() {
+    if (typeof window !== 'undefined' && window.matchMedia) {
+      this.isMobile = window.matchMedia('(max-width: 768px)').matches;
+      window.addEventListener('resize', () => {
+        this.isMobile = window.matchMedia('(max-width: 768px)').matches;
+      });
+    }
   }
 
   loadCategorias() {
@@ -177,13 +171,7 @@ export class ProductosComponent {
         
         // Cargar productos
         this.products.set(response.productos.map(prod => ({
-          id: prod.productoID,
-          name: prod.nombre,
-          description: prod.descripcion,
-          categoryId: prod.categoriaID || 0,
-          precioActual: prod.precioActual,
-          image: prod.urlImagen,
-          visible: prod.visible
+          ...prod
         })));
         
         if (this.categories().length > 0) {
@@ -327,7 +315,7 @@ export class ProductosComponent {
   }
 
   // === GESTIÓN DE PRODUCTOS ===
-  openProductModal(product?: Product) {
+  openProductModal(product?: Producto) {
     // Registrar evento de abrir modal
     this.analyticsService.trackEvent(
       product ? 'Editar Producto' : 'Crear Producto',
@@ -336,20 +324,20 @@ export class ProductosComponent {
 
     if (product) {
       this.productForm = {
-        id: product.id,
-        name: product.name,
-        description: product.description,
-        categoryId: product.categoryId,
+        id: product.productoID,
+        name: product.nombre,
+        description: product.descripcion,
+        categoryId: product.categoriaID ?? null,
         price: product.precioActual,
-        discount: product.discount,
-        image: product.image,
+        discount: 0,
+        image: product.urlImagen,
         visible: product.visible,
-        isPrincipal: product.isPrincipal || false,
-        variants: product.variants ? [...product.variants] : [],
-        hasStockControl: product.hasStockControl || false,
-        currentStock: product.currentStock || 0,
-        minStock: product.minStock || 0,
-        modifiers: product.modifiers ? [...product.modifiers] : []
+        isPrincipal: false,
+        variants: [],
+        hasStockControl: false,
+        currentStock: 0,
+        minStock: 0,
+        modifiers: []
       };
     } else {
       this.productForm = {
@@ -427,18 +415,19 @@ export class ProductosComponent {
       this.productoService.actualizarProducto(this.productForm.id, productoData).subscribe({
         next: (response) => {
           this.products.update(prods => {
-            const index = prods.findIndex(p => p.id === this.productForm.id);
+            const index = prods.findIndex(p => p.productoID === this.productForm.id);
             if (index !== -1) {
               const category = this.categories().find(c => c.id === this.productForm.categoryId);
               prods[index] = {
-                id: response.productoID,
-                name: response.nombre,
-                description: response.descripcion,
-                categoryId: response.categoriaID || 0,
-                categoryName: category?.name,
+                ...prods[index],
+                productoID: response.productoID,
+                nombre: response.nombre,
+                descripcion: response.descripcion,
+                categoriaID: response.categoriaID || 0,
                 precioActual: response.precioActual,
-                image: response.urlImagen,
-                visible: response.visible
+                urlImagen: response.urlImagen,
+                visible: response.visible,
+                aprobado: response.aprobado ?? prods[index].aprobado
               };
             }
             return [...prods];
@@ -456,16 +445,17 @@ export class ProductosComponent {
       // Crear nuevo producto
       this.productoService.crearProducto(productoData).subscribe({
         next: (response) => {
-          const category = this.categories().find(c => c.id === this.productForm.categoryId);
+         // const category = this.categories().find(c => c.id === this.productForm.categoryId);
           this.products.update(prods => [...prods, {
-            id: response.productoID,
-            name: response.nombre,
-            description: response.descripcion,
-            categoryId: response.categoriaID || 0,
-            categoryName: category?.name,
+            productoID: response.productoID,
+            empresaID: response.empresaID || '',
+            nombre: response.nombre,
+            descripcion: response.descripcion,
+            categoriaID: response.categoriaID || 0,
             precioActual: response.precioActual,
-            image: response.urlImagen,
-            visible: response.visible
+            urlImagen: response.urlImagen,
+            visible: response.visible,
+            aprobado: response.aprobado ?? false
           }]);
           this.toastr.success('El producto se ha creado correctamente', 'Producto creado');
           this.updateProductCounts();
@@ -480,18 +470,35 @@ export class ProductosComponent {
   }
 
   toggleProductVisibility(productId: number) {
-    this.products.update(prods => {
-      const product = prods.find(p => p.id === productId);
-      if (product) {
-        product.visible = !product.visible;
-        this.toastr.success(
-          product.visible ? 'Producto visible para los clientes' : 'Producto oculto para los clientes',
-          product.visible ? 'Producto activado' : 'Producto desactivado'
-        );
+    const product = this.products().find(p => p.productoID === productId);
+    if (!product) return;
+    // Llamar al endpoint para cambiar visibilidad
+    this.productoService.cambiarVisibilidadProducto(productId, !product.visible).subscribe({
+      next: (res) => {
+        this.products.update(prods => {
+          const prod = prods.find(p => p.productoID === productId);
+          if (prod) {
+            prod.visible = !prod.visible;
+            this.toastr.success(
+              prod.visible ? 'Producto visible para los clientes' : 'Producto oculto para los clientes'
+            );
+          }
+          return [...prods];
+        });
+      },
+      error: (error) => {
+        this.toastr.error('No se pudo cambiar la visibilidad del producto', 'Error');
       }
-      return [...prods];
     });
   }
+    // === ESTADO DE APROBACIÓN ===
+    getProductApprovalStatus(product: Producto): string {
+      if (product.aprobado === false) {
+        return 'En revisión';
+      }
+      return '';
+    }
+  
 
   deleteProduct(productId: number) {
     this.confirmationService.confirm({
@@ -503,7 +510,8 @@ export class ProductosComponent {
       accept: () => {
         this.productoService.eliminarProducto(productId).subscribe({
           next: () => {
-            this.products.update(prods => prods.filter(p => p.id !== productId));
+            this.products.update(prods => prods.filter(p => p.productoID !== productId));
+              this.products.update(prods => prods.filter(p => p.productoID !== productId));
             this.updateProductCounts();
             this.toastr.success('El producto se ha eliminado correctamente', 'Producto eliminado');
           },
@@ -525,23 +533,23 @@ export class ProductosComponent {
   }
 
   // === UTILIDADES ===
-  get filteredProducts(): Product[] {
+  get filteredProducts(): Producto[] {
     if (!this.selectedCategoryId) return this.products();
-    return this.products().filter(p => p.categoryId === this.selectedCategoryId);
+    return this.products().filter(p => p.categoriaID === this.selectedCategoryId);
   }
 
   getSelectedCategoryName(): string {
     return this.categories().find(c => c.id === this.selectedCategoryId)?.name || 'Productos';
   }
 
-  getProductsByCategory(categoryId: number): Product[] {
-    let filtered = this.products().filter(p => p.categoryId === categoryId);
+  getProductsByCategory(categoryId: number): Producto[] {
+    let filtered = this.products().filter(p => p.categoriaID === categoryId);
     
     if (this.searchTerm.trim()) {
       const search = this.searchTerm.toLowerCase();
       filtered = filtered.filter(p => 
-        p.name.toLowerCase().includes(search) ||
-        (p.description && p.description.toLowerCase().includes(search))
+        p.nombre.toLowerCase().includes(search) ||
+        (p.descripcion && p.descripcion.toLowerCase().includes(search))
       );
     }
     
@@ -571,7 +579,7 @@ export class ProductosComponent {
   updateProductCounts() {
     this.categories.update(cats => {
       cats.forEach(category => {
-        category.productCount = this.products().filter(p => p.categoryId === category.id).length;
+        category.productCount = this.products().filter(p => p.categoriaID === category.id).length;
       });
       return [...cats];
     });
@@ -757,8 +765,8 @@ export class ProductosComponent {
         let count = 0;
         this.products.update(prods => {
           prods.forEach(product => {
-            if (product.categoryId === categoryId && product.id !== this.productForm.id) {
-              product.image = this.productForm.image;
+            if (product.categoriaID === categoryId && product.productoID !== this.productForm.id) {
+              product.urlImagen = this.productForm.image;
               count++;
             }
           });

@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { Register } from '../pages/register/register';
+import { BusinessRegisterComponent } from '../pages/auth/business-register/business-register';
 import { RegisterInmueble } from '../pages/register-inmueble/register-inmueble';
 import { Main } from '../shared/main/main';
 import { Layout } from '../shared/Layout/layout';
@@ -28,6 +29,7 @@ export const routes: Routes = [
       { path: 'negocio/:codigoempresa', component: Company },
     ]
   },
+  { path: 'business-register', component: BusinessRegisterComponent },
   {
     path: 'empresa',
     loadComponent: () => import('./empresa/layout/layout').then(m => m.Layout),

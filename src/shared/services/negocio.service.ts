@@ -88,22 +88,19 @@ export class NegocioService {
     }
 
     private transformNegocio(item: Negocio): Negocio {
-        // Handle imagenes array - transform local paths to web URLs
+        // No transformar las URLs de imagenes, solo devolverlas tal cual vienen del backend
         let transformedImages: NegocioImagen[] = [];
         if (item.imagenes && item.imagenes.length > 0) {
-            transformedImages = item.imagenes.map(img => {
-                const nombreArchivo = img.urlImagen ? img.urlImagen.split(/[/\\]/).pop() : '';
-                return {
-                    urlImagen: nombreArchivo ? `${this.config.baseUrl}/images/${nombreArchivo}` : '',
-                    descripcion: img.descripcion
-                };
-            });
+            transformedImages = item.imagenes.map(img => ({
+                urlImagen: img.urlImagen || '',
+                descripcion: img.descripcion
+            }));
         }
 
-        // Set urlImagen from first image or fallback to urlImagen field
+        // urlImagen: usar la primera imagen si existe, si no, usar el campo urlImagen, si no, fallback
         const urlImagen = transformedImages.length > 0
             ? transformedImages[0].urlImagen
-            : (item.urlImagen ? `${this.config.baseUrl}/images/${item.urlImagen.split(/[/\\]/).pop()}` :
+            : (item.urlImagen ? item.urlImagen :
                 'https://images.unsplash.com/photo-1560448072-283bd0dfaa55?auto=format&fit=crop&w=800&q=60');
 
         return {

@@ -30,8 +30,8 @@ export class RegisterService {
         return this.http.post(url, data);
     }
 
-    getCategories(tipo: string, param: string = ''): Observable<any[]> {
-        return this.http.get<any[]>(`${this.appConfigService.apiUrl}/Tipos?tipo=${tipo}&param=${param}`);
+    getCategories(param: string): Observable<any[]> {
+        return this.http.get<any[]>(`${this.appConfigService.apiUrl}/Tipos?param=${param}`);
     }
 
     reverseGeocode(lat: number, lng: number): Observable<any> {

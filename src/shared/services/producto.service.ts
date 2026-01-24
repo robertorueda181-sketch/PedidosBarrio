@@ -14,6 +14,13 @@ import {
     providedIn: 'root'
 })
 export class ProductoService {
+        cambiarVisibilidadProducto(productoId: number, visible: boolean) {
+            // Llama al endpoint para cambiar la visibilidad del producto
+            return this.http.patch<any>(
+                `${this.config.apiUrl}/Categorias/productos/visible`,
+                { productoId, visible }
+            );
+        }
     private http = inject(HttpClient);
     private config = inject(AppConfigService);
     private negocioService = inject(NegocioService);

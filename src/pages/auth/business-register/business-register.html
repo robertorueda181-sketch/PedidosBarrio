@@ -1,0 +1,307 @@
+<div class="min-h-screen flex bg-white font-sans">
+
+  <!-- LEFT SIDE: FORMULARIO -->
+  <div class="w-full md:w-[50%] lg:w-[45%] flex flex-col justify-center px-8 md:px-16 py-10 relative overflow-y-auto">
+
+    <!-- Logo o Brand -->
+    <div class="absolute top-8 left-8 md:left-16 flex items-center gap-2">
+      <div class="w-8 h-8 rounded-full bg-[#1A365D] flex items-center justify-center text-white font-bold">EO</div>
+      <span class="font-bold text-xl text-[#1A365D]">Espacio Online</span>
+    </div>
+
+    <div class="max-w-md w-full mx-auto mt-12 md:mt-0">
+
+      <!-- STEP 1: LOGIN / GMAIL -->
+      @if (step === 1) {
+      <div class="animate-fade-in">
+        <h2 class="text-4xl font-extrabold text-[#1A1A1A] mb-3">Únete hoy</h2>
+        <p class="text-gray-500 text-lg mb-8">Comienza a digitalizar tu negocio</p>
+
+        <asl-google-signin-button type="standard" size="large" text="continue_with" shape="pill"
+         theme="outline" [width]="googleBtnWidth"></asl-google-signin-button>
+
+        <div class="w-full flex items-center gap-4 mb-6">
+          <div class="flex-1 h-px bg-gray-200"></div>
+          <span class="text-gray-400 text-sm font-medium">o con correo</span>
+          <div class="flex-1 h-px bg-gray-200"></div>
+        </div>
+
+        <!-- Formulario -->
+        <form [formGroup]="registerForm" class="flex flex-col gap-4">
+          <div class="space-y-1">
+            <label class="text-sm font-bold text-gray-700 ml-1">Correo electrónico</label>
+            <input type="email" formControlName="email" placeholder="nombre@ejemplo.com"
+              class="w-full px-5 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-[#1A365D] focus:border-transparent transition-all outline-none">
+          </div>
+
+          <div class="space-y-1">
+            <label class="text-sm font-bold text-gray-700 ml-1">Contraseña</label>
+            <input type="password" formControlName="password" placeholder="••••••••"
+              class="w-full px-5 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-[#1A365D] focus:border-transparent transition-all outline-none">
+          </div>
+
+          <div class="space-y-1">
+            <label class="text-sm font-bold text-gray-700 ml-1">Confirmar contraseña</label>
+            <input type="password" formControlName="confirmPassword" placeholder="••••••••"
+              class="w-full px-5 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-[#1A365D] focus:border-transparent transition-all outline-none">
+          </div>
+
+          <button type="button"
+            class="mt-4 w-full py-4 rounded-xl bg-[#1A1A1A] text-white font-bold text-lg hover:bg-black hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
+            (click)="onSubmitStep1()">
+            Crear cuenta <i class="pi pi-arrow-right ml-2 text-sm"></i>
+          </button>
+        </form>
+
+        <p class="mt-8 text-center text-gray-500 text-sm">
+          ¿Ya tienes cuenta? <a routerLink="/business-auth" class="text-[#1A365D] font-bold hover:underline">Inicia
+            sesión</a>
+        </p>
+      </div>
+      }
+
+      <!-- STEP 2: VERIFICACION -->
+      @if (step === 2 && registroMetodo === 'EMAIL') {
+      <div class="flex flex-col items-center text-center animate-fade-in">
+        <div class="w-full flex justify-start mb-2">
+          <button (click)="prevStep()"
+            class="flex items-center text-gray-400 hover:text-[#1A365D] transition-colors font-bold text-sm">
+            <i class="pi pi-arrow-left mr-2"></i> Volver
+          </button>
+        </div>
+
+        <div class="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mb-6 text-[#1A365D]">
+          <i class="pi pi-envelope text-3xl"></i>
+        </div>
+        <h3 class="text-2xl font-black text-[#1A1A1A] mb-2">Revisa tu correo</h3>
+        <p class="text-gray-500 mb-8">Enviamos un código de 6 dígitos a<br><span class="font-bold text-[#1A365D]">{{
+            registerForm.get('email')?.value }}</span></p>
+
+        <input type="text" maxlength="6" [(ngModel)]="codigoVerificacion" placeholder="000000"
+          class="w-full max-w-[240px] px-4 py-4 mb-6 bg-gray-50 border-2 border-gray-200 rounded-2xl text-center text-3xl font-black tracking-[0.5em] text-[#1A365D] focus:border-[#1A365D] focus:bg-white outline-none transition-all">
+
+        <button type="button"
+          class="w-full py-4 rounded-xl bg-[#1A1A1A] text-white font-bold text-lg hover:bg-black hover:shadow-lg transition-all"
+          (click)="verificarCodigo()">
+          Verificar código
+        </button>
+
+        <button type="button" class="mt-6 text-sm font-bold text-gray-500 hover:text-[#1A365D] transition-colors"
+          [disabled]="!puedeReenviar" (click)="reenviarCodigo()">
+          No recibí el código
+          @if (!puedeReenviar) {
+          <span class="text-gray-400 font-normal">({{ tiempoRestante }}s)</span>
+          }
+        </button>
+      </div>
+      }
+
+      <!-- STEP 3: TIPO DE EMPRESA (GRID SELECTION) -->
+      @if (step === 3) {
+      <div class="animate-fade-in">
+        <button (click)="prevStep()"
+          class="mb-4 flex items-center text-gray-400 hover:text-[#1A365D] transition-colors font-bold text-sm">
+          <i class="pi pi-arrow-left mr-2"></i> Volver
+        </button>
+        <h3 class="text-3xl font-black text-[#1A1A1A] mb-2">¿Qué vas a registrar?</h3>
+        <p class="text-gray-500 mb-8">Elige la categoría que mejor describa tu actividad</p>
+
+        <div class="grid grid-cols-1 gap-4">
+          @if (tiposRegistro.negocio) {
+          <button (click)="setRegistrationType('NEGOCIO');"
+            class="group relative overflow-hidden p-6 rounded-2xl border-2 border-gray-100 hover:border-[#1A365D] bg-white hover:shadow-xl transition-all duration-300 text-left">
+            <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+              <i class="pi pi-shopping-bag text-6xl text-[#1A365D]"></i>
+            </div>
+            <div class="flex items-center gap-4 relative z-10">
+              <div
+                class="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-[#1A365D] group-hover:scale-110 transition-transform">
+                <i class="pi pi-shopping-bag text-2xl"></i>
+              </div>
+              <div>
+                <span class="block text-lg font-bold text-gray-900">Negocio</span>
+                <span class="text-sm text-gray-500">Tienda, restaurante, bodega...</span>
+              </div>
+            </div>
+          </button>
+          }
+
+          @if (tiposRegistro.servicio) {
+          <button (click)="setRegistrationType('SERVICIO');"
+            class="group relative overflow-hidden p-6 rounded-2xl border-2 border-gray-100 hover:border-purple-600 bg-white hover:shadow-xl transition-all duration-300 text-left">
+            <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+              <i class="pi pi-briefcase text-6xl text-purple-600"></i>
+            </div>
+            <div class="flex items-center gap-4 relative z-10">
+              <div
+                class="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center text-purple-600 group-hover:scale-110 transition-transform">
+                <i class="pi pi-briefcase text-2xl"></i>
+              </div>
+              <div>
+                <span class="block text-lg font-bold text-gray-900">Servicio</span>
+                <span class="text-sm text-gray-500">Profesional, técnico, oficio...</span>
+              </div>
+            </div>
+          </button>
+          }
+
+          @if (tiposRegistro.inmueble) {
+          <button (click)="setRegistrationType('INMUEBLE');"
+            class="group relative overflow-hidden p-6 rounded-2xl border-2 border-gray-100 hover:border-green-600 bg-white hover:shadow-xl transition-all duration-300 text-left">
+            <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+              <i class="pi pi-home text-6xl text-green-600"></i>
+            </div>
+            <div class="flex items-center gap-4 relative z-10">
+              <div
+                class="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center text-green-600 group-hover:scale-110 transition-transform">
+                <i class="pi pi-home text-2xl"></i>
+              </div>
+              <div>
+                <span class="block text-lg font-bold text-gray-900">Inmueble</span>
+                <span class="text-sm text-gray-500">Venta o alquiler de propiedades</span>
+              </div>
+            </div>
+          </button>
+          }
+        </div>
+      </div>
+      }
+
+      <!-- STEP 4: CATEGORÍA DETALLADA (GRID) -->
+      @if (step === 4) {
+      <div class="animate-fade-in w-full">
+        <button (click)="prevStep()"
+          class="mb-4 flex items-center text-gray-400 hover:text-[#1A365D] transition-colors font-bold text-sm">
+          <i class="pi pi-arrow-left mr-2"></i> Volver
+        </button>
+        <h3 class="text-2xl font-black text-[#1A1A1A] mb-2">Selecciona tu categoría</h3>
+        <p class="text-gray-500 mb-6">¿A qué rubro pertenece tu {{ registerForm.get('registrationType')?.value |
+          lowercase }}?</p>
+
+        <!-- Loading State -->
+        @if (loadingCategories()) {
+        <div class="flex flex-col items-center justify-center py-10">
+          <i class="pi pi-spin pi-spinner text-4xl text-[#1A365D] mb-4"></i>
+          <p class="text-gray-400">Cargando categorías...</p>
+        </div>
+        }
+
+        <!-- Grid Categories -->
+        @if (!loadingCategories()) {
+        <div
+          class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+          @for (cat of categories(); track cat.descripcion) {
+          <div (click)="selectCategory(cat.descripcion)" [class.border-[#1A365D]]="selectedCategory === cat.descripcion"
+            [class.bg-blue-50]="selectedCategory === cat.descripcion"
+            class="cursor-pointer border-2 border-gray-100 rounded-xl p-4 flex flex-col items-center justify-center text-center hover:border-[#1A365D] hover:shadow-md transition-all h-[110px] group">
+
+            <!-- Icon logic simulated by first letter or generic -->
+            <div
+              class="w-10 h-10 mb-2 rounded-full bg-gray-50 group-hover:bg-white flex items-center justify-center text-[#1A365D] text-lg font-bold shadow-sm transition-colors">
+              <i class="pi {{cat.icono}}"></i>
+            </div>
+            <span class="text-sm font-bold text-gray-700 leading-tight">{{ cat.descripcion }}</span>
+          </div>
+          }
+        </div>
+        }
+
+        <!-- Boton para avanzar si ya selecciono (aunque el click lo puede hacer directo) -->
+        @if (selectedCategory) {
+        <div class="mt-6">
+          <button class="w-full py-3 rounded-xl bg-[#1A1A1A] text-white font-bold hover:bg-black transition-all"
+            (click)="nextStep()">Continuar</button>
+        </div>
+        }
+      </div>
+      }
+
+      <!-- STEP 5: INFORMACIÓN FINAL -->
+      @if (step === 5) {
+      <div class="animate-fade-in" [formGroup]="registerForm">
+        <button (click)="prevStep()"
+          class="mb-4 flex items-center text-gray-400 hover:text-[#1A365D] transition-colors font-bold text-sm">
+          <i class="pi pi-arrow-left mr-2"></i> Volver
+        </button>
+        <h3 class="text-3xl font-black text-[#1A1A1A] mb-2">Casi listo</h3>
+        <p class="text-gray-500 mb-8">Completa los últimos detalles para configurar tu perfil</p>
+
+        <div class="space-y-5">
+          <div>
+            <label class="block text-gray-700 text-sm font-bold mb-2">Nombre del Negocio / Proyecto</label>
+            <input type="text" formControlName="businessName"
+              class="w-full px-5 py-4 bg-gray-50 border-2 border-transparent rounded-xl focus:bg-white focus:border-[#1A365D] outline-none transition-all font-medium placeholder-gray-400">
+          </div>
+
+          <div>
+            <label class="block text-gray-700 text-sm font-bold mb-2">Nombre del Representante</label>
+            <input type="text" formControlName="ownerName"
+              class="w-full px-5 py-4 bg-gray-50 border-2 border-transparent rounded-xl focus:bg-white focus:border-[#1A365D] outline-none transition-all font-medium placeholder-gray-400">
+          </div>
+
+          <div>
+            <label class="block text-gray-700 text-sm font-bold mb-2">Celular de contacto <span
+                class="text-gray-400 font-normal">(Opcional)</span></label>
+            <input type="text" formControlName="phone"
+              class="w-full px-5 py-4 bg-gray-50 border-2 border-transparent rounded-xl focus:bg-white focus:border-[#1A365D] outline-none transition-all font-medium placeholder-gray-400">
+          </div>
+        </div>
+
+        <button type="button"
+          class="mt-8 w-full py-4 rounded-xl bg-[#1A1A1A] text-white font-bold text-lg hover:bg-black hover:shadow-lg transition-all"
+          (click)="finalizarRegistro()">
+          Finalizar Registro
+        </button>
+      </div>
+      }
+
+    </div>
+
+    <!-- Footer mobile only -->
+    <div class="md:hidden mt-8 text-center text-xs text-gray-400">
+      &copy; 2026 PedidosBarrio. All rights reserved.
+    </div>
+  </div>
+
+  <!-- RIGHT SIDE: VISUAL / SPACE THEME -->
+  <div class="hidden md:flex w-[50%] lg:w-[55%] relative overflow-hidden bg-black items-center justify-center p-12">
+
+    <!-- Background Space Image / Gradient -->
+    <div
+      class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2672&auto=format&fit=crop')] bg-cover bg-center opacity-60">
+    </div>
+    <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black opacity-80"></div>
+    <div class="absolute inset-0 bg-gradient-to-r from-black/80 via-transparent to-black/20"></div>
+
+    <!-- Content -->
+    <div class="relative z-10 max-w-xl text-white">
+
+      <h1 class="text-6xl lg:text-7xl font-black mb-6 leading-tight tracking-tight">
+        Lleva tu negocio<br>
+        <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-500">al Espacio
+          Online</span>
+      </h1>
+
+      <p class="text-xl text-gray-300 leading-relaxed mb-10 max-w-lg">
+        Conéctate con miles de clientes en tu zona. Gestiona pedidos, catálogo y entregas desde un panel de control de
+        otro planeta.
+      </p>
+
+      <!-- <div class="flex items-center gap-4">
+        <div class="flex -space-x-4">
+          <img class="w-12 h-12 rounded-full border-2 border-black" src="https://i.pravatar.cc/100?img=1" alt="">
+          <img class="w-12 h-12 rounded-full border-2 border-black" src="https://i.pravatar.cc/100?img=2" alt="">
+          <img class="w-12 h-12 rounded-full border-2 border-black" src="https://i.pravatar.cc/100?img=3" alt="">
+          <div class="w-12 h-12 rounded-full border-2 border-black bg-white flex items-center justify-center text-black font-bold text-xs">+2k</div>
+        </div>
+        <span class="text-sm font-bold text-gray-400">Negocios ya confían en nosotros</span>
+      </div> -->
+    </div>
+
+    <!-- Decorative Elements -->
+    <div class="absolute top-20 right-20 w-64 h-64 bg-purple-600 rounded-full blur-[128px] opacity-20 animate-pulse">
+    </div>
+    <div class="absolute bottom-20 left-20 w-96 h-96 bg-cyan-600 rounded-full blur-[128px] opacity-20"></div>
+  </div>
+
+</div>

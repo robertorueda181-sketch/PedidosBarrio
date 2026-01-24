@@ -1,78 +1,151 @@
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-[#1A365D] to-cyan-400 p-4">
+  <div class="w-full max-w-lg bg-white/95 rounded-3xl shadow-2xl p-10 flex flex-col items-center">
+    <h2 class="text-4xl font-black text-[#1A365D] mb-8">Crea tu cuenta</h2>
+    <!-- Botón Gmail arriba -->
+    <button type="button" class="w-full flex items-center justify-center gap-3 py-4 mb-6 rounded-xl bg-[#4285F4] text-white font-bold text-lg hover:bg-[#357ae8] transition-all" (click)="registerWithGoogle()">
+      <i class="pi pi-google text-2xl"></i> Registrarme con Google
+    </button>
+    <div class="w-full flex items-center gap-2 mb-6">
+      <div class="flex-1 h-px bg-gray-300"></div>
+      <span class="text-gray-400 font-bold">o</span>
+      <div class="flex-1 h-px bg-gray-300"></div>
+    </div>
 
-<div class="max-w-4xl mx-auto px-4 py-12">
-  <!-- Progress Bar -->
-  <div class="mb-12">
-    <div class="flex items-center justify-between max-w-md mx-auto relative">
-      <div class="absolute top-1/2 left-0 w-full h-0.5 bg-gray-200 -translate-y-1/2 z-0"></div>
-      <div class="absolute top-1/2 left-0 h-0.5 bg-[#1A365D] -translate-y-1/2 z-0 transition-all duration-500"
-        [style.width]="(step - 1) * 50 + '%'"></div>
-
-      <div class="relative z-10 flex flex-col items-center">
-        <div [class]="step >= 1 ? 'bg-[#1A365D] text-white' : 'bg-white text-gray-400 border-2 border-gray-200'"
-          class="w-10 h-10 rounded-full flex items-center justify-center font-bold transition-all duration-500">
-          1
-        </div>
-        <span class="text-xs mt-2 font-bold text-gray-500">Tipo</span>
+    <!-- Selección de tipo de empresa -->
+    <div *ngIf="step === 3" class="w-full mt-8">
+      <h3 class="text-2xl font-black text-[#1A365D] mb-4">Tipo de empresa</h3>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <button *ngIf="tiposRegistro.negocio" (click)="setRegistrationType('NEGOCIO'); nextStep()" class="group bg-white p-6 rounded-2xl border-2 border-gray-200 hover:border-[#1A365D] text-center font-bold">Negocio</button>
+        <button *ngIf="tiposRegistro.servicio" (click)="setRegistrationType('SERVICIO'); nextStep()" class="group bg-white p-6 rounded-2xl border-2 border-gray-200 hover:border-[#1A365D] text-center font-bold">Servicio</button>
+        <button *ngIf="tiposRegistro.inmueble" (click)="setRegistrationType('INMUEBLE'); nextStep()" class="group bg-white p-6 rounded-2xl border-2 border-gray-200 hover:border-[#1A365D] text-center font-bold">Inmueble</button>
       </div>
-
-      <div class="relative z-10 flex flex-col items-center">
-        <div [class]="step >= 2 ? 'bg-[#1A365D] text-white' : 'bg-white text-gray-400 border-2 border-gray-200'"
-          class="w-10 h-10 rounded-full flex items-center justify-center font-bold transition-all duration-500">
-          2
-        </div>
-        <span class="text-xs mt-2 font-bold text-gray-500">Información</span>
-      </div>
-
-      <div class="relative z-10 flex flex-col items-center">
-        <div [class]="step >= 3 ? 'bg-[#1A365D] text-white' : 'bg-white text-gray-400 border-2 border-gray-200'"
-          class="w-10 h-10 rounded-full flex items-center justify-center font-bold transition-all duration-500">
-          3
-        </div>
-        <span class="text-xs mt-2 font-bold text-gray-500">Identidad</span>
-      </div>
+    </div>
+    <!-- Selección de categoría -->
+    <div *ngIf="step === 4" class="w-full mt-8">
+      <h3 class="text-2xl font-black text-[#1A365D] mb-4">Categoría</h3>
+      <p-select formControlName="category" [options]="categories()" optionLabel="descripcion" optionValue="descripcion" placeholder="Ej: Restaurante, Bodega, Farmacia, Panadería, etc." [loading]="loadingCategories()" class="w-full"></p-select>
+      <button type="button" class="w-full mt-4 py-3 rounded-xl bg-[#1A365D] text-white font-bold text-lg hover:bg-[#16305a] transition-all" (click)="nextStep()">Siguiente</button>
+    </div>
+    <!-- Datos empresa y dueño -->
+    <div *ngIf="step === 5" class="w-full mt-8">
+      <h3 class="text-2xl font-black text-[#1A365D] mb-4">Datos de la empresa</h3>
+      <input type="text" formControlName="businessName" placeholder="Nombre del negocio" class="w-full px-6 py-4 mb-4 bg-gray-50 border-none rounded-2xl focus:ring-4 focus:ring-[#1A365D]/10 transition-all">
+      <input type="text" formControlName="ownerName" placeholder="Nombre del dueño" class="w-full px-6 py-4 mb-4 bg-gray-50 border-none rounded-2xl focus:ring-4 focus:ring-[#1A365D]/10 transition-all">
+      <input type="text" formControlName="phone" placeholder="Celular (opcional)" class="w-full px-6 py-4 mb-4 bg-gray-50 border-none rounded-2xl focus:ring-4 focus:ring-[#1A365D]/10 transition-all">
+      <button type="submit" class="w-full py-3 rounded-xl bg-[#1A365D] text-white font-bold text-lg hover:bg-[#16305a] transition-all">Finalizar Registro</button>
     </div>
   </div>
-
-  <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
-    <!-- STEP 1: Selection -->
+</div>
+                    <!-- STEP 5: Categoría, nombre y celular -->
+                    @if (step === 5) {
+                    <div class="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-black via-[#1A365D] to-cyan-400">
+                      <div class="bg-white/90 rounded-3xl shadow-2xl p-10 w-full max-w-lg flex flex-col items-center">
+                        <h2 class="text-3xl font-black text-[#1A365D] mb-6">Categoría y datos del negocio</h2>
+                        <p class="text-gray-500 text-lg mb-8">Selecciona la categoría y completa los datos principales</p>
+                        <div class="w-full mb-6">
+                          <label class="block text-sm font-bold mb-2">Categoría</label>
+                          <p-select formControlName="category" [options]="categories()" optionLabel="descripcion" optionValue="descripcion" placeholder="Ej: Restaurante, Bodega, Farmacia, Panadería, Cafetería, Minimarket, Licorería, Pollería, Pastelería, Heladería, Tienda de mascotas, Ferretería, Florería, Barbería, Peluquería, Lavandería, Veterinaria, etc." [loading]="loadingCategories()" class="w-full"></p-select>
+                        </div>
+                        <div class="w-full mb-6">
+                          <label class="block text-sm font-bold mb-2">Nombre del negocio</label>
+                          <input type="text" formControlName="businessName" placeholder="Ej: Mi Negocio S.A.C" class="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl focus:ring-4 focus:ring-[#1A365D]/10 transition-all">
+                        </div>
+                        <div class="w-full mb-8">
+                          <label class="block text-sm font-bold mb-2">Celular (opcional)</label>
+                          <input type="text" formControlName="phone" placeholder="Ej: 987654321" class="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl focus:ring-4 focus:ring-[#1A365D]/10 transition-all">
+                        </div>
+                        <button type="submit" class="w-full py-3 rounded-xl bg-[#1A365D] text-white font-bold text-lg hover:bg-[#16305a] transition-all">Finalizar Registro</button>
+                      </div>
+                    </div>
+                    }
+                <!-- STEP 4: Selección de tipo de registro -->
+                @if (step === 4) {
+                <div class="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-black via-[#1A365D] to-cyan-400">
+                  <div class="bg-white/90 rounded-3xl shadow-2xl p-10 w-full max-w-lg flex flex-col items-center">
+                    <h2 class="text-3xl font-black text-[#1A365D] mb-6">¿Qué deseas registrar?</h2>
+                    <p class="text-gray-500 text-lg mb-8">Selecciona la opción que mejor describa tu actividad</p>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 w-full">
+                      @if (tiposRegistro.negocio) {
+                      <div (click)="setRegistrationType('NEGOCIO'); nextStep()"
+                        class="group bg-white p-8 rounded-3xl shadow-sm hover:shadow-2xl transition-all duration-500 cursor-pointer border-2 border-transparent hover:border-[#1A365D] text-center">
+                        <div class="w-20 h-20 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
+                          <i class="pi pi-shopping-bag text-4xl text-[#1A365D]"></i>
+                        </div>
+                        <h3 class="text-2xl font-black text-gray-900 mb-2">Negocio</h3>
+                        <p class="text-gray-500 text-sm">Venta de productos, tiendas, restaurantes y más.</p>
+                      </div>
+                      }
+                      @if (tiposRegistro.servicio) {
+                      <div (click)="setRegistrationType('SERVICIO'); nextStep()"
+                        class="group bg-white p-8 rounded-3xl shadow-sm hover:shadow-2xl transition-all duration-500 cursor-pointer border-2 border-transparent hover:border-[#1A365D] text-center">
+                        <div class="w-20 h-20 bg-purple-50 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
+                          <i class="pi pi-briefcase text-4xl text-purple-600"></i>
+                        </div>
+                        <h3 class="text-2xl font-black text-gray-900 mb-2">Servicio</h3>
+                        <p class="text-gray-500 text-sm">Profesionales, oficios y servicios especializados.</p>
+                      </div>
+                      }
+                      @if (tiposRegistro.inmueble) {
+                      <div (click)="setRegistrationType('INMUEBLE'); nextStep()"
+                        class="group bg-white p-8 rounded-3xl shadow-sm hover:shadow-2xl transition-all duration-500 cursor-pointer border-2 border-transparent hover:border-[#1A365D] text-center">
+                        <div class="w-20 h-20 bg-green-50 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
+                          <i class="pi pi-home text-4xl text-green-600"></i>
+                        </div>
+                        <h3 class="text-2xl font-black text-gray-900 mb-2">Inmueble</h3>
+                        <p class="text-gray-500 text-sm">Venta o alquiler de casas, departamentos y terrenos.</p>
+                      </div>
+                      }
+                    </div>
+                  </div>
+                </div>
+                }
+            <!-- STEP 3: Políticas y autorización de datos -->
+            @if (step === 3) {
+            <div class="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-black via-[#1A365D] to-cyan-400">
+              <div class="bg-white/90 rounded-3xl shadow-2xl p-10 w-full max-w-lg flex flex-col items-center">
+                <h2 class="text-3xl font-black text-[#1A365D] mb-6">Políticas y Autorización</h2>
+                <p class="text-gray-500 text-lg mb-8">Antes de continuar, acepta nuestras políticas y el uso de tus datos.</p>
+                <div class="w-full flex flex-col gap-4 mb-6">
+                  <label class="flex items-center gap-3">
+                    <input type="checkbox" [(ngModel)]="aceptaTerminos" class="accent-[#1A365D] w-5 h-5"> Acepto los <a href="/terminos" target="_blank" class="text-[#1A365D] underline">Términos y Condiciones</a>
+                  </label>
+                  <label class="flex items-center gap-3">
+                    <input type="checkbox" [(ngModel)]="aceptaDatos" class="accent-[#1A365D] w-5 h-5"> Autorizo el uso de mis datos personales según la <a href="/privacidad" target="_blank" class="text-[#1A365D] underline">Política de Privacidad</a>
+                  </label>
+                </div>
+                <button type="button" class="w-full py-3 rounded-xl bg-[#1A365D] text-white font-bold text-lg hover:bg-[#16305a] transition-all" [disabled]="!aceptaTerminos || !aceptaDatos" (click)="nextStep()">Continuar</button>
+              </div>
+            </div>
+            }
+        <!-- STEP 2: Verificación de correo -->
+        @if (step === 2 && registroMetodo === 'EMAIL') {
+        <div class="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-black via-[#1A365D] to-cyan-400">
+          <div class="bg-white/90 rounded-3xl shadow-2xl p-10 w-full max-w-lg flex flex-col items-center">
+            <h2 class="text-3xl font-black text-[#1A365D] mb-6">Verifica tu correo</h2>
+            <p class="text-gray-500 text-lg mb-8">Te enviamos un código a <span class="font-bold">{{ registerForm.get('email')?.value }}</span>. Ingresa el código para continuar.</p>
+            <input type="text" maxlength="6" [(ngModel)]="codigoVerificacion" placeholder="Código de verificación" class="w-full px-6 py-4 mb-4 bg-gray-50 border-none rounded-2xl text-center text-2xl font-bold tracking-widest focus:ring-4 focus:ring-[#1A365D]/10 transition-all">
+            <button type="button" class="w-full py-3 rounded-xl bg-[#1A365D] text-white font-bold text-lg hover:bg-[#16305a] transition-all mb-2" (click)="verificarCodigo()">Verificar código</button>
+            <button type="button" class="w-full py-2 rounded-xl bg-transparent text-[#1A365D] font-bold text-sm hover:underline" (click)="reenviarCodigo()">Reenviar código</button>
+          </div>
+        </div>
+        }
+    <!-- STEP 1: Método de registro -->
     @if (step === 1) {
-    <div class="text-center mb-12">
-      <h2 class="text-4xl font-black text-[#1A365D] mb-4">¿Qué deseas registrar?</h2>
-      <p class="text-gray-500 text-lg">Selecciona la categoría que mejor describa tu actividad</p>
-    </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-      <!-- Negocio -->
-      <div (click)="setRegistrationType('NEGOCIO')"
-        class="group bg-white p-8 rounded-3xl shadow-sm hover:shadow-2xl transition-all duration-500 cursor-pointer border-2 border-transparent hover:border-[#1A365D] text-center">
-        <div
-          class="w-20 h-20 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
-          <i class="pi pi-shopping-bag text-4xl text-[#1A365D]"></i>
+    <div class="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-black via-[#1A365D] to-cyan-400">
+      <div class="bg-white/90 rounded-3xl shadow-2xl p-10 w-full max-w-lg flex flex-col items-center">
+        <h2 class="text-4xl font-black text-[#1A365D] mb-6">Crea tu cuenta</h2>
+        <p class="text-gray-500 text-lg mb-8">Elige cómo deseas registrarte</p>
+        <button type="button" class="w-full flex items-center justify-center gap-3 py-4 mb-4 rounded-xl bg-[#4285F4] text-white font-bold text-lg hover:bg-[#357ae8] transition-all" (click)="registerWithGoogle()">
+          <i class="pi pi-google text-2xl"></i> Registrarme con Google
+        </button>
+        <div class="w-full flex items-center gap-2 mb-4">
+          <div class="flex-1 h-px bg-gray-300"></div>
+          <span class="text-gray-400 font-bold">o</span>
+          <div class="flex-1 h-px bg-gray-300"></div>
         </div>
-        <h3 class="text-2xl font-black text-gray-900 mb-2">Negocio</h3>
-        <p class="text-gray-500 text-sm">Venta de productos, tiendas, restaurantes y más.</p>
-      </div>
-
-      <!-- Servicio -->
-      <div (click)="setRegistrationType('SERVICIO')"
-        class="group bg-white p-8 rounded-3xl shadow-sm hover:shadow-2xl transition-all duration-500 cursor-pointer border-2 border-transparent hover:border-[#1A365D] text-center">
-        <div
-          class="w-20 h-20 bg-purple-50 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
-          <i class="pi pi-briefcase text-4xl text-purple-600"></i>
-        </div>
-        <h3 class="text-2xl font-black text-gray-900 mb-2">Servicio</h3>
-        <p class="text-gray-500 text-sm">Profesionales, oficios y servicios especializados.</p>
-      </div>
-
-      <!-- Inmueble -->
-      <div (click)="setRegistrationType('INMUEBLE')"
-        class="group bg-white p-8 rounded-3xl shadow-sm hover:shadow-2xl transition-all duration-500 cursor-pointer border-2 border-transparent hover:border-[#1A365D] text-center">
-        <div
-          class="w-20 h-20 bg-green-50 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
-          <i class="pi pi-home text-4xl text-green-600"></i>
-        </div>
-        <h3 class="text-2xl font-black text-gray-900 mb-2">Inmueble</h3>
-        <p class="text-gray-500 text-sm">Venta o alquiler de casas, departamentos y terrenos.</p>
+        <button type="button" class="w-full flex items-center justify-center gap-3 py-4 rounded-xl bg-[#1A365D] text-white font-bold text-lg hover:bg-[#16305a] transition-all" (click)="nextStep('EMAIL')">
+          <i class="pi pi-envelope text-2xl"></i> Registrarme con correo y contraseña
+        </button>
       </div>
     </div>
     }
@@ -285,5 +358,3 @@
       </div>
     </div>
     }
-  </form>
-</div>
