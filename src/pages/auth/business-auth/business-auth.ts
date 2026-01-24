@@ -52,9 +52,13 @@ export class BusinessAuth implements OnDestroy {
     personLastName = signal<string>('');
     acceptTerms = signal<boolean>(false);
 
+    googleBtnWidth: number = 300; 
+
     constructor() {
         // Disable automatic registration globally while on this page
         this.authService.autoRegisterSocial = false;
+        
+        this.calculateGoogleBtnWidth();
 
         effect(() => {
             // Monitor login state for Google Auth
@@ -127,6 +131,13 @@ export class BusinessAuth implements OnDestroy {
         // Re-enable automatic registration when leaving
         this.authService.autoRegisterSocial = true;
         this.isNavigating = false;
+    }
+
+    calculateGoogleBtnWidth() {
+        const padding = 64; 
+        const maxWidth = 400;
+        const width = Math.min(window.innerWidth - padding, maxWidth);
+        this.googleBtnWidth = width > 0 ? width : 200;
     }
 
     toggleMode(register: boolean) {

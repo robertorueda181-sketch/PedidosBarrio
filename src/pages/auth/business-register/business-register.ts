@@ -32,27 +32,27 @@ export class BusinessRegisterComponent implements OnInit, OnDestroy {
   loggedIn: boolean = false;
 
   // CONTROL DE FLUJO
-  step = 1;
-  registroMetodo: 'EMAIL' | 'GOOGLE' | null = null;
+  step = signal(1);
+  registroMetodo = signal<'EMAIL' | 'GOOGLE' | null>(null);
   tiposRegistro = { negocio: true, servicio: true, inmueble: true };
   
   // VERIFICACION DE CORREO
-  codigoVerificacion: string = '';
-  emailVerificado: boolean = false;
-  tiempoRestante: number = 180;
-  puedeReenviar: boolean = false;
+  codigoVerificacion = signal<string>('');
+  emailVerificado = signal<boolean>(false);
+  tiempoRestante = signal<number>(180);
+  puedeReenviar = signal<boolean>(false);
   timerInterval: any;
 
   // STEP POLITICAS
-  aceptaTerminos: boolean = false;
-  aceptaDatos: boolean = false;
+  aceptaTerminos = signal<boolean>(false);
+  aceptaDatos = signal<boolean>(false);
 
   // DATA
   categories = signal<any[]>([]);
   loadingCategories = signal<boolean>(false);
   typeCateg = 'Tipo_Neg'; // Por defecto NEGOCIO (Tipo_Neg)
-  selectedCategory: string | null = null; // Nuevo campo para la grilla
-  googleBtnWidth: number = 300;  // Default width
+  selectedCategory = signal<string | null>(null); // Nuevo campo para la grilla
+  googleBtnWidth = signal<number>(300);  // Default width
 
   registerForm: FormGroup = this.fb.group({
     registrationType: ['NEGOCIO', Validators.required], // NEGOCIO, SERVICIO, INMUEBLE
@@ -90,11 +90,11 @@ export class BusinessRegisterComponent implements OnInit, OnDestroy {
     if (config.registroTipos) {
       this.tiposRegistro = { ...this.tiposRegistro, ...config.registroTipos };
     }
+    this.calculateGoogleBtnWidth();
   }
 
   ngOnInit() {
     this.restoreState(); // Recuperar estado al iniciar
-    this.calculateGoogleBtnWidth();
 
     // Suscribirse a cambios de estado de autenticación (Google)
     this.authService.authState.subscribe((user) => {
@@ -105,6 +105,7 @@ export class BusinessRegisterComponent implements OnInit, OnDestroy {
         this.handleGoogleLogin(user);
       }
     });
+    if(this.step() === 2 && this.registroMetodo() === 'GOOGLE') this.nextStep('GOOGLE');
   }
 
   handleGoogleLogin(user: SocialUser) {
@@ -120,14 +121,10 @@ export class BusinessRegisterComponent implements OnInit, OnDestroy {
       });
       
       // Marcar email como verificado
-      this.emailVerificado = true;
+      this.emailVerificado.set(true);
       
-      this.toastr.success(`Bienvenido ${user.name}`, 'Sesión iniciada con Google');
-
-      // Avanzar flujo saltando verificación, si estamos en paso 1
-      if (this.step === 1) {
-         this.nextStep('GOOGLE');
-      }
+      // Avanzar flujo saltando verificación
+      this.nextStep('GOOGLE');
     });
   }
 
@@ -137,7 +134,7 @@ export class BusinessRegisterComponent implements OnInit, OnDestroy {
     const padding = 64; 
     const maxWidth = 400;
     const width = Math.min(window.innerWidth - padding, maxWidth);
-    this.googleBtnWidth = width > 0 ? width : 200;
+    this.googleBtnWidth.set(width > 0 ? width : 200);
   }
 
   ngOnDestroy() {
@@ -149,12 +146,12 @@ export class BusinessRegisterComponent implements OnInit, OnDestroy {
   // --- STATE MANAGEMENT (CACHE) ---
   saveState() {
     const state = {
-      step: this.step,
-      registroMetodo: this.registroMetodo,
+      step: this.step(),
+      registroMetodo: this.registroMetodo(),
       formValues: this.registerForm.value,
-      emailVerificado: this.emailVerificado,
+      emailVerificado: this.emailVerificado(),
       typeCateg: this.typeCateg,
-      selectedCategory: this.selectedCategory
+      selectedCategory: this.selectedCategory()
     };
     localStorage.setItem('business_register_state', JSON.stringify(state));
   }
@@ -163,18 +160,18 @@ export class BusinessRegisterComponent implements OnInit, OnDestroy {
     const stored = localStorage.getItem('business_register_state');
     if (stored) {
       const state = JSON.parse(stored);
-      this.step = state.step || 1;
-      this.registroMetodo = state.registroMetodo;
-      this.emailVerificado = state.emailVerificado;
+      this.step.set(state.step || 1);
+      this.registroMetodo.set(state.registroMetodo);
+      this.emailVerificado.set(state.emailVerificado);
       this.typeCateg = state.typeCateg || 'Tipo_Neg';
-      this.selectedCategory = state.selectedCategory;
+      this.selectedCategory.set(state.selectedCategory);
       
       if (state.formValues) {
         this.registerForm.patchValue(state.formValues);
       }
       
       // Si estamos en pasos avanzados, asegurar cargar data necesaria
-      if (this.step >= 4) {
+      if (this.step() >= 4) {
          this.loadCategories();
       }
     }
@@ -199,11 +196,11 @@ export class BusinessRegisterComponent implements OnInit, OnDestroy {
 
   // --- FLOW MANAGEMENT ---
   prevStep() {
-    if (this.step > 1) {
-      if (this.step === 3 && this.registroMetodo === 'GOOGLE') {
-        this.step = 1; 
+    if (this.step() > 1) {
+      if (this.step() === 3 && this.registroMetodo() === 'GOOGLE') {
+        this.step.set(1); 
       } else {
-        this.step--;
+        this.step.update(s => s - 1);
       }
       this.saveState();
     }
@@ -211,21 +208,21 @@ export class BusinessRegisterComponent implements OnInit, OnDestroy {
 
   nextStep(metodo?: 'EMAIL' | 'GOOGLE') {
     if (metodo) {
-      this.registroMetodo = metodo;
+      this.registroMetodo.set(metodo);
       if (metodo === 'EMAIL') {
-        this.step = 2;
+        this.step.set(2);
         this.enviarCodigoVerificacion();
         this.saveState();
         return;
       }
       if (metodo === 'GOOGLE') {
         // Skip verification for Google? Or different flow
-        this.step = 3;
+        this.step.set(3);
         this.saveState();
         return;
       }
     }
-    this.step++;
+    this.step.update(s => s + 1);
     this.saveState();
   }
 
@@ -239,8 +236,8 @@ export class BusinessRegisterComponent implements OnInit, OnDestroy {
 
   verificarCodigo() {
     // Mock verificación
-    if (this.codigoVerificacion === '123456') {
-      this.emailVerificado = true;
+    if (this.codigoVerificacion() === '123456') {
+      this.emailVerificado.set(true);
       clearInterval(this.timerInterval);
       this.toastr.success('Correo verificado éxitosamente', 'Éxito');
       this.nextStep(); // Ir a paso 3
@@ -250,20 +247,20 @@ export class BusinessRegisterComponent implements OnInit, OnDestroy {
   }
 
   reenviarCodigo() {
-    if (!this.puedeReenviar) return;
+    if (!this.puedeReenviar()) return;
     this.enviarCodigoVerificacion();
   }
 
   startTimer() {
-    this.tiempoRestante = 180; // 3 minutos
-    this.puedeReenviar = false;
+    this.tiempoRestante.set(180); // 3 minutos
+    this.puedeReenviar.set(false);
     if (this.timerInterval) clearInterval(this.timerInterval);
     
     this.timerInterval = setInterval(() => {
-      if (this.tiempoRestante > 0) {
-        this.tiempoRestante--;
+      if (this.tiempoRestante() > 0) {
+        this.tiempoRestante.update(t => t - 1);
       } else {
-        this.puedeReenviar = true;
+        this.puedeReenviar.set(true);
         clearInterval(this.timerInterval);
       }
     }, 1000);
@@ -275,7 +272,7 @@ export class BusinessRegisterComponent implements OnInit, OnDestroy {
     
     // Cargar categorías según el tipo
     this.categories.set([]); // Clear previous
-    this.selectedCategory = null; // Reset selection on type change
+    this.selectedCategory.set(null); // Reset selection on type change
 
     if (type === 'NEGOCIO') this.typeCateg = 'Tipo_Neg'; 
     else if (type === 'SERVICIO') this.typeCateg = 'Tipo_Ser';
@@ -287,7 +284,7 @@ export class BusinessRegisterComponent implements OnInit, OnDestroy {
   
   // --- SELECCION DE CATEGORIA EN GRID ---
   selectCategory(catName: string) {
-    this.selectedCategory = catName;
+    this.selectedCategory.set(catName);
     this.registerForm.get('category')?.setValue(catName);
     this.saveState();
   }
