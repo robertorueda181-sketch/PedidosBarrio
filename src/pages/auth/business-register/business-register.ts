@@ -11,6 +11,7 @@ import { RegisterService } from '../../../shared/services/register.service';
 import { RegisterRequest } from '../../../shared/interfaces/register.interface';
 import { ToastrService } from 'ngx-toastr';
 import { GoogleSigninButtonModule, SocialAuthService, SocialUser } from '@abacritt/angularx-social-login';
+import { AuthService } from '../../../shared/services/auth.service';
 
 @Component({
   selector: 'app-business-register',
@@ -25,12 +26,16 @@ export class BusinessRegisterComponent implements OnInit, OnDestroy {
   private registerService = inject(RegisterService);
   private router = inject(Router);
   private toastr = inject(ToastrService);
-  private authService = inject(SocialAuthService);
+  private socialAuthService = inject(SocialAuthService);
+  private appAuthService = inject(AuthService);
   private ngZone = inject(NgZone);
 
   // SOCIAL USER
   user: SocialUser | null = null;
   loggedIn: boolean = false;
+  
+  // MODAL
+  showWelcomeModal = signal<boolean>(false);
 
   // CONTROL DE FLUJO
   step = signal(1);
@@ -98,7 +103,7 @@ export class BusinessRegisterComponent implements OnInit, OnDestroy {
     this.restoreState(); // Recuperar estado al iniciar
 
     // Suscribirse a cambios de estado de autenticación (Google)
-    this.authService.authState.subscribe((user) => {
+    this.socialAuthService.authState.subscribe((user) => {
       this.user = user;
       this.loggedIn = (user != null);
       if (this.loggedIn && user) {
@@ -383,9 +388,38 @@ export class BusinessRegisterComponent implements OnInit, OnDestroy {
     this.registerService.registerBusiness(req).subscribe({
         next: (res) => {
             console.log('Registro exitoso:', res);
-            this.toastr.success('Registro completado con éxito', 'Bienvenido');
-            this.clearState();
-            this.router.navigate(['/business-auth']); 
+            
+            if (res.token) {
+                 // Usamos 'any' en el cast intermedio para compatibilidad si faltan propiedades opcionales
+                 // pero aseguramos que SocialUser tenga las obligatorias
+                 const user: SocialUser = {
+                    provider: 'LOCAL',
+                    id: '', 
+                    email: req.email,
+                    name: `${req.nombre} ${req.apellido}`,
+                    photoUrl: '',
+                    firstName: req.nombre,
+                    lastName: req.apellido,
+                    authToken: res.token,
+                    idToken: '',
+                    authorizationCode: '',
+                    response: null
+                } as any as SocialUser;
+                
+                // Guardamos sesión usando el servicio personalizado de la App
+                this.appAuthService.saveSession(res.token, user);
+                this.appAuthService.user.set(user);
+                this.appAuthService.loggedIn.set(true);
+
+                // Mostramos el modal en lugar de navegar y mostrar toasts dispersos
+                this.showWelcomeModal.set(true);
+                this.clearState();
+
+            } else {
+                this.toastr.success('Registro completado con éxito', 'Bienvenido');
+                this.clearState();
+                this.router.navigate(['/business-auth']); 
+            }
         },
         error: (err) => {
             console.error('Error en registro:', err);
@@ -420,5 +454,11 @@ export class BusinessRegisterComponent implements OnInit, OnDestroy {
             this.toastr.error(msg, 'Intente nuevamente');
         }
     });
+  }
+
+  // --- MODAL ACTION ---
+  closeModalAndNavigate() {
+    this.showWelcomeModal.set(false);
+    this.router.navigate(['/empresa']);
   }
 }

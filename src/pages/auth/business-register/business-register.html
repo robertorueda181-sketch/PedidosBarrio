@@ -305,3 +305,59 @@
   </div>
 
 </div>
+
+<!-- WELCOME MODAL SPACE THEME -->
+@if (showWelcomeModal()) {
+  <div class="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-90 animate-fade-in backdrop-blur-sm">
+      <div class="relative w-full max-w-lg mx-4 bg-[#0a0e17] rounded-3xl p-8 border border-white/20 shadow-2xl overflow-hidden text-center text-white">
+          
+          <!-- Estrellas / Fondo Espacial -->
+          <div class="stars-container absolute inset-0 opacity-50 pointer-events-none"></div>
+          <div class="absolute -top-20 -left-20 w-64 h-64 bg-purple-600 rounded-full blur-[100px] opacity-30"></div>
+          <div class="absolute -bottom-20 -right-20 w-64 h-64 bg-blue-600 rounded-full blur-[100px] opacity-30"></div>
+
+          <!-- Icono / Imagen Espacial -->
+          <div class="relative z-10 mb-6 flex justify-center">
+              <div class="w-24 h-24 bg-gradient-to-tr from-purple-500 to-indigo-600 rounded-full flex items-center justify-center shadow-lg animate-bounce-slow">
+                  <i class="pi pi-globe text-4xl text-white"></i> 
+                  <!-- Se puede reemplazar por icono de cohete si se tiene librería de iconos o svg -->
+                  <!-- <i class="fa-solid fa-rocket text-4xl"></i> -->
+              </div>
+          </div>
+
+          <h2 class="relative z-10 text-3xl font-extrabold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-blue-300 to-purple-300">
+              ¡Bienvenido a Bordo!
+          </h2>
+          
+          <p class="relative z-10 text-gray-300 mb-6 text-lg">
+              Tu espacio online ha sido creado exitosamente.
+          </p>
+
+          <div class="relative z-10 bg-white/5 rounded-xl p-4 mb-6 border border-white/10 text-left space-y-3">
+              <div class="flex gap-3 items-start">
+                  <div class="mt-1 min-w-[20px] text-yellow-400">
+                      <i class="pi pi-check-circle"></i>
+                  </div>
+                  <div>
+                      <p class="font-bold text-sm text-white">Estado de Cuenta: En Evaluación</p>
+                      <p class="text-xs text-gray-400 mt-0.5">Estamos revisando tu información para asegurar la calidad de la plataforma.</p>
+                  </div>
+              </div>
+              <div class="flex gap-3 items-start">
+                  <div class="mt-1 min-w-[20px] text-blue-400">
+                      <i class="pi pi-envelope"></i>
+                  </div>
+                  <div>
+                      <p class="font-bold text-sm text-white">Confirmación por Correo</p>
+                      <p class="text-xs text-gray-400 mt-0.5">En menos de 24 horas recibirás un email confirmando que cumples con las normas.</p>
+                  </div>
+              </div>
+          </div>
+
+          <button (click)="closeModalAndNavigate()" 
+              class="relative z-10 w-full py-3.5 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl font-bold text-white hover:shadow-[0_0_20px_rgba(99,102,241,0.5)] transform hover:scale-[1.02] transition-all">
+              Entendido, ir a mi dashboard
+          </button>
+      </div>
+  </div>
+}

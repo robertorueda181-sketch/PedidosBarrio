@@ -20,9 +20,6 @@ export class RegisterService {
         return this.http.post(`${this.appConfigService.apiUrl}/Auth/Register/business`, data);
     }
 
-    registerSocialUser(data: RegisterRequest): Observable<any> {
-        return this.http.post(`${this.appConfigService.apiUrl}/Auth/Register/social`, data);
-    }
 
     login(data: LoginRequest): Observable<any> {
         const url = `${this.appConfigService.apiUrl}/Auth/Login`;

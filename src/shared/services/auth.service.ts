@@ -101,7 +101,7 @@ export class AuthService {
         }
     }
 
-    private saveSession(token: string, user: SocialUser) {
+    public saveSession(token: string, user: SocialUser) {
         localStorage.setItem(this.TOKEN_KEY, token);
         localStorage.setItem(this.USER_KEY, JSON.stringify(user));
     }
@@ -138,26 +138,26 @@ export class AuthService {
             idToken: user.idToken || ''
         };
 
-        this.registerService.registerSocialUser(userData).subscribe({
-            next: (response: any) => {
-                console.log('User registered/authenticated successfully:', response);
+    //     this.registerService.registerSocialUser(userData).subscribe({
+    //         next: (response: any) => {
+    //             console.log('User registered/authenticated successfully:', response);
 
-                // Assuming the backend returns { token: string, user: object }
-                if (response.token) {
-                    this.saveSession(response.token, user);
-                    console.log('Session saved successfully');
-                } else {
-                    console.warn('No token received from backend');
-                }
-            },
-            error: (error: any) => {
-                console.error('Error registering/authenticating user:', error);
-                const errorMessage = error.error?.message || error.error || 'Error local al autenticar con Google';
-                this.toastr.error(
-                    typeof errorMessage === 'string' ? errorMessage : 'Error en la respuesta del servidor (400)',
-                    'Error de Autenticación'
-                );
-            }
-        });
-    }
+    //             // Assuming the backend returns { token: string, user: object }
+    //             if (response.token) {
+    //                 this.saveSession(response.token, user);
+    //                 console.log('Session saved successfully');
+    //             } else {
+    //                 console.warn('No token received from backend');
+    //             }
+    //         },
+    //         error: (error: any) => {
+    //             console.error('Error registering/authenticating user:', error);
+    //             const errorMessage = error.error?.message || error.error || 'Error local al autenticar con Google';
+    //             this.toastr.error(
+    //                 typeof errorMessage === 'string' ? errorMessage : 'Error en la respuesta del servidor (400)',
+    //                 'Error de Autenticación'
+    //             );
+    //         }
+    //     });
+     }
 }
