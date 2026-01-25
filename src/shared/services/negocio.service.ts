@@ -81,7 +81,7 @@ export class NegocioService {
                 ...detalle,
                 productos: detalle.productos.map(p => ({
                     ...p,
-                    urlImagen: p.urlImagen ? `${this.config.baseUrl}/${p.urlImagen.replace(/\\/g, '/')}` : 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80'
+                    urlImagen: p.urlImagen ? p.urlImagen : 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80'
                 }))
             }))
         );

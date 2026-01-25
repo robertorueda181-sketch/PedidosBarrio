@@ -54,8 +54,8 @@ export const routes: Routes = [
   },
  
   { path: 'business-auth', loadComponent: () => import('../pages/auth/business-auth/business-auth').then(m => m.BusinessAuth) },
-  { path: 'negocio/amanro', component: Amanro },
-  { path: 'negocio/stacion64', component: Stacion64 },
-  { path: 'negocio/pilar', component: PilarComponent },
+  { path: 'amanro', component: Amanro },
+  { path: 'stacion64', component: Stacion64 },
+  { path: 'pilar', component: PilarComponent },
   { path: '**', redirectTo: '' }
 ];
