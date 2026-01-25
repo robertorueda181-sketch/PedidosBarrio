@@ -30,6 +30,27 @@
     scrollbar-width: none;
 }
 
+/* PrimeNG Carousel Customization */
+:host ::ng-deep .p-carousel-indicators {
+    padding-top: 1rem;
+}
+
+:host ::ng-deep .p-carousel .p-carousel-indicators .p-carousel-indicator.p-highlight button {
+    background-color: #0891b2; /* Cyan-600 */
+}
+
+:host ::ng-deep .p-carousel .p-carousel-indicators .p-carousel-indicator button {
+    background-color: #cbd5e1; /* Slate-300 */
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 9999px;
+    transition: background-color 0.2s;
+}
+
+:host ::ng-deep .p-carousel .p-carousel-indicators .p-carousel-indicator button:hover {
+    background-color: #06b6d4; /* Cyan-500 */
+}
+
 /* Custom Slider Transition */
 .slider-container {
     display: flex;

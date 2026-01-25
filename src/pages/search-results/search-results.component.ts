@@ -39,10 +39,15 @@ export class SearchResultsComponent implements OnInit {
     activeTab = signal<string>('TODOS');
     results = signal<SearchResult[]>([]);
     isLoading = signal<boolean>(false);
+    showMobileFilters = signal<boolean>(false);
 
     // Mock filters
     categories = ['Restaurantes', 'Salud', 'Hogar', 'Tecnología', 'Venta', 'Alquiler'];
     selectedCategory = signal<string>('');
+
+    toggleMobileFilters() {
+        this.showMobileFilters.update(v => !v);
+    }
 
     ngOnInit() {
         this.route.queryParams.subscribe(params => {
@@ -59,6 +64,7 @@ export class SearchResultsComponent implements OnInit {
         this.isLoading.set(true);
         this.searchService.search(this.searchQuery()).subscribe({
             next: (data) => {
+                console.log('Search results:', data);
                 this.results.set(data);
                 this.isLoading.set(false);
                 

@@ -14,8 +14,7 @@ export class SearchService {
     search(query: string): Observable<SearchResult[]> {
         return this.http.get<SearchResult[]>(`${this.config.apiUrl}/Search?q=${query}`).pipe(
             map(results => results.map(item => ({
-                ...item,
-                imageUrl: this.transformImageUrl(item.imageUrl)
+                ...item
             })))
         );
     }

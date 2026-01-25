@@ -131,34 +131,41 @@
   </div>
 
   @if (negocios().length > 0) {
-  <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
-    @for (negocio of negocios(); track negocio.negocioID) {
-    <div (click)="goToNegocio(negocio.urlNegocio)"
-      class="group bg-white rounded-2xl md:rounded-3xl shadow-sm hover:shadow-2xl hover:shadow-cyan-500/20 transition-all duration-500 cursor-pointer border border-gray-100 overflow-hidden hover:-translate-y-2">
-      <div class="relative h-32 md:h-48 overflow-hidden">
-        <img
-          [src]="negocio.urlImagen || 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=800&q=60'"
-          [alt]="negocio.descripcion"
-          class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-      </div>
-      <div class="p-3 md:p-5">
-        <h3
-          class="font-black text-sm md:text-lg text-gray-900 mb-1 md:mb-2 capitalize group-hover:text-cyan-600 transition-colors line-clamp-1">
-          {{ negocio.descripcion }}
-        </h3>
-        <p class="hidden md:block text-gray-500 text-sm mb-6 line-clamp-2">
-          Visita nuestro sitio web para conocer más sobre nuestros productos y servicios.
-        </p>
-        <span class="text-cyan-600 group-hover:text-cyan-700 font-bold text-[10px] md:text-sm flex items-center gap-2">
-          Visitar ahora
-        </span>
-      </div>
-    </div>
-    }
+  <div class="carousel-container">
+    <p-carousel [value]="negocios()" [numVisible]="4" [numScroll]="1" [circular]="true"
+      [responsiveOptions]="responsiveOptions" [autoplayInterval]="4000">
+      <ng-template let-negocio pTemplate="item">
+        <div class="p-2 h-full">
+          <div (click)="goToNegocio(negocio.urlNegocio)"
+            class="group bg-white rounded-2xl md:rounded-3xl shadow-sm hover:shadow-2xl hover:shadow-cyan-500/20 transition-all duration-500 cursor-pointer border border-gray-100 overflow-hidden hover:-translate-y-2 h-full flex flex-col">
+            <div class="relative h-32 md:h-48 overflow-hidden shrink-0">
+              <img
+                [src]="negocio.urlImagen || 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=800&q=60'"
+                [alt]="negocio.descripcion"
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+            </div>
+            <div class="p-3 md:p-5 flex-1 flex flex-col">
+              <h3
+                class="font-black text-sm md:text-lg text-gray-900 mb-1 md:mb-2 capitalize group-hover:text-cyan-600 transition-colors line-clamp-1">
+                {{ negocio.descripcion }}
+              </h3>
+              <p class="hidden md:block text-gray-500 text-sm mb-4 line-clamp-2 flex-1">
+                Visita nuestro sitio web para conocer más sobre nuestros productos y servicios.
+              </p>
+              <span
+                class="text-cyan-600 group-hover:text-cyan-700 font-bold text-[10px] md:text-sm flex items-center gap-2 mt-auto">
+                Visitar ahora
+              </span>
+            </div>
+          </div>
+        </div>
+      </ng-template>
+    </p-carousel>
   </div>
   }
 </section>
 
+@if (servicios().length > 0) {
 <!-- Servicios Section -->
 <section class="bg-gradient-to-b from-white via-cyan-50/30 to-white py-12 md:py-16">
   <div class="max-w-7xl mx-auto px-6">
@@ -172,7 +179,7 @@
         todos</button>
     </div>
 
-    @if (servicios().length > 0) {
+    
     <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-8">
       @for (servicio of servicios(); track servicio.servicioID) {
       <div (click)="navigateToServicioDetail(servicio.servicioID)"
@@ -194,9 +201,10 @@
       </div>
       }
     </div>
-    }
+    
   </div>
 </section>
+}
 
 <!-- Inmuebles Section -->
 <section class="max-w-7xl mx-auto px-6 py-12 md:py-16">
@@ -213,23 +221,30 @@
   </div>
 
   @if (inmuebles().length > 0) {
-  <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
-    @for (inmueble of inmuebles(); track inmueble.inmuebleID) {
-    <div (click)="navigateToInmuebleDetail(inmueble.inmuebleID)"
-      class="group bg-white rounded-2xl md:rounded-3xl shadow-sm hover:shadow-2xl hover:shadow-cyan-500/20 transition-all duration-500 cursor-pointer overflow-hidden border border-gray-100">
-      <div class="relative h-32 md:h-56">
-        <img [src]="inmueble.urlImagen" [alt]="inmueble.titulo" class="w-full h-full object-cover" />
-      </div>
-      <div class="p-3 md:p-5">
-        <h3 class="font-black text-sm md:text-lg text-gray-900 mb-1 md:mb-2 line-clamp-1">
-          {{ inmueble.titulo }}
-        </h3>
-        <p class="text-sm md:text-2xl font-black bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
-          S/. {{ inmueble.precio | number }}
-        </p>
-      </div>
-    </div>
-    }
+  <div class="carousel-container">
+    <p-carousel [value]="inmuebles()" [numVisible]="4" [numScroll]="1" [circular]="true"
+      [responsiveOptions]="responsiveOptions" [autoplayInterval]="4000">
+      <ng-template let-inmueble pTemplate="item">
+        <div class="p-2 h-full">
+          <div (click)="navigateToInmuebleDetail(inmueble.inmuebleID)"
+            class="group bg-white rounded-2xl md:rounded-3xl shadow-sm hover:shadow-2xl hover:shadow-cyan-500/20 transition-all duration-500 cursor-pointer overflow-hidden border border-gray-100 h-full flex flex-col">
+            <div class="relative h-32 md:h-56 overflow-hidden shrink-0">
+              <img [src]="inmueble.urlImagen" [alt]="inmueble.titulo"
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+            </div>
+            <div class="p-3 md:p-5 flex-1 flex flex-col justify-between">
+              <h3 class="font-black text-sm md:text-lg text-gray-900 mb-1 md:mb-2 line-clamp-1">
+                {{ inmueble.titulo }}
+              </h3>
+              <p
+                class="text-sm md:text-2xl font-black bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
+                S/. {{ inmueble.precio | number }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </ng-template>
+    </p-carousel>
   </div>
   }
 </section>

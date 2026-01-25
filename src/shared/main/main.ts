@@ -5,7 +5,7 @@ import { Inmueble, InmuebleService } from '../services/inmueble.service';
 import { Negocio, NegocioService } from '../services/negocio.service';
 import { Servicio, ServicioService } from '../services/servicio.service';
 import { TipoService, TipoValor } from '../services/tipo.service';
-
+import { CarouselModule } from 'primeng/carousel';
 
 import { FormsModule } from '@angular/forms';
 
@@ -13,7 +13,7 @@ import { FormsModule } from '@angular/forms';
 @Component({
   selector: 'app-main',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, CarouselModule],
   templateUrl: './main.html',
   styleUrls: ['./main.css']
 })
@@ -36,6 +36,12 @@ export class Main implements OnInit {
     { url: 'assets/banner1.png', title: 'Descubre lo mejor de tu barrio', subtitle: 'Apoya a los negocios locales y encuentra todo lo que necesitas.' },
     { url: 'assets/banner.png', title: 'Servicios a tu alcance', subtitle: 'Encuentra profesionales calificados para cada necesidad.' },
     { url: 'assets/fondo.jpg', title: 'Tu próximo hogar te espera', subtitle: 'Explora nuestra selección exclusiva de inmuebles.' }
+  ];
+
+  responsiveOptions = [
+    { breakpoint: '1400px', numVisible: 4, numScroll: 4 },
+    { breakpoint: '1024px', numVisible: 3, numScroll: 3 },
+    { breakpoint: '768px', numVisible: 2, numScroll: 2 },
   ];
 
   private iconMapping: { [key: string]: string } = {};
@@ -147,8 +153,7 @@ export class Main implements OnInit {
   loadFeaturedInmuebles() {
     this.inmuebleService.getInmuebles().subscribe({
       next: (data) => {
-        // Mostrar solo los primeros 4 inmuebles
-        this.inmuebles.set(data.slice(0, 4));
+        this.inmuebles.set(data);
         console.log(data);
       },
       error: (err) => console.error('Error loading inmuebles', err)
