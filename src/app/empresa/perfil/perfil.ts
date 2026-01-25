@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
@@ -11,6 +11,9 @@ import { TooltipModule } from 'primeng/tooltip';
 import { DialogModule } from 'primeng/dialog';
 import { ImageCropperComponent, ImageCroppedEvent, LoadedImage } from 'ngx-image-cropper';
 import { ProgressService } from '../services/progress.service';
+import { LocationService, LocationItem } from '../../../shared/services/location.service';
+import { SelectModule } from 'primeng/select';
+import { CheckboxModule } from 'primeng/checkbox';
 import * as L from 'leaflet';
 
 interface Address {
@@ -56,7 +59,9 @@ interface CompanyProfile {
     TabsModule,
     TooltipModule,
     DialogModule,
-    ImageCropperComponent
+    ImageCropperComponent,
+    SelectModule,
+    CheckboxModule
   ],
   providers: [],
   templateUrl: './perfil.html',
@@ -65,13 +70,15 @@ interface CompanyProfile {
 export class Perfil implements OnInit {
   private toastr = inject(ToastrService);
   private progressService = inject(ProgressService);
-  
+  private locationService = inject(LocationService);
+  private cdr = inject(ChangeDetectorRef);
+
   isLoading = signal(false);
   showImageCropper = signal(false);
   currentImageForCrop = signal<string | null>(null);
   croppedImage: any = '';
   imageChangedEvent: any = '';
-  
+
   showAddressDialog = signal(false);
   editingAddress: Address | null = null;
   private map: L.Map | null = null;
@@ -81,19 +88,23 @@ export class Perfil implements OnInit {
   addressSuggestions: any[] = [];
   showSuggestions = signal(false);
   private searchTimeout: any = null;
-  
+
+  departments = signal<LocationItem[]>([]);
+  provinces = signal<LocationItem[]>([]);
+  districts = signal<LocationItem[]>([]);
+
+  // Individual Form Signals
+  addrId = signal('');
+  addrName = signal('');
+  addrLine = signal('');
+  addrLat = signal(-12.0464);
+  addrLng = signal(-77.0428);
+  addrIsMain = signal(false);
+  addrDist = signal('');
+  addrProv = signal('');
+  addrDept = signal('');
+
   activeTab = signal('0');
-  newAddress: Address = {
-    id: '',
-    name: '',
-    address: '',
-    lat: -12.0464,
-    lng: -77.0428,
-    isMain: false,
-    distrito: '',
-    provincia: '',
-    departamento: ''
-  };
 
   companyProfile: CompanyProfile = {
     name: 'Mi Negocio',
@@ -128,15 +139,90 @@ export class Perfil implements OnInit {
 
   ngOnInit() {
     this.updateProgress();
+    this.loadDepartments();
+    this.fixLeafletIcon();
+  }
+
+  fixLeafletIcon() {
+    const path = '/assets/';
+    L.Icon.Default.imagePath = path;
+    delete (L.Icon.Default.prototype as any)._getIconUrl;
+    L.Icon.Default.mergeOptions({
+      iconRetinaUrl: path + 'marker-icon-2x.png',
+      iconUrl: path + 'marker-icon.png',
+      shadowUrl: path + 'marker-shadow.png',
+    });
+  }
+
+  loadDepartments() {
+    this.locationService.getDepartments().subscribe(data => {
+      this.departments.set(data);
+    });
+  }
+
+  onDepartmentChange() {
+    this.provinces.set([]);
+    this.districts.set([]);
+    this.addrProv.set('');
+    this.addrDist.set('');
+
+    const dept = this.addrDept();
+    if (dept) {
+      this.locationService.getProvinces(dept).subscribe(data => {
+        this.provinces.set(data);
+      });
+    }
+  }
+
+  onProvinceChange() {
+    this.districts.set([]);
+    this.addrDist.set('');
+
+    const prov = this.addrProv();
+    if (prov) {
+      this.locationService.getDistricts(prov).subscribe(data => {
+        this.districts.set(data);
+      });
+    }
+  }
+
+  onDistrictChange() {
+    if (this.addrDist() && this.addrProv() && this.addrDept()) {
+      const query = `${this.addrDist()}, ${this.addrProv()}, ${this.addrDept()}, Perú`;
+      this.updateMapBySearch(query);
+    }
+  }
+
+  private async updateMapBySearch(query: string) {
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`
+      );
+      const data = await response.json();
+      if (data && data.length > 0) {
+        const result = data[0];
+        const lat = parseFloat(result.lat);
+        const lng = parseFloat(result.lon);
+
+        this.addrLat.set(lat);
+        this.addrLng.set(lng);
+        this.addrLine.set(result.display_name);
+
+        if (this.map && this.marker) {
+          this.map.setView([lat, lng], 15);
+          this.marker.setLatLng([lat, lng]);
+        }
+      }
+    } catch (error) {
+      console.error('Error actualizando mapa por selección:', error);
+    }
   }
 
   loadProfile() {
-    // Aquí cargarías los datos desde el backend
     console.log('Cargando perfil');
   }
 
   updateProgress() {
-    // Actualizar progreso cuando cambian los datos
     this.progressService.updateProgress({
       hasLogo: !!this.companyProfile.logo,
       hasBasicInfo: this.companyProfile.name.trim() !== 'Mi Negocio' && this.companyProfile.description.length > 50,
@@ -148,18 +234,11 @@ export class Perfil implements OnInit {
 
   async saveProfile() {
     this.isLoading.set(true);
-
     try {
       await new Promise(resolve => setTimeout(resolve, 1000));
-      console.log('Guardando perfil:', this.companyProfile);
-
-      // Actualizar progreso después de guardar
       this.updateProgress();
-
       this.toastr.success('Los cambios se han guardado correctamente', 'Perfil actualizado');
-
     } catch (error) {
-      console.error('Error al guardar:', error);
       this.toastr.error('Error al guardar los cambios', 'Error');
     } finally {
       this.isLoading.set(false);
@@ -191,14 +270,8 @@ export class Perfil implements OnInit {
     this.croppedImage = event.blob;
   }
 
-  imageLoaded(image: LoadedImage) {
-    // Imagen cargada
-  }
-
-  cropperReady() {
-    // Cropper listo
-  }
-
+  imageLoaded(image: LoadedImage) { }
+  cropperReady() { }
   loadImageFailed() {
     this.toastr.error('No se pudo cargar la imagen', 'Error');
   }
@@ -233,46 +306,74 @@ export class Perfil implements OnInit {
   openAddressDialog(address?: Address) {
     if (address) {
       this.editingAddress = address;
-      this.newAddress = { ...address };
+      this.addrId.set(address.id);
+      this.addrName.set(address.name);
+      this.addrLine.set(address.address);
+      this.addrLat.set(address.lat);
+      this.addrLng.set(address.lng);
+      this.addrIsMain.set(address.isMain);
+      this.addrDept.set(address.departamento || '');
+      this.addrProv.set(address.provincia || '');
+      this.addrDist.set(address.distrito || '');
     } else {
       this.editingAddress = null;
-      this.newAddress = {
-        id: Date.now().toString(),
-        name: '',
-        address: '',
-        lat: -12.0464,
-        lng: -77.0428,
-        isMain: this.companyProfile.addresses.length === 0,
-        distrito: '',
-        provincia: '',
-        departamento: ''
-      };
+      this.addrId.set(Date.now().toString());
+      this.addrName.set('');
+      this.addrLine.set('');
+      this.addrLat.set(-12.0464);
+      this.addrLng.set(-77.0428);
+      this.addrIsMain.set(this.companyProfile.addresses.length === 0);
+      this.addrDept.set('');
+      this.addrProv.set('');
+      this.addrDist.set('');
     }
     this.showAddressDialog.set(true);
-    
-    // Inicializar mapa después de que el dialog se renderice
+
+    if (this.addrDept()) {
+      this.locationService.getProvinces(this.addrDept()).subscribe(data => {
+        this.provinces.set(data);
+        if (this.addrProv()) {
+          this.locationService.getDistricts(this.addrProv()).subscribe(dataDist => {
+            this.districts.set(dataDist);
+          });
+        }
+      });
+    }
+
     setTimeout(() => this.initMap(), 100);
   }
 
   saveAddress() {
-    if (!this.newAddress.name.trim() || !this.newAddress.address.trim()) {
+    if (!this.addrName().trim() || !this.addrLine().trim()) {
       this.toastr.warning('Por favor completa todos los campos', 'Campos requeridos');
       return;
     }
 
+    const addressObj: Address = {
+      id: this.addrId(),
+      name: this.addrName(),
+      address: this.addrLine(),
+      lat: this.addrLat(),
+      lng: this.addrLng(),
+      isMain: this.addrIsMain(),
+      departamento: this.addrDept(),
+      provincia: this.addrProv(),
+      distrito: this.addrDist()
+    };
+
     if (this.editingAddress) {
       const index = this.companyProfile.addresses.findIndex(a => a.id === this.editingAddress!.id);
       if (index !== -1) {
-        this.companyProfile.addresses[index] = { ...this.newAddress };
+        this.companyProfile.addresses[index] = addressObj;
       }
     } else {
-      this.companyProfile.addresses.push({ ...this.newAddress });
+      this.companyProfile.addresses.push(addressObj);
     }
 
-    if (this.newAddress.isMain) {
-      this.companyProfile.addresses.forEach(addr => {
-        if (addr.id !== this.newAddress.id) {
-          addr.isMain = false;
+    if (addressObj.isMain) {
+      this.companyProfile.addresses.forEach(a => {
+        if (a.id !== addressObj.id) {
+          a.isMain = false;
         }
       });
     }
@@ -302,14 +403,12 @@ export class Perfil implements OnInit {
     this.editingAddress = null;
     this.addressSuggestions = [];
     this.showSuggestions.set(false);
-    
-    // Limpiar timeout
+
     if (this.searchTimeout) {
       clearTimeout(this.searchTimeout);
       this.searchTimeout = null;
     }
-    
-    // Destruir mapa
+
     if (this.map) {
       this.map.remove();
       this.map = null;
@@ -319,94 +418,50 @@ export class Perfil implements OnInit {
 
   // === GESTIÓN DEL MAPA ===
   private initMap() {
-    if (this.map) {
-      this.map.remove();
-    }
+    if (this.map) this.map.remove();
 
-    // Configurar iconos por defecto de Leaflet
-    const iconRetinaUrl = 'assets/marker-icon-2x.png';
-    const iconUrl = 'assets/marker-icon.png';
-    const shadowUrl = 'assets/marker-shadow.png';
-    const iconDefault = L.icon({
-      iconRetinaUrl,
-      iconUrl,
-      shadowUrl,
-      iconSize: [25, 41],
-      iconAnchor: [12, 41],
-      popupAnchor: [1, -34],
-      tooltipAnchor: [16, -28],
-      shadowSize: [41, 41]
-    });
-    L.Marker.prototype.options.icon = iconDefault;
+    this.map = L.map('addressMap').setView([this.addrLat(), this.addrLng()], 15);
 
-    // Inicializar mapa
-    this.map = L.map('addressMap').setView(
-      [this.newAddress.lat, this.newAddress.lng],
-      15
-    );
-
-    // Agregar capa de OpenStreetMap
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors',
       maxZoom: 19
     }).addTo(this.map);
 
-    // Agregar marcador
-    this.marker = L.marker([this.newAddress.lat, this.newAddress.lng], {
+    this.marker = L.marker([this.addrLat(), this.addrLng()], {
       draggable: true
     }).addTo(this.map);
 
-    // Evento cuando se arrastra el marcador
     this.marker.on('dragend', () => {
-      const position = this.marker!.getLatLng();
-      this.newAddress.lat = position.lat;
-      this.newAddress.lng = position.lng;
-      this.reverseGeocode(position.lat, position.lng);
+      const pos = this.marker!.getLatLng();
+      this.addrLat.set(pos.lat);
+      this.addrLng.set(pos.lng);
+      this.reverseGeocode(pos.lat, pos.lng);
     });
 
-    // Evento cuando se hace clic en el mapa
     this.map.on('click', (e: L.LeafletMouseEvent) => {
-      this.newAddress.lat = e.latlng.lat;
-      this.newAddress.lng = e.latlng.lng;
-      
-      if (this.marker) {
-        this.marker.setLatLng(e.latlng);
-      }
-      
+      this.addrLat.set(e.latlng.lat);
+      this.addrLng.set(e.latlng.lng);
+      if (this.marker) this.marker.setLatLng(e.latlng);
       this.reverseGeocode(e.latlng.lat, e.latlng.lng);
     });
   }
 
   onAddressInput() {
-    // Cancelar búsqueda anterior
-    if (this.searchTimeout) {
-      clearTimeout(this.searchTimeout);
-    }
-
-    const query = this.newAddress.address.trim();
-    
+    if (this.searchTimeout) clearTimeout(this.searchTimeout);
+    const query = this.addrLine().trim();
     if (query.length < 3) {
       this.addressSuggestions = [];
       this.showSuggestions.set(false);
       return;
     }
-
-    // Debounce de 500ms
-    this.searchTimeout = setTimeout(async () => {
-      await this.loadAddressSuggestions(query);
-    }, 500);
+    this.searchTimeout = setTimeout(() => this.loadAddressSuggestions(query), 500);
   }
 
   private async loadAddressSuggestions(query: string) {
     this.isLoadingSuggestions.set(true);
-    
     try {
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1`
-      );
-      
-      const data = await response.json();
-      
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1`);
+      const data = await res.json();
       if (data && data.length > 0) {
         this.addressSuggestions = data;
         this.showSuggestions.set(true);
@@ -415,8 +470,6 @@ export class Perfil implements OnInit {
         this.showSuggestions.set(false);
       }
     } catch (error) {
-      console.error('Error buscando sugerencias:', error);
-      this.addressSuggestions = [];
       this.showSuggestions.set(false);
     } finally {
       this.isLoadingSuggestions.set(false);
@@ -424,72 +477,44 @@ export class Perfil implements OnInit {
   }
 
   selectSuggestion(suggestion: any) {
-    this.newAddress.address = suggestion.display_name;
-    this.newAddress.lat = parseFloat(suggestion.lat);
-    this.newAddress.lng = parseFloat(suggestion.lon);
-    
-    // Extraer detalles de ubicación
-    if (suggestion.address) {
-      this.newAddress.distrito = suggestion.address.suburb || 
-                                 suggestion.address.neighbourhood || 
-                                 suggestion.address.hamlet || 
-                                 suggestion.address.quarter || 
-                                 suggestion.address.city_district || '';
-      
-      this.newAddress.provincia = suggestion.address.county || 
-                                  suggestion.address.state_district || 
-                                  suggestion.address.city || '';
-      
-      this.newAddress.departamento = suggestion.address.state || 
-                                     suggestion.address.region || '';
-    }
-    
-    // Actualizar mapa
+    const lat = parseFloat(suggestion.lat);
+    const lng = parseFloat(suggestion.lon);
+    this.addrLat.set(lat);
+    this.addrLng.set(lng);
+    this.addrLine.set(suggestion.display_name);
+
+    if (suggestion.address) this.matchLocationFromGeocode(suggestion.address);
+
     if (this.map && this.marker) {
-      this.map.setView([this.newAddress.lat, this.newAddress.lng], 15);
-      this.marker.setLatLng([this.newAddress.lat, this.newAddress.lng]);
+      this.map.setView([lat, lng], 15);
+      this.marker.setLatLng([lat, lng]);
     }
-    
+
     this.addressSuggestions = [];
     this.showSuggestions.set(false);
-    
-    this.toastr.success('Ubicación actualizada en el mapa', 'Dirección seleccionada');
+    this.toastr.success('Ubicación actualizada', 'Dirección seleccionada');
   }
 
   async searchAddress() {
-    if (!this.newAddress.address.trim()) {
-      this.toastr.warning('Ingresa una dirección para buscar', 'Campo vacío');
-      return;
-    }
+    const query = this.addrLine().trim();
+    if (!query) return;
 
     this.isSearching.set(true);
-
     try {
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(this.newAddress.address)}&limit=1`
-      );
-      
-      const data = await response.json();
-      
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`);
+      const data = await res.json();
       if (data && data.length > 0) {
-        const result = data[0];
-        this.newAddress.lat = parseFloat(result.lat);
-        this.newAddress.lng = parseFloat(result.lon);
-        this.newAddress.address = result.display_name;
-        
-        // Actualizar mapa
+        const r = data[0];
+        const lat = parseFloat(r.lat);
+        const lng = parseFloat(r.lon);
+        this.addrLat.set(lat);
+        this.addrLng.set(lng);
+        this.addrLine.set(r.display_name);
         if (this.map && this.marker) {
-          this.map.setView([this.newAddress.lat, this.newAddress.lng], 15);
-          this.marker.setLatLng([this.newAddress.lat, this.newAddress.lng]);
+          this.map.setView([lat, lng], 15);
+          this.marker.setLatLng([lat, lng]);
         }
-        
-        this.toastr.success('Ubicación actualizada en el mapa', 'Dirección encontrada');
-      } else {
-        this.toastr.warning('No se encontró la dirección. Intenta con otra búsqueda', 'No encontrada');
       }
-    } catch (error) {
-      console.error('Error buscando dirección:', error);
-      this.toastr.error('Error al buscar la dirección', 'Error');
     } finally {
       this.isSearching.set(false);
     }
@@ -497,36 +522,71 @@ export class Perfil implements OnInit {
 
   private async reverseGeocode(lat: number, lng: number) {
     try {
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`
-      );
-      
-      const data = await response.json();
-      
+      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`);
+      const data = await res.json();
       if (data && data.display_name) {
-        this.newAddress.address = data.display_name;
-        
-        // Extraer detalles de ubicación
-        if (data.address) {
-          // Distrito (suburb, neighbourhood, hamlet, quarter)
-          this.newAddress.distrito = data.address.suburb || 
-                                     data.address.neighbourhood || 
-                                     data.address.hamlet || 
-                                     data.address.quarter || 
-                                     data.address.city_district || '';
-          
-          // Provincia (county, state_district)
-          this.newAddress.provincia = data.address.county || 
-                                      data.address.state_district || 
-                                      data.address.city || '';
-          
-          // Departamento (state, region)
-          this.newAddress.departamento = data.address.state || 
-                                         data.address.region || '';
-        }
+        this.addrLine.set(data.display_name);
+        if (data.address) this.matchLocationFromGeocode(data.address);
       }
-    } catch (error) {
-      console.error('Error en geocodificación inversa:', error);
+    } catch (error) { }
+  }
+
+  private matchLocationFromGeocode(addressData: any) {
+    const deptCandidate = addressData.state || addressData.region || addressData.province || '';
+    const provCandidate = addressData.county || addressData.state_district || addressData.city || addressData.region || '';
+    const distCandidate = addressData.suburb || addressData.neighbourhood || addressData.village || addressData.town || addressData.hamlet || addressData.quarter || addressData.municipality || '';
+    console.log(addressData);
+    const matchedDept = this.departments().find(d => this.isNameMatch(d.name, deptCandidate));
+    console.log(matchedDept);
+    if (matchedDept) {
+      this.addrDept.set(matchedDept.name);
+      this.locationService.getProvinces(matchedDept.name).subscribe(provs => {
+        console.log(provs);
+        this.provinces.set(provs);
+        const matchedProv = provs.find(p => this.isNameMatch(p.name, provCandidate)) || provs.find(p => this.isNameMatch(p.name, distCandidate));
+        console.log(matchedProv);
+        if (matchedProv) {
+          this.addrProv.set(matchedProv.name);
+          this.locationService.getDistricts(matchedProv.name).subscribe(dists => {
+            this.districts.set(dists);
+            const matchedDist = dists.find(d => this.isNameMatch(d.name, distCandidate)) || dists.find(d => this.isNameMatch(d.name, addressData.road || '')) || dists.find(d => this.isNameMatch(d.name, provCandidate));
+            if (matchedDist) {
+              this.addrDist.set(matchedDist.name);
+            } else {
+              this.addrDist.set('');
+            }
+            this.cdr.detectChanges();
+          });
+        } else {
+          this.addrProv.set('');
+          this.districts.set([]);
+          this.addrDist.set('');
+          this.cdr.detectChanges();
+        }
+        this.cdr.detectChanges();
+      });
+    } else {
+      this.clearLocationFields();
+      this.cdr.detectChanges();
     }
+  }
+
+  private clearLocationFields() {
+    this.addrDept.set('');
+    this.addrProv.set('');
+    this.addrDist.set('');
+    this.provinces.set([]);
+    this.districts.set([]);
+  }
+
+  private isNameMatch(localName: string, externalName: string): boolean {
+    if (!localName || !externalName) return false;
+    const clean = (s: string) => s.toLowerCase()
+      .replace(/departamento de |provincia de |distrito de |región de |municipalidad de |gobierno regional de /gi, '')
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9 ]/g, '').trim();
+    const cL = clean(localName);
+    const cE = clean(externalName);
+    return cL === cE || cE.includes(cL) || cL.includes(cE);
   }
 }

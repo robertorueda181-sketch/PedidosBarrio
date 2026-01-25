@@ -1,3 +1,4 @@
+<p-menu #mobileMenu [model]="mobileMenuItems" [popup]="true" appendTo="body"></p-menu>
 
 <p-confirmDialog></p-confirmDialog>
 
@@ -7,7 +8,8 @@
     <div class="header-info">
       <div class="business-badge">
         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
         </svg>
         <div>
           <h2>Gestión de Productos</h2>
@@ -17,7 +19,7 @@
       <div class="header-actions">
         <button class="btn-secondary" (click)="openCategoryModal()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
           </svg>
           Nueva Categoría
         </button>
@@ -29,164 +31,171 @@
     <!-- Buscador Global -->
     <div class="global-search-container">
       <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
       </svg>
-      <input 
-        type="text" 
-        class="search-input" 
-        [(ngModel)]="searchTerm" 
+      <input type="text" class="search-input" [(ngModel)]="searchTerm"
         placeholder="Buscar productos en todas las categorías...">
       @if (searchTerm) {
-        <button class="clear-search" (click)="searchTerm = ''" title="Limpiar búsqueda">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-          </svg>
-        </button>
+      <button class="clear-search" (click)="searchTerm = ''" title="Limpiar búsqueda">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
       }
     </div>
 
     <!-- Acordeón de Categorías y Productos -->
     <div class="accordion-container w-full">
       @for (category of filteredCategories; track category.id) {
-        <div class="accordion-item">
-          <div class="accordion-header" [style.border-left-color]="category.color" (click)="toggleCategory(category.id)">
-            <div class="accordion-left">
-              <div class="category-badge" [style.background-color]="category.color">
-                @if (category.isFavorite) {
-                  <svg viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
-                  </svg>
-                }
-              </div>
-              <div class="accordion-info">
-                <h3>{{ category.name }}</h3>
-                <span class="product-count-text">{{ getProductsByCategory(category.id).length }} productos</span>
-              </div>
-            </div>
-            <div class="accordion-actions">
-              <button class="btn-icon-sm" (click)="openCategoryModal(category); $event.stopPropagation()" title="Editar categoría">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
-                </svg>
-              </button>
-              <button class="btn-icon-sm" (click)="deleteCategory(category.id); $event.stopPropagation()" title="Eliminar categoría">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                </svg>
-              </button>
-              <button class="btn-icon-sm accordion-toggle">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" [class.rotated]="category.expanded">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                </svg>
-              </button>
-            </div>
-          </div>
-          
-          <div class="accordion-content" [class.expanded]="category.expanded">
-            <div class="accordion-body">
-              <button class="btn-add-product-full" (click)="selectedCategoryId = category.id; openProductModal()">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                </svg>
-                Agregar Producto a {{ category.name }}
-              </button>
-              
-              @if (getProductsByCategory(category.id).length > 0) {
-                <div class="products-table-container">
-                  <table class="products-table">
-                    <thead>
-                      <tr>
-                        @if (!isMobile) {
-                          <th>Acciones</th>
-                        }
-                        <th>Imagen</th>
-                        <th>Nombre</th>
-                        <th>Descripción</th>
-                        <th>Precio</th>
-                        <th>Estado</th>
-                        @if (isMobile) {
-                          <th>Acciones</th>
-                        }
-                      </tr>
-                    </thead>
-                    <tbody>
-                      @for (product of getProductsByCategory(category.id); track product.productoID) {
-                        <tr>
-                          @if (!isMobile) {
-                            <td>
-                              <div class="product-actions">
-                                <button class="btn-icon-sm" (click)="openProductModal(product)" title="Editar producto">
-                                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
-                                  </svg>
-                                </button>
-                                <button class="btn-icon-sm btn-visibility" 
-                                        (click)="toggleProductVisibility(product.productoID)"
-                                        [title]="product.visible ? 'Ocultar producto' : 'Mostrar producto'">
-                                  @if (product.visible) {
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                    </svg>
-                                  } @else {
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>
-                                    </svg>
-                                  }
-                                </button>
-                                <button class="btn-icon-sm" (click)="deleteProduct(product.productoID)" title="Eliminar producto">
-                                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                  </svg>
-                                </button>
-                              </div>
-                            </td>
-                          }
-                          <td>
-                            <img class="product-thumbnail" [src]="product.imagenPrincipal" alt="Imagen del producto"[alt]="product.nombre">
-                          </td>
-                          <td>
-                            <div class="product-name">{{ product.nombre }}</div>
-                          </td>
-                          <td class="product-description">{{ product.descripcion }}</td>
-                          <td>
-                            <span class="product-price">S/. {{ product.precioActual | number:'1.2-2' }}</span>
-                          </td>
-                          <td>
-                            <span class="product-status-badge" [class.active]="product.visible">
-                              {{ product.visible ? 'Visible' : 'No visible' }}
-                            </span>
-                          </td>
-                          @if (isMobile) {
-                            <td>
-                              <div class="dropdown">
-                                <!-- Menú móvil: si se requiere, implementar lógica alternativa -->
-                                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                    <circle cx="12" cy="12" r="2"/>
-                                    <circle cx="19" cy="12" r="2"/>
-                                    <circle cx="5" cy="12" r="2"/>
-                                  </svg>
-                                
-                                <!-- Menú móvil: si se requiere, implementar lógica alternativa -->
-                              </div>
-                            </td>
-                          }
-                        </tr>
-                      }
-                    </tbody>
-                  </table>
-                </div>
-              } @else {
-                <div class="empty-accordion">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
-                  </svg>
-                  <p>No hay productos en esta categoría</p>
-                </div>
+      <div class="accordion-item">
+        <div class="accordion-header" [style.border-left-color]="category.color" (click)="toggleCategory(category.id)">
+          <div class="accordion-left">
+            <div class="category-badge" [style.background-color]="category.color">
+              @if (category.isFavorite) {
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path
+                  d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+              </svg>
               }
             </div>
+            <div class="accordion-info">
+              <h3>{{ category.name }}</h3>
+              <span class="product-count-text">{{ getProductsByCategory(category.id).length }} productos</span>
+            </div>
+          </div>
+          <div class="accordion-actions">
+            <button class="btn-icon-sm" (click)="openCategoryModal(category); $event.stopPropagation()"
+              title="Editar categoría">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+              </svg>
+            </button>
+            <button class="btn-icon-sm" (click)="deleteCategory(category.id); $event.stopPropagation()"
+              title="Eliminar categoría">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </button>
+            <button class="btn-icon-sm accordion-toggle">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" [class.rotated]="category.expanded">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
           </div>
         </div>
+
+        <div class="accordion-content" [class.expanded]="category.expanded">
+          <div class="accordion-body">
+            <button class="btn-add-product-full" (click)="selectedCategoryId = category.id; openProductModal()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
+              Agregar Producto a {{ category.name }}
+            </button>
+
+            @if (getProductsByCategory(category.id).length > 0) {
+            <div class="products-table-container">
+              <table class="products-table">
+                <thead>
+                  <tr>
+                    <th>Acciones</th>
+                    <th>Imagen</th>
+                    <th>Nombre</th>
+                    <th>Descripción</th>
+                    <th>Precio</th>
+                    <th>Estado</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (product of getProductsByCategory(category.id); track product.productoID) {
+                  <tr [class.product-in-review]="product.aprobado === false">
+                    <td>
+                      @if (!isMobile) {
+                      <div class="product-actions">
+                        <button class="btn-icon-sm" (click)="openProductModal(product)" title="Editar producto">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                          </svg>
+                        </button>
+                        <button class="btn-icon-sm btn-visibility" (click)="toggleProductVisibility(product.productoID)"
+                          [disabled]="product.aprobado === false"
+                          [title]="product.aprobado === false ? 'Producto en evaluación' : (product.visible ? 'Ocultar producto' : 'Mostrar producto')">
+                          @if (product.visible) {
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                          </svg>
+                          } @else {
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                          </svg>
+                          }
+                        </button>
+                        <button class="btn-icon-sm" (click)="deleteProduct(product.productoID)"
+                          title="Eliminar producto">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
+                      </div>
+                      } @else {
+                      <button class="btn-icon-sm" (click)="openMobileMenu($event, product, mobileMenu)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                          <circle cx="12" cy="12" r="2" />
+                          <circle cx="19" cy="12" r="2" />
+                          <circle cx="5" cy="12" r="2" />
+                        </svg>
+                      </button>
+                      }
+                    </td>
+                    <td>
+                      <img class="product-thumbnail" [src]="product.imagenPrincipal" alt="Imagen del producto"
+                        [alt]="product.nombre">
+                    </td>
+                    <td>
+                      <div class="product-name">{{ product.nombre }}</div>
+                    </td>
+                    <td class="product-description">{{ product.descripcion }}</td>
+                    <td>
+                      <span class="product-price">S/. {{ product.precioActual | number:'1.2-2' }}</span>
+                    </td>
+                    <td>
+                      @if (product.aprobado === false) {
+                      <span class="product-status-badge status-review" pTooltip="Este producto está en evaluación porque fue marcado como inapropiado por la IA, 
+                        la evaluación puede tardar máximo 24 horas." tooltipPosition="top">
+                        ⚠ En Evaluación
+                      </span>
+                      } @else {
+                      <span class="product-status-badge" [class.active]="product.visible">
+                        {{ product.visible ? 'Visible' : 'No visible' }}
+                      </span>
+                      }
+                    </td>
+                  </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+            } @else {
+            <div class="empty-accordion">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+              </svg>
+              <p>No hay productos en esta categoría</p>
+            </div>
+            }
+          </div>
+        </div>
+      </div>
       }
     </div>
   </div>
@@ -194,48 +203,35 @@
 
 <!-- Modal Categoría -->
 @if (showCategoryModal) {
-  <div class="modal-overlay" (click)="closeCategoryModal()">
-    <div class="modal" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <h3>{{ categoryForm.id ? 'Editar Categoría' : 'Nueva Categoría' }}</h3>
-        <button class="btn-close" (click)="closeCategoryModal()">×</button>
+<div class="modal-overlay" (click)="closeCategoryModal()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>{{ categoryForm.id ? 'Editar Categoría' : 'Nueva Categoría' }}</h3>
+      <button class="btn-close" (click)="closeCategoryModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Nombre de la categoría</label>
+        <input type="text" [(ngModel)]="categoryForm.name" placeholder="Ej: Platos, Bebidas, Postres"
+          class="form-control">
       </div>
-      <div class="modal-body">
-        <div class="form-group">
-          <label>Nombre de la categoría</label>
-          <input 
-            type="text" 
-            [(ngModel)]="categoryForm.name" 
-            placeholder="Ej: Platos, Bebidas, Postres"
-            class="form-control">
+      <div class="form-group">
+        <label>Color de la categoría</label>
+        <div class="color-picker-group">
+          <input type="color" [(ngModel)]="categoryForm.color" class="color-picker">
+          <input type="text" [(ngModel)]="categoryForm.color" placeholder="#3b82f6" class="form-control color-input">
+          <!-- <div class="color-preview" [style.background-color]="categoryForm.color"></div> -->
         </div>
-        <div class="form-group">
-          <label>Color de la categoría</label>
-          <div class="color-picker-group">
-            <input 
-              type="color" 
-              [(ngModel)]="categoryForm.color" 
-              class="color-picker">
-            <input 
-              type="text" 
-              [(ngModel)]="categoryForm.color" 
-              placeholder="#3b82f6"
-              class="form-control color-input">
-            <!-- <div class="color-preview" [style.background-color]="categoryForm.color"></div> -->
-          </div>
-          <div class="color-presets">
-            @for (color of ['#ef4444', '#f59e0b', '#fbbf24', '#10b981', '#06b6d4', '#3b82f6', '#8b5cf6', '#ec4899']; track color) {
-              <button 
-                type="button"
-                class="color-preset" 
-                [style.background-color]="color"
-                (click)="categoryForm.color = color"
-                [class.active]="categoryForm.color === color">
-              </button>
-            }
-          </div>
+        <div class="color-presets">
+          @for (color of ['#ef4444', '#f59e0b', '#fbbf24', '#10b981', '#06b6d4', '#3b82f6', '#8b5cf6', '#ec4899']; track
+          color) {
+          <button type="button" class="color-preset" [style.background-color]="color"
+            (click)="categoryForm.color = color" [class.active]="categoryForm.color === color">
+          </button>
+          }
         </div>
-        <!-- <div class="form-group">
+      </div>
+      <!-- <div class="form-group">
           <label class="checkbox-label">
             <input 
               type="checkbox" 
@@ -243,29 +239,21 @@
             <span>Marcar como categoría favorita</span>
           </label>
         </div> -->
-      </div>
-      <div class="modal-footer">
-        <button class="btn-secondary" (click)="closeCategoryModal()">Cancelar</button>
-        <button class="btn-primary" (click)="saveCategoryForm()">{{ categoryForm.id ? 'Guardar' : 'Crear' }}</button>
-      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="closeCategoryModal()">Cancelar</button>
+      <button class="btn-primary" (click)="saveCategoryForm()">{{ categoryForm.id ? 'Guardar' : 'Crear' }}</button>
     </div>
   </div>
+</div>
 }
 
 <!-- Modal Producto con PrimeNG -->
-<p-dialog 
-  [(visible)]="showProductModal" 
-  [header]="productForm.id ? 'Editar Producto' : 'Nuevo Producto'"
-  [modal]="true"
-  [closable]="false"
-  [closeOnEscape]="false"
-  [breakpoints]="{'960px': '100vw', '640px': '100vw'}"
-  [style]="{width: '90%', maxWidth: '1000px'}"
-  [contentStyle]="{height: 'calc(95vh - 120px)', overflow: 'auto'}"
-  [draggable]="false"
-  [resizable]="false"
-  styleClass="product-dialog">
-  
+<p-dialog [(visible)]="showProductModal" [header]="productForm.id ? 'Editar Producto' : 'Nuevo Producto'" [modal]="true"
+  [closable]="false" [closeOnEscape]="false" [breakpoints]="{'960px': '100vw', '640px': '100vw'}"
+  [style]="{width: '90%', maxWidth: '1000px'}" [contentStyle]="{height: 'calc(95vh - 120px)', overflow: 'auto'}"
+  [draggable]="false" [resizable]="false" styleClass="product-dialog">
+
   <p-tabs value="0">
     <p-tablist>
       <p-tab value="0" class="flex items-center !gap-2">
@@ -277,161 +265,107 @@
         <span>Precio</span>
       </p-tab>
       @if (productForm.hasStockControl) {
-        <p-tab value="2" class="flex items-center !gap-2">
-          <i class="pi pi-box"></i>
-          <span>Inventario</span>
-          <p-chip 
-            [label]="'Stock: ' + productForm.currentStock" 
-            [styleClass]="productForm.currentStock <= productForm.minStock ? 'ml-2 bg-red-500' : 'ml-2 bg-green-500'">
-          </p-chip>
-        </p-tab>
+      <p-tab value="2" class="flex items-center !gap-2">
+        <i class="pi pi-box"></i>
+        <span>Inventario</span>
+        <p-chip [label]="'Stock: ' + productForm.currentStock"
+          [styleClass]="productForm.currentStock <= productForm.minStock ? 'ml-2 bg-red-500' : 'ml-2 bg-green-500'">
+        </p-chip>
+      </p-tab>
       }
       <p-tab value="3" class="flex items-center !gap-2">
         <i class="pi pi-sliders-h"></i>
         <span>Modificadores</span>
         @if (productForm.modifiers.length > 0) {
-          <p-chip [label]="productForm.modifiers.length.toString()" styleClass="ml-2"></p-chip>
+        <p-chip [label]="productForm.modifiers.length.toString()" styleClass="ml-2"></p-chip>
         }
       </p-tab>
     </p-tablist>
-    
+
     <p-tabpanels>
       <!-- Tab 1: Información Básica -->
       <p-tabpanel value="0">
-        <app-tab-basic-info
-          [productForm]="productForm"
-          [categories]="categories()"
-          [kitchenAreas]="kitchenAreas"
-          (openImageModal)="openImageModal()"
-          (deleteImage)="onDeleteImage()"
+        <app-tab-basic-info [productForm]="productForm" [categories]="categories()" [kitchenAreas]="kitchenAreas"
+          (openImageModal)="openImageModal()" (deleteImage)="onDeleteImage()"
           (showStockInfo)="showStockInfoDialog = true">
         </app-tab-basic-info>
       </p-tabpanel>
 
-    <!-- Tab 2: Precio -->
-    <p-tabpanel value="1">
-      <app-tab-prices
-        #tabPrices
-        [productForm]="productForm"
-        [newVariant]="newVariant"
-        (addVariant)="addVariant()"
-        (removeVariant)="removeVariant($event)"
-        (validationError)="showValidationError($event)">
-      </app-tab-prices>
-    </p-tabpanel>
+      <!-- Tab 2: Precio -->
+      <p-tabpanel value="1">
+        <app-tab-prices #tabPrices [productForm]="productForm" [newVariant]="newVariant" (addVariant)="addVariant()"
+          (removeVariant)="removeVariant($event)" (validationError)="showValidationError($event)">
+        </app-tab-prices>
+      </p-tabpanel>
 
-    <!-- Tab 3: Stock -->
-    @if (productForm.hasStockControl) {
+      <!-- Tab 3: Stock -->
+      @if (productForm.hasStockControl) {
       <p-tabpanel value="2">
         <app-tab-inventory [productForm]="productForm"></app-tab-inventory>
       </p-tabpanel>
-    }
+      }
 
-    <!-- Tab 4: Modificadores -->
-    <p-tabpanel value="3">
-      <app-tab-modifiers
-        [productForm]="productForm"
-        [newModifier]="newModifier"
-        (addModifier)="addModifier($event)"
-        (removeModifier)="removeModifier($event)"
-        (validationError)="showValidationError($event)">
-      </app-tab-modifiers>
-    </p-tabpanel>
-  </p-tabpanels>
+      <!-- Tab 4: Modificadores -->
+      <p-tabpanel value="3">
+        <app-tab-modifiers [productForm]="productForm" [newModifier]="newModifier" (addModifier)="addModifier($event)"
+          (removeModifier)="removeModifier($event)" (validationError)="showValidationError($event)">
+        </app-tab-modifiers>
+      </p-tabpanel>
+    </p-tabpanels>
   </p-tabs>
 
   <ng-template pTemplate="footer">
-    <button 
-      pButton 
-      label="Cancelar" 
-      icon="pi pi-times" 
-      class="p-button-text"
-      (click)="closeProductModal()">
+    <button pButton label="Cancelar" icon="pi pi-times" class="p-button-text" (click)="closeProductModal()">
     </button>
-    <button 
-      pButton 
-      [label]="productForm.id ? 'Guardar Cambios' : 'Guardar Producto'" 
-      icon="pi pi-check" 
+    <button pButton [label]="productForm.id ? 'Guardar Cambios' : 'Guardar Producto'" icon="pi pi-check"
       (click)="saveProductForm()">
     </button>
   </ng-template>
 </p-dialog>
 
 <!-- Modal de recorte de imagen -->
-<p-dialog 
-  [visible]="showImageCropper()" 
-  (visibleChange)="showImageCropper.set($event)"
-  header="Vista Previa de Imagen"
-  [modal]="true"
-  [closable]="false"
-  [closeOnEscape]="false"
-  [style]="{width: '600px'}"
-  [draggable]="false"
+<p-dialog [visible]="showImageCropper()" (visibleChange)="showImageCropper.set($event)" header="Vista Previa de Imagen"
+  [modal]="true" [closable]="false" [closeOnEscape]="false" [style]="{width: '600px'}" [draggable]="false"
   [resizable]="false">
-  
+
   @if (isLoadingImage()) {
-    <div class="text-center p-6">
-      <i class="pi pi-spin pi-spinner text-6xl text-primary mb-4 block"></i>
-      <p class="text-600">Cargando imagen...</p>
-    </div>
+  <div class="text-center p-6">
+    <i class="pi pi-spin pi-spinner text-6xl text-primary mb-4 block"></i>
+    <p class="text-600">Cargando imagen...</p>
+  </div>
   }
-  
+
   @if (!currentImageForCrop() && !isLoadingImage()) {
-    <div class="text-center p-6">
-      <i class="pi pi-image text-6xl text-400 mb-4 block"></i>
-      <p class="text-600 mb-4">Selecciona una imagen para comenzar</p>
-      <button 
-        pButton 
-        label="Seleccionar Imagen" 
-        icon="pi pi-upload"
-        (click)="imageInputModal.click()">
-      </button>
-      <input 
-        #imageInputModal
-        type="file" 
-        (change)="onFileSelected($event, productForm.id ?? 0)"
-        accept="image/*"
-        style="display: none">
-    </div>
-  }
-  
-  @if (currentImageForCrop()) {
-    <div class="mb-3">
-      <image-cropper
-        [imageBase64]="currentImageForCrop() || ''"
-        [maintainAspectRatio]="true"
-        [aspectRatio]="1 / 1"
-        [resizeToWidth]="500"
-        format="png"
-        (imageCropped)="imageCropped($event)"
-        (imageLoaded)="imageLoaded($event)"
-        (cropperReady)="cropperReady()"
-        (loadImageFailed)="loadImageFailed()"
-        [style.height.px]="400">
-      </image-cropper>
-    </div>
-    
-    <div class="surface-card border-round p-3">
-      <p class="text-600 m-0 text-sm">
-        <i class="pi pi-info-circle mr-2"></i>
-        Arrastra las esquinas para ajustar el área de recorte. La imagen se recortará en formato cuadrado.
-      </p>
-    </div>
-  }
-  
-  <ng-template pTemplate="footer">
-    <button 
-      pButton 
-      label="Cancelar" 
-      icon="pi pi-times" 
-      class="p-button-text"
-      (click)="closeImageCropper()">
+  <div class="text-center p-6">
+    <i class="pi pi-image text-6xl text-400 mb-4 block"></i>
+    <p class="text-600 mb-4">Selecciona una imagen para comenzar</p>
+    <button pButton label="Seleccionar Imagen" icon="pi pi-upload" (click)="imageInputModal.click()">
     </button>
-    <button 
-      pButton 
-      label="Guardar Recorte" 
-      icon="pi pi-check" 
-      (click)="saveCroppedImage()">
+    <input #imageInputModal type="file" (change)="onFileSelected($event, productForm.id ?? 0)" accept="image/*"
+      style="display: none">
+  </div>
+  }
+
+  @if (currentImageForCrop()) {
+  <div class="mb-3">
+    <image-cropper [imageBase64]="currentImageForCrop() || ''" [maintainAspectRatio]="true" [aspectRatio]="1 / 1"
+      [resizeToWidth]="500" format="png" (imageCropped)="imageCropped($event)" (imageLoaded)="imageLoaded($event)"
+      (cropperReady)="cropperReady()" (loadImageFailed)="loadImageFailed()" [style.height.px]="400">
+    </image-cropper>
+  </div>
+
+  <div class="surface-card border-round p-3">
+    <p class="text-600 m-0 text-sm">
+      <i class="pi pi-info-circle mr-2"></i>
+      Arrastra las esquinas para ajustar el área de recorte. La imagen se recortará en formato cuadrado.
+    </p>
+  </div>
+  }
+
+  <ng-template pTemplate="footer">
+    <button pButton label="Cancelar" icon="pi pi-times" class="p-button-text" (click)="closeImageCropper()">
+    </button>
+    <button pButton label="Guardar Recorte" icon="pi pi-check" (click)="saveCroppedImage()">
     </button>
   </ng-template>
 </p-dialog>

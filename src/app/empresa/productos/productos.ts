@@ -3,13 +3,14 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ProductoService } from '../../../shared/services/producto.service';
 import { Precio, Producto, ProductoDetalle } from '../../../shared/models/producto.model';
-import { ConfirmationService } from 'primeng/api';
+import { ConfirmationService, MenuItem } from 'primeng/api';
 import { ToastrService } from 'ngx-toastr';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { MenuModule } from 'primeng/menu';
 import { DialogModule } from 'primeng/dialog';
 import { TabsModule } from 'primeng/tabs';
 import { InputTextModule } from 'primeng/inputtext';
-import { TextareaModule  } from 'primeng/textarea';
+import { TextareaModule } from 'primeng/textarea';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { SelectModule } from 'primeng/select';
 import { CheckboxModule } from 'primeng/checkbox';
@@ -52,8 +53,8 @@ interface Modifier {
   selector: 'app-productos',
   standalone: true,
   imports: [
-    CommonModule, 
-    FormsModule, 
+    CommonModule,
+    FormsModule,
     ConfirmDialogModule,
     DialogModule,
     TabsModule,
@@ -70,7 +71,8 @@ interface Modifier {
     TabBasicInfoComponent,
     TabPricesComponent,
     TabInventoryComponent,
-    TabModifiersComponent
+    TabModifiersComponent,
+    MenuModule
   ],
   providers: [ConfirmationService],
   templateUrl: './productos.html',
@@ -98,6 +100,10 @@ export class ProductosComponent {
   croppedImage: any = '';
   imageChangedEvent: any = '';
   originalImageUrl: string | undefined = undefined;
+
+  // Acciones para menú móvil
+  mobileMenuItems: MenuItem[] = [];
+  selectedProductForMenu: Producto | null = null;
 
   // Categoría seleccionada
   selectedCategoryId: number | null = null;
@@ -131,7 +137,7 @@ export class ProductosComponent {
   // Formularios temporales para agregar variantes y modificadores
   newVariant = { name: '', price: 0 };
   newModifier = { name: '', options: '', required: false, maxSelections: 1 };
-  
+
   kitchenAreas = ['Cocina principal', 'Barra', 'Parrilla', 'Repostería', 'Bebidas'];
 
   categories = signal<Category[]>([]);
@@ -143,6 +149,29 @@ export class ProductosComponent {
     this.loadCategorias();
     this.selectedCategoryId = this.categories()[0]?.id || null;
     this.updateProductCounts();
+  }
+
+  openMobileMenu(event: any, product: Producto, menu: any) {
+    this.selectedProductForMenu = product;
+    this.mobileMenuItems = [
+      {
+        label: 'Editar',
+        icon: 'pi pi-pencil',
+        command: () => this.openProductModal(product)
+      },
+      {
+        label: product.visible ? 'Ocultar' : 'Mostrar',
+        icon: product.visible ? 'pi pi-eye-slash' : 'pi pi-eye',
+        disabled: product.aprobado === false,
+        command: () => this.toggleProductVisibility(product.productoID)
+      },
+      {
+        label: 'Eliminar',
+        icon: 'pi pi-trash',
+        command: () => this.deleteProduct(product.productoID)
+      }
+    ];
+    menu.toggle(event);
   }
 
   checkMobile() {
@@ -158,7 +187,7 @@ export class ProductosComponent {
     this.productoService.getCategoriasConProductos().subscribe({
       next: (response) => {
         console.log('Datos cargados desde el servicio:', response);
-        
+
         // Cargar categorías
         this.categories.set(response.categorias.map(cat => ({
           id: cat.categoriaID,
@@ -168,12 +197,12 @@ export class ProductosComponent {
           color: cat.color || '#3b82f6',
           expanded: false
         })));
-        
+
         // Cargar productos
         this.products.set(response.productos.map(prod => ({
           ...prod
         })));
-        
+
         if (this.categories().length > 0) {
           this.categories.update(cats => {
             cats[0].expanded = true;
@@ -181,7 +210,7 @@ export class ProductosComponent {
           });
           this.selectedCategoryId = this.categories()[0].id;
         }
-        
+
         this.updateProductCounts();
       },
       error: (error) => {
@@ -198,7 +227,7 @@ export class ProductosComponent {
 
   openCategoryModal(category?: Category) {
     if (category) {
-      this.categoryForm = { 
+      this.categoryForm = {
         id: category.id,
         name: category.name,
         isFavorite: category.isFavorite,
@@ -341,7 +370,7 @@ export class ProductosComponent {
         minStock: 0,
         modifiers: []
       };
-      
+
       this.originalImageUrl = product.imagenPrincipal;
 
       // Cargar detalles completos del producto
@@ -351,9 +380,9 @@ export class ProductosComponent {
           console.log(product)
           const otherPrices = detalle.precios.filter(p => !p.esPrincipal);
           const variants: Variant[] = otherPrices.map(p => ({
-              id: p.idPrecio.toString(),
-              name: p.descripcion,
-              price: p.precioValor
+            id: p.idPrecio.toString(),
+            name: p.descripcion,
+            price: p.precioValor
           }));
 
           this.productForm = {
@@ -368,9 +397,9 @@ export class ProductosComponent {
             modifiers: [] // TODO: Si el detalle trae modificadores, mapearlos aquí
           };
           this.originalImageUrl = detalle.imagenPrincipal || this.originalImageUrl;
-          
-          if(detalle.descripcion) {
-             this.productForm.description = detalle.descripcion;
+
+          if (detalle.descripcion) {
+            this.productForm.description = detalle.descripcion;
           }
         },
         error: (error) => {
@@ -419,8 +448,8 @@ export class ProductosComponent {
       return;
     }
     let precios: Precio[] = [];
-    if(this.productForm.variants.length == 0){
-    // Preparar los precios según el formato de la API
+    if (this.productForm.variants.length == 0) {
+      // Preparar los precios según el formato de la API
       precios = [{
         precioValor: this.productForm.price,
         descripcion: this.productForm.variants.length > 0 ? 'Precio base' : 'Precio único',
@@ -429,7 +458,7 @@ export class ProductosComponent {
         esPrincipal: true
       }];
     }
-   console.log('product form',this.productForm);
+    console.log('product form', this.productForm);
     // Agregar variantes como precios adicionales
     this.productForm.variants.forEach(variant => {
       console.log(variant);
@@ -458,7 +487,7 @@ export class ProductosComponent {
       this.productoService.actualizarProducto(this.productForm.id, productoData).subscribe({
         next: (response) => {
           console.log('Producto actualizado:', response);
-          
+
           const updateLocalProduct = (prodResponse: any) => {
             this.products.update(prods => {
               const index = prods.findIndex(p => p.productoID === this.productForm.id);
@@ -479,9 +508,9 @@ export class ProductosComponent {
             });
             this.updateProductCounts();
             this.closeProductModal();
-           
+
           };
-          
+
           if (this.pendingImageData) {
             this.productoService.uploadImagen(this.pendingImageData.file, response.productoID, this.productForm.name, true).subscribe({
               next: (imgRes) => {
@@ -489,18 +518,21 @@ export class ProductosComponent {
                   response.imagenPrincipal = imgRes.url;
                 }
                 updateLocalProduct(response);
+                this.loadCategorias();
                 this.toastr.success('El producto y la imagen se han actualizado correctamente', 'Producto actualizado');
-               //this.pendingImageData = null; 
+                this.pendingImageData = null;
               },
               error: (err) => {
                 console.error('Error updating image', err);
                 this.toastr.warning('Producto actualizado, pero hubo error al subir la imagen', 'Advertencia');
                 updateLocalProduct(response);
+                this.loadCategorias();
               }
             });
           } else {
-             updateLocalProduct(response);
-             this.toastr.success('El producto se ha actualizado correctamente', 'Producto actualizado');
+            updateLocalProduct(response);
+            this.loadCategorias();
+            this.toastr.success('El producto se ha actualizado correctamente', 'Producto actualizado');
           }
         },
         error: (error) => {
@@ -525,28 +557,31 @@ export class ProductosComponent {
             }]);
             this.updateProductCounts();
             this.closeProductModal();
-            
+
           };
           console.log('Pending image data:', this.pendingImageData);
           if (this.pendingImageData) {
-             this.productoService.uploadImagen(this.pendingImageData.file, response.productoID, this.productForm.name, true).subscribe({
-                next: (imgRes) => {
-                   if(imgRes && imgRes.url) {
-                       response.imagenPrincipal = imgRes.url;
-                   }
-                   addLocalProduct(response);
-                   this.toastr.success('El producto y la imagen se han creado correctamente', 'Producto creado');
-                  this.pendingImageData = null;
-                },
-                 error: (err) => {
-                   console.error("Error uploading image for new product", err);
-                   this.toastr.warning('Producto creado, pero hubo error al subir la imagen', 'Advertencia');
-                   addLocalProduct(response);
+            this.productoService.uploadImagen(this.pendingImageData.file, response.productoID, this.productForm.name, true).subscribe({
+              next: (imgRes) => {
+                if (imgRes && imgRes.url) {
+                  response.imagenPrincipal = imgRes.url;
                 }
-             })
+                addLocalProduct(response);
+                this.loadCategorias();
+                this.toastr.success('El producto y la imagen se han creado correctamente', 'Producto creado');
+                this.pendingImageData = null;
+              },
+              error: (err) => {
+                console.error("Error uploading image for new product", err);
+                this.toastr.warning('Producto creado, pero hubo error al subir la imagen', 'Advertencia');
+                addLocalProduct(response);
+                this.loadCategorias();
+              }
+            })
           } else {
-             addLocalProduct(response);
-             this.toastr.success('El producto se ha creado correctamente', 'Producto creado');
+            addLocalProduct(response);
+            this.loadCategorias();
+            this.toastr.success('El producto se ha creado correctamente', 'Producto creado');
           }
         },
         error: (error) => {
@@ -579,14 +614,14 @@ export class ProductosComponent {
       }
     });
   }
-    // === ESTADO DE APROBACIÓN ===
-    getProductApprovalStatus(product: Producto): string {
-      if (product.aprobado === false) {
-        return 'En revisión';
-      }
-      return '';
+  // === ESTADO DE APROBACIÓN ===
+  getProductApprovalStatus(product: Producto): string {
+    if (product.aprobado === false) {
+      return 'En revisión';
     }
-  
+    return '';
+  }
+
 
   deleteProduct(productId: number) {
     this.confirmationService.confirm({
@@ -631,15 +666,15 @@ export class ProductosComponent {
 
   getProductsByCategory(categoryId: number): Producto[] {
     let filtered = this.products().filter(p => p.categoriaID === categoryId);
-    
+
     if (this.searchTerm.trim()) {
       const search = this.searchTerm.toLowerCase();
-      filtered = filtered.filter(p => 
+      filtered = filtered.filter(p =>
         p.nombre.toLowerCase().includes(search) ||
         (p.descripcion && p.descripcion.toLowerCase().includes(search))
       );
     }
-    
+
     return filtered;
   }
 
@@ -647,8 +682,8 @@ export class ProductosComponent {
     if (!this.searchTerm.trim()) {
       return this.categories();
     }
-    
-    return this.categories().filter(category => 
+
+    return this.categories().filter(category =>
       this.getProductsByCategory(category.id).length > 0
     );
   }
@@ -729,8 +764,8 @@ export class ProductosComponent {
   }
 
   onDeleteImage() {
-      this.productForm.image = undefined;
-      this.pendingImageData = null;
+    this.productForm.image = undefined;
+    this.pendingImageData = null;
   }
 
   cropperReady() {
@@ -749,18 +784,18 @@ export class ProductosComponent {
       // para consistencia y evitar actualizaciones parciales si el usuario cancela.
       const fileName = 'product_image_' + Date.now() + '_cropped.png';
       const croppedFile = new File([croppedBlob], fileName, { type: croppedBlob.type || 'image/png' });
-        
+
       // Crear preview en base64
       const reader = new FileReader();
       reader.onload = (e: any) => {
-          this.pendingImageData = {
-              base64: e.target.result,
-              file: croppedFile
-          };
-          this.productForm.image = e.target.result; // Mostrar preview en el formulario
-          this.toastr.info('La imagen se guardará al confirmar los cambios en el producto', 'Imagen pendiente');
-          console.log('Cropped image ready to be saved later:', this.pendingImageData);
-          this.closeImageCropper();
+        this.pendingImageData = {
+          base64: e.target.result,
+          file: croppedFile
+        };
+        this.productForm.image = e.target.result; // Mostrar preview en el formulario
+        this.toastr.info('La imagen se guardará al confirmar los cambios en el producto', 'Imagen pendiente');
+        console.log('Cropped image ready to be saved later:', this.pendingImageData);
+        this.closeImageCropper();
       };
       reader.readAsDataURL(croppedFile);
     } else {
@@ -782,7 +817,7 @@ export class ProductosComponent {
 
     this.productForm.variants.push(variant);
     this.newVariant = { name: '', price: 0 };
-    
+
     this.toastr.success(`${variant.name} agregado correctamente`, 'Variante agregada');
   }
 
@@ -825,7 +860,7 @@ export class ProductosComponent {
 
     this.productForm.modifiers.push(newModifier);
     this.newModifier = { name: '', options: '', required: false, maxSelections: 1 };
-    
+
     this.toastr.success(`${newModifier.name} con ${newModifier.options.length} opciones`, 'Modificador agregado');
   }
 

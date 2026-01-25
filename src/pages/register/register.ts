@@ -20,54 +20,54 @@ import { ToastrService } from 'ngx-toastr';
   styleUrl: './register.css',
 })
 export class Register implements OnInit {
-        tiposRegistro = { negocio: true, servicio: true, inmueble: true };
-      aceptaTerminos: boolean = false;
-      aceptaDatos: boolean = false;
-    registroMetodo: 'EMAIL' | 'GOOGLE' | null = null;
-    codigoVerificacion: string = '';
-    emailVerificado: boolean = false;
-    // Simulación de servicio de envío/verificación de código
-    enviarCodigoVerificacion() {
-      // Aquí deberías llamar a tu servicio real
-      this.toastr.info('Se ha enviado un código de verificación a tu correo.','Verificación');
-    }
+  tiposRegistro = { negocio: true, servicio: true, inmueble: true };
+  aceptaTerminos: boolean = false;
+  aceptaDatos: boolean = false;
+  registroMetodo: 'EMAIL' | 'GOOGLE' | null = null;
+  codigoVerificacion: string = '';
+  emailVerificado: boolean = false;
+  // Simulación de servicio de envío/verificación de código
+  enviarCodigoVerificacion() {
+    // Aquí deberías llamar a tu servicio real
+    this.toastr.info('Se ha enviado un código de verificación a tu correo.', 'Verificación');
+  }
 
-    verificarCodigo() {
-      // Aquí deberías llamar a tu servicio real para validar el código
-      if (this.codigoVerificacion === '123456') { // Simulación
-        this.emailVerificado = true;
-        this.toastr.success('Correo verificado correctamente.','Éxito');
-        this.nextStep();
-      } else {
-        this.toastr.error('Código incorrecto.','Error');
+  verificarCodigo() {
+    // Aquí deberías llamar a tu servicio real para validar el código
+    if (this.codigoVerificacion === '123456') { // Simulación
+      this.emailVerificado = true;
+      this.toastr.success('Correo verificado correctamente.', 'Éxito');
+      this.nextStep();
+    } else {
+      this.toastr.error('Código incorrecto.', 'Error');
+    }
+  }
+
+  reenviarCodigo() {
+    this.enviarCodigoVerificacion();
+    this.toastr.info('Código reenviado.', 'Verificación');
+  }
+
+  nextStep(metodo?: 'EMAIL' | 'GOOGLE') {
+    if (metodo) {
+      this.registroMetodo = metodo;
+      if (metodo === 'EMAIL') {
+        this.step = 2;
+        this.enviarCodigoVerificacion();
+        return;
+      }
+      if (metodo === 'GOOGLE') {
+        // Aquí iría la lógica de Google
+        this.step = 3;
+        return;
       }
     }
+    this.step++;
+  }
 
-    reenviarCodigo() {
-      this.enviarCodigoVerificacion();
-      this.toastr.info('Código reenviado.','Verificación');
-    }
-
-    nextStep(metodo?: 'EMAIL' | 'GOOGLE') {
-      if (metodo) {
-        this.registroMetodo = metodo;
-        if (metodo === 'EMAIL') {
-          this.step = 2;
-          this.enviarCodigoVerificacion();
-          return;
-        }
-        if (metodo === 'GOOGLE') {
-          // Aquí iría la lógica de Google
-          this.step = 3;
-          return;
-        }
-      }
-      this.step++;
-    }
-
-    registerWithGoogle() {
-      this.nextStep('GOOGLE');
-    }
+  registerWithGoogle() {
+    this.nextStep('GOOGLE');
+  }
   private fb = inject(FormBuilder);
   private registerService = inject(RegisterService);
   private router = inject(Router);
@@ -118,11 +118,11 @@ export class Register implements OnInit {
   loadingLocation = false;
 
   constructor() {
-        // Leer flags de config.json
-        const config = (window as any).appConfig || {};
-        if (config.registroTipos) {
-          this.tiposRegistro = { ...this.tiposRegistro, ...config.registroTipos };
-        }
+    // Leer flags de config.json
+    const config = (window as any).appConfig || {};
+    if (config.registroTipos) {
+      this.tiposRegistro = { ...this.tiposRegistro, ...config.registroTipos };
+    }
     this.addSchedule();
     this.fixLeafletIcon();
   }
@@ -162,20 +162,14 @@ export class Register implements OnInit {
   }
 
   fixLeafletIcon() {
-    const iconRetinaUrl = 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png';
-    const iconUrl = 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png';
-    const shadowUrl = 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png';
-    const iconDefault = L.icon({
-      iconRetinaUrl,
-      iconUrl,
-      shadowUrl,
-      iconSize: [25, 41],
-      iconAnchor: [12, 41],
-      popupAnchor: [1, -34],
-      tooltipAnchor: [16, -28],
-      shadowSize: [41, 41]
+    const path = '/assets/';
+    L.Icon.Default.imagePath = path;
+    delete (L.Icon.Default.prototype as any)._getIconUrl;
+    L.Icon.Default.mergeOptions({
+      iconRetinaUrl: path + 'marker-icon-2x.png',
+      iconUrl: path + 'marker-icon.png',
+      shadowUrl: path + 'marker-shadow.png',
     });
-    L.Marker.prototype.options.icon = iconDefault;
   }
 
   get schedules() {

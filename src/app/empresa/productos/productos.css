@@ -1558,3 +1558,38 @@
     font-size: 0.875rem;
   }
 }
+/* Status Review */
+.product-in-review {
+  background-color: #f3f4f6;
+  pointer-events: none;
+}
+
+.product-in-review .product-thumbnail {
+  filter: grayscale(100%);
+  opacity: 0.6;
+}
+
+.product-in-review .product-name,
+.product-in-review .product-description,
+.product-in-review .product-price {
+  color: #9ca3af;
+}
+
+/* Enable pointer events for tooltips/actions if necessary */
+.product-in-review td {
+  pointer-events: auto; 
+}
+/* But we want to disable most interactions. */
+/* Let's refine. If I want the tooltip on the status badge to work, I need pointer-events: auto on it. */
+
+.status-review {
+  background: #fff7ed;
+  color: #c2410c;
+  border: 1px solid #fed7aa;
+  cursor: help;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  pointer-events: auto;
+}
+
