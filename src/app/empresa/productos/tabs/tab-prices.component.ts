@@ -44,7 +44,7 @@ export class TabPricesComponent {
         this.validationError.emit('Por favor agrega al menos una variante con su precio');
         return false;
       }
-      
+      console.log(this.productForm);
       // Verificar que todas las variantes tengan precio
       const invalidVariant = this.productForm.variants.find((v: any) => !v.price || v.price <= 0);
       if (invalidVariant) {

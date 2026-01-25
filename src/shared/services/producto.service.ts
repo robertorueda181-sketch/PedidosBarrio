@@ -7,7 +7,8 @@ import {
     Producto, 
     ProductoCreateRequest, 
     Categoria, 
-    CategoriasProductosResponse 
+    CategoriasProductosResponse,
+    ProductoDetalle
 } from '../models/producto.model';
 
 @Injectable({
@@ -20,6 +21,10 @@ export class ProductoService {
                 `${this.config.apiUrl}/Categorias/productos/visible`,
                 { productoId, visible }
             );
+        }
+
+        getProductoDetalle(id: number): Observable<ProductoDetalle> {
+            return this.http.get<ProductoDetalle>(`${this.config.apiUrl}/Categorias/productos/${id}`);
         }
     private http = inject(HttpClient);
     private config = inject(AppConfigService);
@@ -52,6 +57,7 @@ export class ProductoService {
 
     getCategoriasConProductos(): Observable<CategoriasProductosResponse> {
         return this.http.get<CategoriasProductosResponse>(`${this.config.apiUrl}/Categorias/getAll`).pipe(
+           
             map(response => ({
                 categorias: response.categorias || [],
                 productos: response.productos?.map(p => this.transformProducto(p)) || []
@@ -93,14 +99,13 @@ export class ProductoService {
     }
 
     private transformProducto(producto: Producto): Producto {
-        const nombreArchivo = producto.urlImagen ? producto.urlImagen.split(/[/\\]/).pop() : '';
-        const urlImagen = nombreArchivo
-            ? `${this.config.baseUrl}/images/${nombreArchivo}`
-            : 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80';
+        const urlImagen = producto.imagenPrincipal != '' ?
+          producto.imagenPrincipal :
+         'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80';
 
         return {
             ...producto,
-            urlImagen
+            imagenPrincipal: urlImagen
         };
     }
 }

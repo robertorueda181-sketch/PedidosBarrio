@@ -87,13 +87,13 @@
       <div class="surface-card rounded-lg p-3 h-full">
         <div class="flex items-center gap-3">
           <p-checkbox 
-            [(ngModel)]="productForm.active" 
+            [(ngModel)]="productForm.visible" 
             [binary]="true" 
-            inputId="active">
+            inputId="visible">
           </p-checkbox>
-          <label for="active" class="cursor-pointer flex-1">
+          <label for="visible" class="cursor-pointer flex-1">
             <div class="text-900 font-semibold">
-              <i class="pi pi-eye text-green-500 mr-2"></i>Producto Activo
+              <i class="pi pi-eye text-green-500 mr-2"></i>Producto Visible
             </div>
             <small class="text-600">Visible para clientes</small>
           </label>

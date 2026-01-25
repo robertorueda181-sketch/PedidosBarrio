@@ -1,5 +1,5 @@
 export interface Precio {
-    precio: number;
+    precioValor: number;
     descripcion: string;
     cantidadMinima: number;
     modalidad: string;
@@ -8,15 +8,14 @@ export interface Precio {
 
 export interface Producto {
     productoID: number;
-    empresaID: string;
     nombre: string;
     descripcion: string;
     precioActual: number;
-    urlImagen?: string;
     categoria?: string;
     categoriaID?: number;
     visible: boolean;
     aprobado: boolean;
+    imagenPrincipal?: string;
 }
 
 export interface ProductoCreateRequest {
@@ -27,8 +26,6 @@ export interface ProductoCreateRequest {
     stockMinimo: number;
     inventario: boolean;
     precios: Precio[];
-    imagenUrl: string;
-    imagenDescripcion: string;
 }
 
 export interface Categoria {
@@ -44,4 +41,40 @@ export interface Categoria {
 export interface CategoriasProductosResponse {
     categorias: Categoria[];
     productos: Producto[];
+}
+
+export interface PrecioDetalle {
+    idPrecio: number;
+    precioValor: number;
+    esPrincipal: boolean;
+    descripcion: string;
+}
+
+export interface Presentacion {
+    presentacionID: number;
+    descripcion: string;
+    precios: PrecioDetalle[];
+}
+
+export interface Imagen {
+    imagenID?: number;
+    url: string;
+    descripcion?: string;
+    esPrincipal?: boolean;
+}
+
+export interface ProductoDetalle {
+  productoID: number;
+  nombre: string;
+  descripcion?: string;
+  presentaciones: Presentacion[];
+  precios: PrecioDetalle[];
+  imagenes: Imagen[];
+  imagenPrincipal: string;
+  precioActual: number;
+  categoriaID?: number;
+  visible?: boolean;
+  stock?: number;
+  stockMinimo?: number;
+  inventario?: boolean;
 }

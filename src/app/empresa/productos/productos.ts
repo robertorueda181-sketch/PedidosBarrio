@@ -2,7 +2,7 @@ import { Component, inject, signal, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ProductoService } from '../../../shared/services/producto.service';
-import { Producto } from '../../../shared/models/producto.model';
+import { Precio, Producto, ProductoDetalle } from '../../../shared/models/producto.model';
 import { ConfirmationService } from 'primeng/api';
 import { ToastrService } from 'ngx-toastr';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
@@ -18,7 +18,6 @@ import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { ChipModule } from 'primeng/chip';
 import { TooltipModule } from 'primeng/tooltip';
 import { ImageCropperComponent, ImageCroppedEvent, LoadedImage } from 'ngx-image-cropper';
-import { DomSanitizer } from '@angular/platform-browser';
 import { AnalyticsService } from '../../../shared/services/analytics.service';
 import { TabBasicInfoComponent } from './tabs/tab-basic-info.component';
 import { TabPricesComponent } from './tabs/tab-prices.component';
@@ -98,6 +97,7 @@ export class ProductosComponent {
   currentImageForCrop = signal<string | null>(null);
   croppedImage: any = '';
   imageChangedEvent: any = '';
+  originalImageUrl: string | undefined = undefined;
 
   // Categoría seleccionada
   selectedCategoryId: number | null = null;
@@ -316,13 +316,15 @@ export class ProductosComponent {
 
   // === GESTIÓN DE PRODUCTOS ===
   openProductModal(product?: Producto) {
+    this.pendingImageData = null; // Limpiar imagen pendiente al abrir el modal
     // Registrar evento de abrir modal
-    this.analyticsService.trackEvent(
-      product ? 'Editar Producto' : 'Crear Producto',
-      { categoryId: this.selectedCategoryId }
-    );
+    // this.analyticsService.trackEvent(
+    //   product ? 'Editar Producto' : 'Crear Producto',
+    //   { categoryId: this.selectedCategoryId }
+    // );
 
     if (product) {
+      // Inicializar con datos básicos
       this.productForm = {
         id: product.productoID,
         name: product.nombre,
@@ -330,7 +332,7 @@ export class ProductosComponent {
         categoryId: product.categoriaID ?? null,
         price: product.precioActual,
         discount: 0,
-        image: product.urlImagen,
+        image: product.imagenPrincipal,
         visible: product.visible,
         isPrincipal: false,
         variants: [],
@@ -339,6 +341,44 @@ export class ProductosComponent {
         minStock: 0,
         modifiers: []
       };
+      
+      this.originalImageUrl = product.imagenPrincipal;
+
+      // Cargar detalles completos del producto
+      this.productoService.getProductoDetalle(product.productoID).subscribe({
+        next: (detalle: ProductoDetalle) => {
+          console.log('Detalles del producto:', detalle);
+          console.log(product)
+          const otherPrices = detalle.precios.filter(p => !p.esPrincipal);
+          const variants: Variant[] = otherPrices.map(p => ({
+              id: p.idPrecio.toString(),
+              name: p.descripcion,
+              price: p.precioValor
+          }));
+
+          this.productForm = {
+            ...this.productForm,
+            price: detalle.precioActual, // Asegurar precio actual del detalle
+            image: detalle.imagenPrincipal || this.productForm.image,
+            variants: variants,
+            // Asumiendo que el detalle puede traer info de stock
+            currentStock: detalle.stock || 0,
+            minStock: detalle.stockMinimo || 0,
+            hasStockControl: detalle.inventario || false,
+            modifiers: [] // TODO: Si el detalle trae modificadores, mapearlos aquí
+          };
+          this.originalImageUrl = detalle.imagenPrincipal || this.originalImageUrl;
+          
+          if(detalle.descripcion) {
+             this.productForm.description = detalle.descripcion;
+          }
+        },
+        error: (error) => {
+          console.error('Error al cargar detalles del producto:', error);
+          this.toastr.error('No se pudieron cargar los detalles completos del producto', 'Error de carga');
+        }
+      });
+
     } else {
       this.productForm = {
         id: null,
@@ -356,6 +396,7 @@ export class ProductosComponent {
         minStock: 0,
         modifiers: []
       };
+      this.originalImageUrl = undefined;
     }
     this.newVariant = { name: '', price: 0 };
     this.newModifier = { name: '', options: '', required: false, maxSelections: 1 };
@@ -377,20 +418,23 @@ export class ProductosComponent {
     if (this.tabPrices && !this.tabPrices.validatePrice()) {
       return;
     }
-
+    let precios: Precio[] = [];
+    if(this.productForm.variants.length == 0){
     // Preparar los precios según el formato de la API
-    const precios = [{
-      precio: this.productForm.price,
-      descripcion: this.productForm.variants.length > 0 ? 'Precio base' : 'Precio único',
-      cantidadMinima: 1,
-      modalidad: 'Unidad',
-      esPrincipal: true
-    }];
-
+      precios = [{
+        precioValor: this.productForm.price,
+        descripcion: this.productForm.variants.length > 0 ? 'Precio base' : 'Precio único',
+        cantidadMinima: 1,
+        modalidad: 'Unidad',
+        esPrincipal: true
+      }];
+    }
+   console.log('product form',this.productForm);
     // Agregar variantes como precios adicionales
     this.productForm.variants.forEach(variant => {
+      console.log(variant);
       precios.push({
-        precio: variant.price,
+        precioValor: variant.price,
         descripcion: variant.name,
         cantidadMinima: 1,
         modalidad: 'Variante',
@@ -406,35 +450,58 @@ export class ProductosComponent {
       stockMinimo: this.productForm.minStock || 0,
       inventario: this.productForm.hasStockControl || false,
       precios: precios,
-      imagenUrl: this.productForm.image || '',
-      imagenDescripcion: this.productForm.name
+      visible: this.productForm.visible || true
     };
-
+    console.log('Producto data to save:', productoData);
     if (this.productForm.id) {
       // Editar producto existente
       this.productoService.actualizarProducto(this.productForm.id, productoData).subscribe({
         next: (response) => {
-          this.products.update(prods => {
-            const index = prods.findIndex(p => p.productoID === this.productForm.id);
-            if (index !== -1) {
-              const category = this.categories().find(c => c.id === this.productForm.categoryId);
-              prods[index] = {
-                ...prods[index],
-                productoID: response.productoID,
-                nombre: response.nombre,
-                descripcion: response.descripcion,
-                categoriaID: response.categoriaID || 0,
-                precioActual: response.precioActual,
-                urlImagen: response.urlImagen,
-                visible: response.visible,
-                aprobado: response.aprobado ?? prods[index].aprobado
-              };
-            }
-            return [...prods];
-          });
-          this.toastr.success('El producto se ha actualizado correctamente', 'Producto actualizado');
-          this.updateProductCounts();
-          this.closeProductModal();
+          console.log('Producto actualizado:', response);
+          
+          const updateLocalProduct = (prodResponse: any) => {
+            this.products.update(prods => {
+              const index = prods.findIndex(p => p.productoID === this.productForm.id);
+              if (index !== -1) {
+                prods[index] = {
+                  ...prods[index],
+                  productoID: prodResponse.productoID,
+                  nombre: prodResponse.nombre,
+                  descripcion: prodResponse.descripcion,
+                  categoriaID: prodResponse.categoriaID || 0,
+                  precioActual: prodResponse.precioActual,
+                  imagenPrincipal: prodResponse.imagenPrincipal,
+                  visible: prodResponse.visible,
+                  aprobado: prodResponse.aprobado ?? prods[index].aprobado
+                };
+              }
+              return [...prods];
+            });
+            this.updateProductCounts();
+            this.closeProductModal();
+           
+          };
+          
+          if (this.pendingImageData) {
+            this.productoService.uploadImagen(this.pendingImageData.file, response.productoID, this.productForm.name, true).subscribe({
+              next: (imgRes) => {
+                if (imgRes && imgRes.url) {
+                  response.imagenPrincipal = imgRes.url;
+                }
+                updateLocalProduct(response);
+                this.toastr.success('El producto y la imagen se han actualizado correctamente', 'Producto actualizado');
+               //this.pendingImageData = null; 
+              },
+              error: (err) => {
+                console.error('Error updating image', err);
+                this.toastr.warning('Producto actualizado, pero hubo error al subir la imagen', 'Advertencia');
+                updateLocalProduct(response);
+              }
+            });
+          } else {
+             updateLocalProduct(response);
+             this.toastr.success('El producto se ha actualizado correctamente', 'Producto actualizado');
+          }
         },
         error: (error) => {
           console.error('Error al actualizar producto:', error);
@@ -445,21 +512,42 @@ export class ProductosComponent {
       // Crear nuevo producto
       this.productoService.crearProducto(productoData).subscribe({
         next: (response) => {
-         // const category = this.categories().find(c => c.id === this.productForm.categoryId);
-          this.products.update(prods => [...prods, {
-            productoID: response.productoID,
-            empresaID: response.empresaID || '',
-            nombre: response.nombre,
-            descripcion: response.descripcion,
-            categoriaID: response.categoriaID || 0,
-            precioActual: response.precioActual,
-            urlImagen: response.urlImagen,
-            visible: response.visible,
-            aprobado: response.aprobado ?? false
-          }]);
-          this.toastr.success('El producto se ha creado correctamente', 'Producto creado');
-          this.updateProductCounts();
-          this.closeProductModal();
+          const addLocalProduct = (prodResponse: any) => {
+            this.products.update(prods => [...prods, {
+              productoID: prodResponse.productoID,
+              nombre: prodResponse.nombre,
+              descripcion: prodResponse.descripcion,
+              categoriaID: prodResponse.categoriaID || 0,
+              precioActual: prodResponse.precioActual,
+              imagenPrincipal: prodResponse.imagenPrincipal,
+              visible: prodResponse.visible,
+              aprobado: prodResponse.aprobado ?? false
+            }]);
+            this.updateProductCounts();
+            this.closeProductModal();
+            
+          };
+          console.log('Pending image data:', this.pendingImageData);
+          if (this.pendingImageData) {
+             this.productoService.uploadImagen(this.pendingImageData.file, response.productoID, this.productForm.name, true).subscribe({
+                next: (imgRes) => {
+                   if(imgRes && imgRes.url) {
+                       response.imagenPrincipal = imgRes.url;
+                   }
+                   addLocalProduct(response);
+                   this.toastr.success('El producto y la imagen se han creado correctamente', 'Producto creado');
+                  this.pendingImageData = null;
+                },
+                 error: (err) => {
+                   console.error("Error uploading image for new product", err);
+                   this.toastr.warning('Producto creado, pero hubo error al subir la imagen', 'Advertencia');
+                   addLocalProduct(response);
+                }
+             })
+          } else {
+             addLocalProduct(response);
+             this.toastr.success('El producto se ha creado correctamente', 'Producto creado');
+          }
         },
         error: (error) => {
           console.error('Error al crear producto:', error);
@@ -511,7 +599,6 @@ export class ProductosComponent {
         this.productoService.eliminarProducto(productId).subscribe({
           next: () => {
             this.products.update(prods => prods.filter(p => p.productoID !== productId));
-              this.products.update(prods => prods.filter(p => p.productoID !== productId));
             this.updateProductCounts();
             this.toastr.success('El producto se ha eliminado correctamente', 'Producto eliminado');
           },
@@ -629,7 +716,7 @@ export class ProductosComponent {
     this.currentImageForCrop.set(null);
     this.imageChangedEvent = '';
     this.croppedImage = '';
-    this.pendingImageData = null;
+    // No limpiar pendingImageData aquí, ya que contiene la imagen aceptada a guardar
     this.isLoadingImage.set(false);
   }
 
@@ -639,6 +726,11 @@ export class ProductosComponent {
 
   imageLoaded(image: LoadedImage) {
     // Imagen cargada correctamente
+  }
+
+  onDeleteImage() {
+      this.productForm.image = undefined;
+      this.pendingImageData = null;
   }
 
   cropperReady() {
@@ -653,28 +745,24 @@ export class ProductosComponent {
     if (this.croppedImage) {
       // Convertir blob a File
       const croppedBlob = this.croppedImage as Blob;
-      const productoId = this.productForm.id;
-      if (!productoId) {
-        this.toastr.error('No se encontró el ID del producto para subir la imagen', 'Error');
-        this.closeImageCropper();
-        return;
-      }
-      const croppedFile = new File([croppedBlob], 'producto_' + productoId + '_cropped.png', { type: croppedBlob.type || 'image/png' });
-      this.productoService.uploadImagen(croppedFile, productoId, '', true).subscribe({
-        next: (res) => {
-          console.log('Imagen subida correctamente:', res);
-          this.toastr.success('La imagen recortada ha sido subida correctamente', 'Imagen guardada');
-          // Usar urlCompleta si está disponible, si no urlImagen
-          if (res && (res.urlCompleta || res.urlImagen)) {
-            this.productForm.image = res.urlCompleta || res.urlImagen;
-          }
+      // Siempre diferimos la carga de la imagen al guardar el producto completo
+      // para consistencia y evitar actualizaciones parciales si el usuario cancela.
+      const fileName = 'product_image_' + Date.now() + '_cropped.png';
+      const croppedFile = new File([croppedBlob], fileName, { type: croppedBlob.type || 'image/png' });
+        
+      // Crear preview en base64
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+          this.pendingImageData = {
+              base64: e.target.result,
+              file: croppedFile
+          };
+          this.productForm.image = e.target.result; // Mostrar preview en el formulario
+          this.toastr.info('La imagen se guardará al confirmar los cambios en el producto', 'Imagen pendiente');
+          console.log('Cropped image ready to be saved later:', this.pendingImageData);
           this.closeImageCropper();
-        },
-        error: () => {
-          this.toastr.error('Error al subir la imagen recortada', 'Error');
-          this.closeImageCropper();
-        }
-      });
+      };
+      reader.readAsDataURL(croppedFile);
     } else {
       this.closeImageCropper();
     }
@@ -766,7 +854,7 @@ export class ProductosComponent {
         this.products.update(prods => {
           prods.forEach(product => {
             if (product.categoriaID === categoryId && product.productoID !== this.productForm.id) {
-              product.urlImagen = this.productForm.image;
+              product.imagenPrincipal = this.productForm.image;
               count++;
             }
           });
