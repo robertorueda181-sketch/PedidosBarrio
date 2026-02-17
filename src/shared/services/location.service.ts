@@ -48,33 +48,21 @@ export class LocationService {
         );
     }
 
-    getProvinces(departmentName: string): Observable<LocationItem[]> {
-        return this.getDepartmentsData().pipe(
-            map(depts => depts.find(d => d.name === departmentName)),
-            switchMap((dept: any) => {
-                if (!dept) return of([]);
-                return this.getProvincesData().pipe(
-                    map(provs => provs
-                        .filter(p => p.department_id === dept.id)
-                        .map(p => ({ name: p.name, code: p.id }))
-                    )
-                );
-            })
+    getProvinces(departmentId: string): Observable<LocationItem[]> {
+        return this.getProvincesData().pipe(
+            map(provs => provs
+                .filter(p => p.department_id == departmentId)
+                .map(p => ({ name: p.name, code: p.id }))
+            )
         );
     }
 
-    getDistricts(provinceName: string): Observable<LocationItem[]> {
-        return this.getProvincesData().pipe(
-            map(provs => provs.find(p => p.name === provinceName)),
-            switchMap((prov: any) => {
-                if (!prov) return of([]);
-                return this.getDistrictsData().pipe(
-                    map(dists => dists
-                        .filter(d => d.province_id === prov.id)
-                        .map(d => ({ name: d.name, code: d.id }))
-                    )
-                );
-            })
+    getDistricts(provinceId: string): Observable<LocationItem[]> {
+        return this.getDistrictsData().pipe(
+            map(dists => dists
+                .filter(d => d.province_id == provinceId)
+                .map(d => ({ name: d.name, code: d.id }))
+            )
         );
     }
 }

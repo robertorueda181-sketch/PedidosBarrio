@@ -53,4 +53,18 @@ export class EmpresaService {
             urlLogo: nombreLogo ? `${this.config.baseUrl}/images/${nombreLogo}` : ''
         };
     }
+
+    getSede(): Observable<any> {
+        return this.http.get<any>(`${this.config.apiUrl}/Empresa/sede`);
+    }
+
+    updateSede(data: any): Observable<any> {
+        return this.http.post<any>(`${this.config.apiUrl}/Empresa/sede`, data);
+    }
+
+    updateLogo(file: File): Observable<any> {
+        const formData = new FormData();
+        formData.append('file', file);
+        return this.http.post<any>(`${this.config.apiUrl}/Empresa/profile-image`, formData);
+    }
 }

@@ -2,6 +2,7 @@ import { Component, OnInit, inject, signal, ChangeDetectorRef } from '@angular/c
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
+import { forkJoin } from 'rxjs';
 
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
@@ -9,9 +10,9 @@ import { TextareaModule } from 'primeng/textarea';
 import { TabsModule } from 'primeng/tabs';
 import { TooltipModule } from 'primeng/tooltip';
 import { DialogModule } from 'primeng/dialog';
-import { ImageCropperComponent, ImageCroppedEvent, LoadedImage } from 'ngx-image-cropper';
 import { ProgressService } from '../services/progress.service';
 import { LocationService, LocationItem } from '../../../shared/services/location.service';
+import { EmpresaService } from '../../../shared/services/empresa.service';
 import { SelectModule } from 'primeng/select';
 import { CheckboxModule } from 'primeng/checkbox';
 import * as L from 'leaflet';
@@ -59,7 +60,6 @@ interface CompanyProfile {
     TabsModule,
     TooltipModule,
     DialogModule,
-    ImageCropperComponent,
     SelectModule,
     CheckboxModule
   ],
@@ -71,13 +71,10 @@ export class Perfil implements OnInit {
   private toastr = inject(ToastrService);
   private progressService = inject(ProgressService);
   private locationService = inject(LocationService);
+  private empresaService = inject(EmpresaService);
   private cdr = inject(ChangeDetectorRef);
 
   isLoading = signal(false);
-  showImageCropper = signal(false);
-  currentImageForCrop = signal<string | null>(null);
-  croppedImage: any = '';
-  imageChangedEvent: any = '';
 
   showAddressDialog = signal(false);
   editingAddress: Address | null = null;
@@ -138,9 +135,58 @@ export class Perfil implements OnInit {
   };
 
   ngOnInit() {
-    this.updateProgress();
+    this.loadProfile();
     this.loadDepartments();
     this.fixLeafletIcon();
+    this.initializeAddressSignals();
+  }
+
+  initializeAddressSignals() {
+    if (this.companyProfile.addresses.length > 0) {
+      const addr = this.companyProfile.addresses[0];
+      this.addrId.set(addr.id);
+      this.addrName.set(addr.name);
+      this.addrLine.set(addr.address);
+      this.addrLat.set(addr.lat);
+      this.addrLng.set(addr.lng);
+      this.addrIsMain.set(addr.isMain);
+
+      // Intentar mapear si vienen nombres en lugar de IDs (para compatibilidad)
+      let deptId = addr.departamento || '';
+      const foundDept = this.departments().find(d => d.code == deptId || d.name === deptId);
+      if (foundDept) deptId = foundDept.code;
+      this.addrDept.set(deptId);
+
+      // Load dropdowns based on ID
+      if (deptId) {
+        this.locationService.getProvinces(deptId).subscribe(data => {
+          this.provinces.set(data);
+
+          let provId = addr.provincia || '';
+          const foundProv = data.find(p => p.code == provId || p.name === provId);
+          if (foundProv) provId = foundProv.code;
+          this.addrProv.set(provId);
+
+          if (provId) {
+            this.locationService.getDistricts(provId).subscribe(dataDist => {
+              this.districts.set(dataDist);
+
+              let distId = addr.distrito || '';
+              const foundDist = dataDist.find(d => d.code == distId || d.name === distId);
+              if (foundDist) distId = foundDist.code;
+              this.addrDist.set(distId);
+            });
+          }
+        });
+      }
+    }
+  }
+
+  onTabChange(value: any) {
+    this.activeTab.set(value.toString());
+    if (value.toString() === '3') {
+      setTimeout(() => this.initMap(), 100);
+    }
   }
 
   fixLeafletIcon() {
@@ -187,9 +233,19 @@ export class Perfil implements OnInit {
   }
 
   onDistrictChange() {
-    if (this.addrDist() && this.addrProv() && this.addrDept()) {
-      const query = `${this.addrDist()}, ${this.addrProv()}, ${this.addrDept()}, Perú`;
-      this.updateMapBySearch(query);
+    const distId = this.addrDist();
+    const provId = this.addrProv();
+    const deptId = this.addrDept();
+
+    if (distId && provId && deptId) {
+      const distName = this.districts().find(d => d.code === distId)?.name;
+      const provName = this.provinces().find(p => p.code === provId)?.name;
+      const deptName = this.departments().find(d => d.code === deptId)?.name;
+
+      if (distName && provName && deptName) {
+        const query = `${distName}, ${provName}, ${deptName}, Perú`;
+        this.updateMapBySearch(query);
+      }
     }
   }
 
@@ -219,7 +275,59 @@ export class Perfil implements OnInit {
   }
 
   loadProfile() {
-    console.log('Cargando perfil');
+    this.isLoading.set(true);
+
+    forkJoin({
+      profile: this.empresaService.getSede(),
+      depts: this.locationService.getDepartments()
+    }).subscribe({
+      next: ({ profile, depts }: { profile: any, depts: LocationItem[] }) => {
+        // Set departments first
+        this.departments.set(depts);
+
+        const data = profile;
+        console.log('Datos de sede recibidos:', data);
+        if (data) {
+          this.companyProfile.name = data.nombre || '';
+          this.companyProfile.description = data.descripcion || '';
+          this.companyProfile.logo = data.logoUrl || '';
+          this.companyProfile.contact.phone = data.telefonoPrincipal || '';
+          this.companyProfile.contact.email = data.email || '';
+          this.companyProfile.contact.phone2 = data.telefonoSec || '';
+
+          this.companyProfile.socialMedia = {
+            facebook: data.facebook || '',
+            instagram: data.instagram || '',
+            twitter: data.twitter || '',
+            tiktok: data.tiktok || '',
+            whatsapp: data.whatsapp || ''
+          };
+
+          // Map flat address fields to Address object
+          const addr: Address = {
+            id: (data.direccionID || 1).toString(),
+            name: data.nombreLocal || 'Sede Principal',
+            address: data.direccion || '',
+            lat: parseFloat(data.latitud || '-12.0464'),
+            lng: parseFloat(data.longitud || '-77.0428'),
+            isMain: true,
+            departamento: data.departamento,
+            provincia: data.provincia,
+            distrito: data.distrito
+          };
+
+          this.companyProfile.addresses = [addr];
+          this.initializeAddressSignals();
+
+          this.updateProgress();
+        }
+      },
+      error: (err) => {
+        console.error('Error cargando perfil:', err);
+        this.toastr.error('No se pudo cargar la información del negocio', 'Error');
+      },
+      complete: () => this.isLoading.set(false)
+    });
   }
 
   updateProgress() {
@@ -232,17 +340,68 @@ export class Perfil implements OnInit {
     });
   }
 
-  async saveProfile() {
+  saveProfile() {
     this.isLoading.set(true);
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      this.updateProgress();
-      this.toastr.success('Los cambios se han guardado correctamente', 'Perfil actualizado');
-    } catch (error) {
-      this.toastr.error('Error al guardar los cambios', 'Error');
-    } finally {
-      this.isLoading.set(false);
-    }
+
+    const currentAddress: Address = {
+      id: this.addrId() || '0',
+      name: this.addrName(),
+      address: this.addrLine(),
+      lat: this.addrLat(),
+      lng: this.addrLng(),
+      isMain: true,
+      departamento: this.addrDept(),
+      provincia: this.addrProv(),
+      distrito: this.addrDist()
+    };
+
+    const deptCode = this.addrDept();
+    const provCode = this.addrProv();
+    const distCode = this.addrDist();
+
+    console.log('deptCode', deptCode);
+    console.log('provCode', provCode);
+    console.log('distCode', distCode);
+    const payload = {
+      nombre: this.companyProfile.name,
+      descripcion: this.companyProfile.description,
+      telefono: this.companyProfile.contact.phone,
+      telefono2: this.companyProfile.contact.phone2,
+      correo: this.companyProfile.contact.email,
+      urlLogo: this.companyProfile.logo,
+      redesSociales: {
+        facebook: this.companyProfile.socialMedia.facebook,
+        instagram: this.companyProfile.socialMedia.instagram,
+        twitter: this.companyProfile.socialMedia.twitter,
+        tiktok: this.companyProfile.socialMedia.tiktok,
+        whatsapp: this.companyProfile.socialMedia.whatsapp
+      },
+      direccion: {
+        direccionCompleta: currentAddress.address,
+        latitud: currentAddress.lat.toString(),
+        longitud: currentAddress.lng.toString(),
+        departamento: deptCode,
+        provincia: provCode,
+        distrito: distCode
+      }
+    };
+
+    console.log('Enviando payload:', payload);
+
+    this.empresaService.updateSede(payload).subscribe({
+      next: (resp) => {
+        console.log('Respuesta guardado:', resp);
+        this.updateProgress();
+        this.toastr.success('Los cambios se han guardado correctamente', 'Perfil actualizado');
+        this.loadProfile(); // Recargar para asegurar sincronización
+      },
+      error: (err) => {
+        console.error('Error al guardar:', err);
+        this.toastr.error('Error al guardar los cambios', 'Error');
+        this.isLoading.set(false);
+      },
+      complete: () => this.isLoading.set(false)
+    });
   }
 
   // === GESTIÓN DE IMAGEN ===
@@ -250,51 +409,41 @@ export class Perfil implements OnInit {
     const file = event.target.files[0];
     if (!file) return;
 
+    // Validar extensión y tipo MIME
+    const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      this.toastr.warning('Solo se permiten archivos de imagen (JPG, PNG, GIF, WEBP)', 'Archivo no válido');
+      event.target.value = '';
+      return;
+    }
+
     if (file.size > 4 * 1024 * 1024) {
       this.toastr.warning('La imagen no debe superar los 4MB', 'Archivo muy grande');
       event.target.value = '';
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = (e: any) => {
-      this.currentImageForCrop.set(e.target.result);
-      this.imageChangedEvent = event;
-      this.showImageCropper.set(true);
-      event.target.value = '';
-    };
-    reader.readAsDataURL(file);
-  }
-
-  imageCropped(event: ImageCroppedEvent) {
-    this.croppedImage = event.blob;
-  }
-
-  imageLoaded(image: LoadedImage) { }
-  cropperReady() { }
-  loadImageFailed() {
-    this.toastr.error('No se pudo cargar la imagen', 'Error');
-  }
-
-  saveCroppedImage() {
-    if (this.croppedImage) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        this.companyProfile.logo = reader.result as string;
-        this.toastr.success('El logo se ha actualizado correctamente', 'Logo actualizado');
-        this.closeImageCropper();
-      };
-      reader.readAsDataURL(this.croppedImage as Blob);
-    } else {
-      this.closeImageCropper();
-    }
-  }
-
-  closeImageCropper() {
-    this.showImageCropper.set(false);
-    this.currentImageForCrop.set(null);
-    this.imageChangedEvent = '';
-    this.croppedImage = '';
+    this.isLoading.set(true);
+    this.empresaService.updateLogo(file).subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.companyProfile.logo = response.imageUrl || response.imagePath; // User provided structure has both, prioritize URL
+          this.toastr.success(response.message || 'Logo actualizado correctamente', 'Éxito');
+          this.updateProgress();
+        } else {
+          this.toastr.error(response.message || 'No se pudo actualizar el logo', 'Error');
+        }
+      },
+      error: (err) => {
+        console.error('Error subiendo logo:', err);
+        this.toastr.error('Error al subir el logo', 'Error');
+        this.isLoading.set(false);
+      },
+      complete: () => {
+        this.isLoading.set(false);
+        event.target.value = '';
+      }
+    });
   }
 
   removeLogo() {
@@ -302,119 +451,7 @@ export class Perfil implements OnInit {
     this.toastr.info('El logo se ha eliminado', 'Logo eliminado');
   }
 
-  // === GESTIÓN DE DIRECCIONES ===
-  openAddressDialog(address?: Address) {
-    if (address) {
-      this.editingAddress = address;
-      this.addrId.set(address.id);
-      this.addrName.set(address.name);
-      this.addrLine.set(address.address);
-      this.addrLat.set(address.lat);
-      this.addrLng.set(address.lng);
-      this.addrIsMain.set(address.isMain);
-      this.addrDept.set(address.departamento || '');
-      this.addrProv.set(address.provincia || '');
-      this.addrDist.set(address.distrito || '');
-    } else {
-      this.editingAddress = null;
-      this.addrId.set(Date.now().toString());
-      this.addrName.set('');
-      this.addrLine.set('');
-      this.addrLat.set(-12.0464);
-      this.addrLng.set(-77.0428);
-      this.addrIsMain.set(this.companyProfile.addresses.length === 0);
-      this.addrDept.set('');
-      this.addrProv.set('');
-      this.addrDist.set('');
-    }
-    this.showAddressDialog.set(true);
-
-    if (this.addrDept()) {
-      this.locationService.getProvinces(this.addrDept()).subscribe(data => {
-        this.provinces.set(data);
-        if (this.addrProv()) {
-          this.locationService.getDistricts(this.addrProv()).subscribe(dataDist => {
-            this.districts.set(dataDist);
-          });
-        }
-      });
-    }
-
-    setTimeout(() => this.initMap(), 100);
-  }
-
-  saveAddress() {
-    if (!this.addrName().trim() || !this.addrLine().trim()) {
-      this.toastr.warning('Por favor completa todos los campos', 'Campos requeridos');
-      return;
-    }
-
-    const addressObj: Address = {
-      id: this.addrId(),
-      name: this.addrName(),
-      address: this.addrLine(),
-      lat: this.addrLat(),
-      lng: this.addrLng(),
-      isMain: this.addrIsMain(),
-      departamento: this.addrDept(),
-      provincia: this.addrProv(),
-      distrito: this.addrDist()
-    };
-
-    if (this.editingAddress) {
-      const index = this.companyProfile.addresses.findIndex(a => a.id === this.editingAddress!.id);
-      if (index !== -1) {
-        this.companyProfile.addresses[index] = addressObj;
-      }
-    } else {
-      this.companyProfile.addresses.push(addressObj);
-    }
-
-    if (addressObj.isMain) {
-      this.companyProfile.addresses.forEach(a => {
-        if (a.id !== addressObj.id) {
-          a.isMain = false;
-        }
-      });
-    }
-
-    this.toastr.success(
-      this.editingAddress ? 'Dirección actualizada' : 'Nueva dirección agregada',
-      'Dirección guardada'
-    );
-
-    this.closeAddressDialog();
-  }
-
-  deleteAddress(addressId: string) {
-    this.companyProfile.addresses = this.companyProfile.addresses.filter(a => a.id !== addressId);
-    this.toastr.success('La dirección se ha eliminado', 'Dirección eliminada');
-  }
-
-  setMainAddress(addressId: string) {
-    this.companyProfile.addresses.forEach(addr => {
-      addr.isMain = addr.id === addressId;
-    });
-    this.toastr.success('Se ha establecido como dirección principal', 'Dirección principal actualizada');
-  }
-
-  closeAddressDialog() {
-    this.showAddressDialog.set(false);
-    this.editingAddress = null;
-    this.addressSuggestions = [];
-    this.showSuggestions.set(false);
-
-    if (this.searchTimeout) {
-      clearTimeout(this.searchTimeout);
-      this.searchTimeout = null;
-    }
-
-    if (this.map) {
-      this.map.remove();
-      this.map = null;
-      this.marker = null;
-    }
-  }
+  // === GESTIÓN DE DIRECCIONES (Simplificada a 1) ===
 
   // === GESTIÓN DEL MAPA ===
   private initMap() {
@@ -492,7 +529,6 @@ export class Perfil implements OnInit {
 
     this.addressSuggestions = [];
     this.showSuggestions.set(false);
-    this.toastr.success('Ubicación actualizada', 'Dirección seleccionada');
   }
 
   async searchAddress() {
@@ -533,25 +569,38 @@ export class Perfil implements OnInit {
 
   private matchLocationFromGeocode(addressData: any) {
     const deptCandidate = addressData.state || addressData.region || addressData.province || '';
+    // Agregamos más campos posibles para provincia y distrito
     const provCandidate = addressData.county || addressData.state_district || addressData.city || addressData.region || '';
     const distCandidate = addressData.suburb || addressData.neighbourhood || addressData.village || addressData.town || addressData.hamlet || addressData.quarter || addressData.municipality || '';
-    console.log(addressData);
+
+    // 1. Buscar Departamento (Nombre -> ID)
     const matchedDept = this.departments().find(d => this.isNameMatch(d.name, deptCandidate));
-    console.log(matchedDept);
+    console.log('Departamento encontrado:', matchedDept);
     if (matchedDept) {
-      this.addrDept.set(matchedDept.name);
-      this.locationService.getProvinces(matchedDept.name).subscribe(provs => {
-        console.log(provs);
+      this.addrDept.set(matchedDept.code);
+
+      // 2. Cargar Provincias con el ID del departamento
+      this.locationService.getProvinces(matchedDept.code).subscribe(provs => {
         this.provinces.set(provs);
-        const matchedProv = provs.find(p => this.isNameMatch(p.name, provCandidate)) || provs.find(p => this.isNameMatch(p.name, distCandidate));
-        console.log(matchedProv);
+
+        // 3. Buscar Provincia (Nombre -> ID)
+        const matchedProv = provs.find(p => this.isNameMatch(p.name, provCandidate))
+          || provs.find(p => this.isNameMatch(p.name, distCandidate));
+
         if (matchedProv) {
-          this.addrProv.set(matchedProv.name);
-          this.locationService.getDistricts(matchedProv.name).subscribe(dists => {
+          this.addrProv.set(matchedProv.code);
+
+          // 4. Cargar Distritos con el ID de la provincia
+          this.locationService.getDistricts(matchedProv.code).subscribe(dists => {
             this.districts.set(dists);
-            const matchedDist = dists.find(d => this.isNameMatch(d.name, distCandidate)) || dists.find(d => this.isNameMatch(d.name, addressData.road || '')) || dists.find(d => this.isNameMatch(d.name, provCandidate));
+
+            // 5. Buscar Distrito (Nombre -> ID)
+            const matchedDist = dists.find(d => this.isNameMatch(d.name, distCandidate))
+              || dists.find(d => this.isNameMatch(d.name, addressData.road || ''))
+              || dists.find(d => this.isNameMatch(d.name, provCandidate));
+
             if (matchedDist) {
-              this.addrDist.set(matchedDist.name);
+              this.addrDist.set(matchedDist.code);
             } else {
               this.addrDist.set('');
             }
