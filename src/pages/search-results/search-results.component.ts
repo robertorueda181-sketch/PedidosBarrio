@@ -101,12 +101,6 @@ export class SearchResultsComponent implements OnInit {
     }
 
     goToDetail(result: SearchResult) {
-        if (result.type === 'NEGOCIO' && result.url) {
-            this.router.navigateByUrl('/' + result.url);
-        } else if (result.type === 'INMUEBLE') {
-            this.router.navigate(['/inmueble', result.id]);
-        } else if (result.type === 'SERVICIO') {
-            this.router.navigate(['/servicio', result.id]);
-        }
+        window.open(result.url || '', '_blank');
     }
 }

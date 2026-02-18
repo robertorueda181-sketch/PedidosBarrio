@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
@@ -13,7 +13,7 @@ import { ProgressService } from '../../services/progress.service';
       <!-- Panel de progreso -->
       @if (showPanel()) {
         <div class="mb-4 bg-white rounded-lg shadow-2xl border border-gray-200 w-80 md:w-96 animate-slide-up">
-          <div class="bg-gradient-to-r from-primary to-blue-500 text-white p-4 rounded-t-lg">
+          <div class="bg-primary to-blue-500 text-white p-4 rounded-t-lg">
             <div class="flex items-center justify-between mb-2">
               <h3 class="font-bold text-lg">Guía de Configuración</h3>
               <button
@@ -133,7 +133,7 @@ import { ProgressService } from '../../services/progress.service';
     }
   `]
 })
-export class ProgressButtonComponent {
+export class ProgressButtonComponent implements OnInit {
   progressService = inject(ProgressService);
   private router = inject(Router);
   

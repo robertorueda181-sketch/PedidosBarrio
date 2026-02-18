@@ -1,0 +1,26 @@
+:host ::ng-deep .p-select {
+    width: 100%;
+    border-radius: 0.75rem;
+    border: 1px solid #f3f4f6;
+    background: #f9fafb;
+    font-weight: 700;
+    height: 52px;
+    display: flex;
+    align-items: center;
+}
+
+.animate-slide-up {
+    animation: slideUp 1s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(40px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

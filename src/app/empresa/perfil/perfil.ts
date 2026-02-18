@@ -104,8 +104,8 @@ export class Perfil implements OnInit {
   activeTab = signal('0');
 
   companyProfile: CompanyProfile = {
-    name: 'Mi Negocio',
-    description: 'Descripción de mi negocio. Esto ayudará a que los clientes encuentren tu negocio más rápido en las búsquedas.',
+    name: '',
+    description: '',
     logo: '',
     socialMedia: {
       facebook: '',
@@ -325,19 +325,14 @@ export class Perfil implements OnInit {
       error: (err) => {
         console.error('Error cargando perfil:', err);
         this.toastr.error('No se pudo cargar la información del negocio', 'Error');
+        this.isLoading.set(false);
       },
       complete: () => this.isLoading.set(false)
     });
   }
 
   updateProgress() {
-    this.progressService.updateProgress({
-      hasLogo: !!this.companyProfile.logo,
-      hasBasicInfo: this.companyProfile.name.trim() !== 'Mi Negocio' && this.companyProfile.description.length > 50,
-      hasSocialMedia: !!(this.companyProfile.socialMedia.facebook || this.companyProfile.socialMedia.instagram || this.companyProfile.socialMedia.whatsapp),
-      hasContactInfo: !!this.companyProfile.contact.email && !!this.companyProfile.contact.phone,
-      hasAddress: this.companyProfile.addresses.length > 0
-    });
+
   }
 
   saveProfile() {
@@ -359,9 +354,6 @@ export class Perfil implements OnInit {
     const provCode = this.addrProv();
     const distCode = this.addrDist();
 
-    console.log('deptCode', deptCode);
-    console.log('provCode', provCode);
-    console.log('distCode', distCode);
     const payload = {
       nombre: this.companyProfile.name,
       descripcion: this.companyProfile.description,

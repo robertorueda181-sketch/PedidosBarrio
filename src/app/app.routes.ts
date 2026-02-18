@@ -36,6 +36,7 @@ export const routes: Routes = [
     children: [
       { path: '', redirectTo: 'inicio', pathMatch: 'full' },
       { path: 'inicio', loadComponent: () => import('./empresa/dashboard/dashboard').then(m => m.DashboardComponent) },
+      { path: 'pasos-iniciales', loadComponent: () => import('./empresa/pasos-iniciales/pasos-iniciales').then(m => m.PasosIniciales) },
       { path: 'productos', loadComponent: () => import('./empresa/productos/productos').then(m => m.ProductosComponent) },
       { path: 'inmuebles', loadComponent: () => import('./empresa/inmuebles/inmuebles').then(m => m.Inmuebles) },
       { path: 'oficios', loadComponent: () => import('./empresa/oficios/oficios').then(m => m.Oficios) },

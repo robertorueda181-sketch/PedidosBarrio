@@ -33,9 +33,9 @@ export class Main implements OnInit {
   isTransitioning = signal<boolean>(false);
   showAllCategories = signal<boolean>(false);
   banners = [
-    { url: 'assets/banner1.png', title: 'Descubre lo mejor de tu barrio', subtitle: 'Apoya a los negocios locales y encuentra todo lo que necesitas.' },
-    { url: 'assets/banner.png', title: 'Servicios a tu alcance', subtitle: 'Encuentra profesionales calificados para cada necesidad.' },
-    { url: 'assets/fondo.jpg', title: 'Tu próximo hogar te espera', subtitle: 'Explora nuestra selección exclusiva de inmuebles.' }
+    { url: 'assets/banner1.avif', title: 'Descubre lo mejor de tu barrio', subtitle: 'Apoya a los negocios locales y encuentra todo lo que necesitas.' },
+    { url: 'assets/banner.avif', title: 'Servicios a tu alcance', subtitle: 'Encuentra profesionales calificados para cada necesidad.' },
+    { url: 'assets/fondo.avif', title: 'Tu próximo hogar te espera', subtitle: 'Explora nuestra selección exclusiva de inmuebles.' }
   ];
 
   responsiveOptions = [
