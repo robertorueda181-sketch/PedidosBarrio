@@ -28,9 +28,17 @@ export interface NegocioDetalle {
     telefono: string | null;
     direccion: string;
     referencia: string | null;
+    latitud?: number;
+    longitud?: number;
     urlBanner?: string;
-    productos: ProductoDetalle[];
-    categorias: Categoria[];
+    logoUrl?: string;     // Added
+    facebook?: string;    // Added
+    instagram?: string;   // Added
+    twitter?: string;  
+    tiktok?: string;      // Added
+    whatsapp?: string;    // Added
+    productos: any[]; // Changed to any[] temporarily or refine based on actual response if needed, kept generic for now as user just said "productos: []"
+    categorias: any[]; // Changed to any[]
 }
 
 export interface ProductoDetalle {
@@ -85,6 +93,10 @@ export class NegocioService {
                 }))
             }))
         );
+    }
+
+    getNegocioPorNombre(nombre: string): Observable<NegocioDetalle> {
+        return this.http.get<NegocioDetalle>(`${this.config.apiUrl}/Negocios/publico/detalle/${nombre}`);
     }
 
     private transformNegocio(item: Negocio): Negocio {

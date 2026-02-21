@@ -45,7 +45,7 @@ export class BannerService {
     if (data.imagen) {
       formData.append('imagen', data.imagen, data.imagen.name);
     } else if (data.urlImagen) {
-      formData.append('urlImagen', data.urlImagen);
+      formData.append('imagenUrl', data.urlImagen);
     }
 
     return this.http.post(`${this.apiUrl}/banner`, formData);
@@ -67,7 +67,7 @@ export class BannerService {
     if (data.imagen) {
       formData.append('imagen', data.imagen, data.imagen.name);
     } else if (data.urlImagen) {
-      formData.append('urlImagen', data.urlImagen);
+      formData.append('imagenUrl', data.urlImagen);
     }
 
     return this.http.put(`${this.apiUrl}/banner/${id}`, formData);

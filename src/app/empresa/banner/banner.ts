@@ -195,7 +195,7 @@ export class Banner implements OnInit {
          if (this.selectedFile) {
             bannerData['imagen'] = this.selectedFile;
          } else if (this.banner.urlImagen && !this.banner.urlImagen.startsWith('data:')) {
-            bannerData['imagenUrl'] = this.banner.urlImagen;
+            bannerData['urlImagen'] = this.banner.urlImagen;
          }
          console.log('Datos a enviar:', bannerData);
          let request$;
