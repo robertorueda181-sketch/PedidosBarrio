@@ -198,7 +198,7 @@
                 <label class="block text-sm font-medium text-gray-700 mb-2">
                   <i class="pi pi-envelope mr-2"></i>Correo Electrónico *
                 </label>
-                <input pInputText [(ngModel)]="companyProfile.contact.email" type="email"
+                <input disabled="true" pInputText [(ngModel)]="companyProfile.contact.email" type="email"
                   placeholder="contacto@minegocio.com" class="w-full">
               </div>
 
@@ -207,17 +207,42 @@
                 <label class="block text-sm font-medium text-gray-700 mb-2">
                   <i class="pi pi-phone mr-2"></i>Teléfono Principal *
                 </label>
-                <input pInputText [(ngModel)]="companyProfile.contact.phone" type="tel" placeholder="+51 999 999 999"
-                  class="w-full">
+                <div class="flex gap-2">
+                <!-- Prefijo fijo -->
+                <input
+                  pInputText
+                  [value]="+51"
+                  disabled
+                  class="w-20 text-center font-bold"
+                />
+
+                <input pInputText pInputMask="999 999 999" [min]="900000000" [max]="999999999" [(ngModel)]="companyProfile.contact.phone" mode="tel" placeholder="99-999999" />
+    
+              
               </div>
+              </div>
+
 
               <!-- Teléfono Secundario -->
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">
                   <i class="pi pi-phone mr-2"></i>Teléfono Secundario (Opcional)
                 </label>
-                <input pInputText [(ngModel)]="companyProfile.contact.phone2" type="tel" placeholder="+51 999 999 999"
-                  class="w-full">
+                 <div>
+             
+                <div class="flex gap-2">
+                <!-- Prefijo fijo -->
+                <input
+                  pInputText
+                  [value]="+51"
+                  disabled
+                  class="w-20 text-center font-bold"
+                />
+               <input pInputText pInputMask="999 999 999" [min]="900000000" [max]="999999999" [(ngModel)]="companyProfile.contact.phone2" placeholder="99-999999" />
+      
+              </div>
+              </div>
+                
               </div>
             </div>
           </p-tabpanel>

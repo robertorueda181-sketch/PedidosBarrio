@@ -16,6 +16,8 @@ import { EmpresaService } from '../../../shared/services/empresa.service';
 import { SelectModule } from 'primeng/select';
 import { CheckboxModule } from 'primeng/checkbox';
 import * as L from 'leaflet';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { InputMaskModule } from 'primeng/inputmask';
 
 interface Address {
   id: string;
@@ -56,6 +58,7 @@ interface CompanyProfile {
     FormsModule,
     ButtonModule,
     InputTextModule,
+    InputMaskModule,
     TextareaModule,
     TabsModule,
     TooltipModule,
@@ -121,7 +124,7 @@ export class Perfil implements OnInit {
     },
     addresses: [
       {
-        id: '1',
+        id: '0',
         name: 'Local Principal',
         address: 'Av. Principal 123, Lima',
         lat: -12.0464,
@@ -151,17 +154,18 @@ export class Perfil implements OnInit {
       this.addrLng.set(addr.lng);
       this.addrIsMain.set(addr.isMain);
 
-      // Intentar mapear si vienen nombres en lugar de IDs (para compatibilidad)
+      // 1. Set Departamento Code
       let deptId = addr.departamento || '';
       const foundDept = this.departments().find(d => d.code == deptId || d.name === deptId);
       if (foundDept) deptId = foundDept.code;
       this.addrDept.set(deptId);
-
+      console.log('Departamento encontrado para dirección:',this.addrDept());
       // Load dropdowns based on ID
       if (deptId) {
         this.locationService.getProvinces(deptId).subscribe(data => {
           this.provinces.set(data);
 
+          // 2. Set Provincia Code
           let provId = addr.provincia || '';
           const foundProv = data.find(p => p.code == provId || p.name === provId);
           if (foundProv) provId = foundProv.code;
@@ -171,10 +175,17 @@ export class Perfil implements OnInit {
             this.locationService.getDistricts(provId).subscribe(dataDist => {
               this.districts.set(dataDist);
 
+              // 3. Set Distrito Code
               let distId = addr.distrito || '';
               const foundDist = dataDist.find(d => d.code == distId || d.name === distId);
               if (foundDist) distId = foundDist.code;
               this.addrDist.set(distId);
+              
+              if(this.companyProfile.addresses[0].id == '0') {
+                this.addrDept.set('0');
+                this.addrProv.set('0');  
+                this.addrDist.set('0');
+              }
             });
           }
         });
@@ -225,28 +236,26 @@ export class Perfil implements OnInit {
     this.addrDist.set('');
 
     const prov = this.addrProv();
+    const dept = this.addrDept();
+
     if (prov) {
       this.locationService.getDistricts(prov).subscribe(data => {
         this.districts.set(data);
       });
+
+      // Update map when province changes
+      const provName = this.provinces().find(p => p.code === prov)?.name;
+      const deptName = this.departments().find(d => d.code === dept)?.name;
+
+      if (provName && deptName) {
+        const query = `${provName}, ${deptName}, Perú`;
+        this.updateMapBySearch(query);
+      }
     }
   }
 
   onDistrictChange() {
-    const distId = this.addrDist();
-    const provId = this.addrProv();
-    const deptId = this.addrDept();
-
-    if (distId && provId && deptId) {
-      const distName = this.districts().find(d => d.code === distId)?.name;
-      const provName = this.provinces().find(p => p.code === provId)?.name;
-      const deptName = this.departments().find(d => d.code === deptId)?.name;
-
-      if (distName && provName && deptName) {
-        const query = `${distName}, ${provName}, ${deptName}, Perú`;
-        this.updateMapBySearch(query);
-      }
-    }
+    // No action on district change regarding map update
   }
 
   private async updateMapBySearch(query: string) {
@@ -315,11 +324,9 @@ export class Perfil implements OnInit {
             provincia: data.provincia,
             distrito: data.distrito
           };
-
+          console.log('Dirección mapeada:', addr);
           this.companyProfile.addresses = [addr];
           this.initializeAddressSignals();
-
-          this.updateProgress();
         }
       },
       error: (err) => {
@@ -329,10 +336,6 @@ export class Perfil implements OnInit {
       },
       complete: () => this.isLoading.set(false)
     });
-  }
-
-  updateProgress() {
-
   }
 
   saveProfile() {
@@ -349,6 +352,7 @@ export class Perfil implements OnInit {
       provincia: this.addrProv(),
       distrito: this.addrDist()
     };
+    console.log('Dirección a guardar:', this.addrDept(), this.addrProv(), this.addrDist(), currentAddress);
 
     const deptCode = this.addrDept();
     const provCode = this.addrProv();
@@ -357,8 +361,8 @@ export class Perfil implements OnInit {
     const payload = {
       nombre: this.companyProfile.name,
       descripcion: this.companyProfile.description,
-      telefono: this.companyProfile.contact.phone,
-      telefono2: this.companyProfile.contact.phone2,
+      telefono: this.companyProfile.contact.phone.toString(),
+      telefono2: (this.companyProfile.contact.phone2 ?? "").toString(),
       correo: this.companyProfile.contact.email,
       urlLogo: this.companyProfile.logo,
       redesSociales: {
@@ -383,7 +387,6 @@ export class Perfil implements OnInit {
     this.empresaService.updateSede(payload).subscribe({
       next: (resp) => {
         console.log('Respuesta guardado:', resp);
-        this.updateProgress();
         this.toastr.success('Los cambios se han guardado correctamente', 'Perfil actualizado');
         this.loadProfile(); // Recargar para asegurar sincronización
       },
@@ -421,7 +424,6 @@ export class Perfil implements OnInit {
         if (response.success) {
           this.companyProfile.logo = response.imageUrl || response.imagePath; // User provided structure has both, prioritize URL
           this.toastr.success(response.message || 'Logo actualizado correctamente', 'Éxito');
-          this.updateProgress();
         } else {
           this.toastr.error(response.message || 'No se pudo actualizar el logo', 'Error');
         }

@@ -5,6 +5,7 @@ import { ToastrService } from 'ngx-toastr';
 import { SelectModule } from 'primeng/select';
 import { DialogModule } from 'primeng/dialog';
 import { BannerService } from '../services/banner.service';
+import { DatePickerModule } from 'primeng/datepicker';
 
 interface BannerConfig {
   title: string;
@@ -12,9 +13,9 @@ interface BannerConfig {
   imageUrl: string;
   ctaText: string;
   ctaAction: string; // ID of the section or URL
-  startDate?: string;
-  endDate?: string;
-  expirationDate?: string;
+  startDate?: Date;
+  endDate?: Date;
+  expirationDate?: Date;
   id?: string;
   link?: string;
 }
@@ -22,14 +23,14 @@ interface BannerConfig {
 @Component({
   selector: 'app-banner',
   standalone: true,
-  imports: [CommonModule, FormsModule, SelectModule, DialogModule],
+  imports: [CommonModule, FormsModule,DatePickerModule  , SelectModule, DialogModule],
   templateUrl: './banner.html',
   styleUrl: './banner.css'
 })
 export class Banner implements OnInit {
   private toastr = inject(ToastrService);
   private bannerService = inject(BannerService);
-  isLoading = false;
+  isLoading = signal(false);
   showFullPreview = false;
   showImageModal = signal(false);
   activeTab: 'upload' | 'stock' = 'upload';
@@ -58,46 +59,60 @@ export class Banner implements OnInit {
   }
 
   cargarBanners() {
-    this.isLoading = true;
+    this.isLoading.set(true);
     this.bannerService.obtenerBanners().subscribe({
-      next: (data) => {
+      next: (data: any[]) => { // Added type any[] to avoid implicit any errors if strict
         // Mapear desde API al formato de BannerConfig
-        const mappedBanners = data.map(b => ({
-          id: b.id || b.bannerID, // Ajustar según respuesta API
+        console.log('Banners obtenidos:', data);
+        const mappedBanners: BannerConfig[] = data.map(b => ({
+          id: b.bannerID, 
           title: b.titulo,
           subtitle: b.descripcion,
           imageUrl: b.imagenUrl || 'https://images.unsplash.com/photo-1517433367423-c7e5b0f35086?w=1600', // URL imagen
           ctaText: b.textoBoton,
           ctaAction: b.redireccion,
-          startDate: b.fechaInicio?.split('T')[0],
-          endDate: b.fechaFin?.split('T')[0],
-          expirationDate: b.fechaExpiracion?.split('T')[0],
+          startDate: b.fechaInicio ? new Date(b.fechaInicio) : undefined,
+          endDate: b.fechaExpiracion ? new Date(b.fechaExpiracion) : undefined,
+          expirationDate: b.fechaExpiracion ? new Date(b.fechaExpiracion) : undefined,
           link: b.link
         }));
         this.banners.set(mappedBanners);
       },
       error: (err) => {
+        // Si es 404, simplemente no hay banners
+        if (err.status === 404) {
+          this.banners.set([]);
+          this.isLoading.set(false); // Fixed: need to stop loading even on 404
+          return;
+        }
+        
         console.error(err);
         this.toastr.error('Error al cargar banners');
-        // Fallback a local storage si falla API? O dejar vacío
-        const saved = localStorage.getItem('hero_banners_list');
-        if (saved) this.banners.set(JSON.parse(saved));
+        this.isLoading.set(false);
+        
+
       },
-      complete: () => this.isLoading = false
+      complete: () => this.isLoading.set(false)
     });
   }
 
   getEmptyBanner(): BannerConfig {
+    const now = new Date();
+    const end = new Date();
+    end.setDate(now.getDate() + 30);
+    const exp = new Date();
+    exp.setDate(now.getDate() + 60);
+
     return {
-      id: crypto.randomUUID(),
+      id: '',
       title: '',
       subtitle: '',
       imageUrl: 'https://images.unsplash.com/photo-1517433367423-c7e5b0f35086?w=1600',
       ctaText: 'Ver Más',
       ctaAction: 'productos',
-      startDate: new Date().toISOString().split('T')[0],
-      endDate: new Date(new Date().setDate(new Date().getDate() + 30)).toISOString().split('T')[0],
-      expirationDate: new Date(new Date().setDate(new Date().getDate() + 60)).toISOString().split('T')[0],
+      startDate: now,
+      endDate: end,
+      expirationDate: exp,
       link: ''
     };
   }
@@ -105,8 +120,9 @@ export class Banner implements OnInit {
   isActive(b: BannerConfig): boolean {
     if (!b.startDate || !b.endDate) return false;
     const now = new Date();
-    const start = new Date(b.startDate);
-    const end = new Date(b.endDate);
+    // Ensure they are Date objects (API mapping should guarantee this, but good for safety if types are loose)
+    const start = b.startDate instanceof Date ? b.startDate : new Date(b.startDate);
+    const end = b.endDate instanceof Date ? b.endDate : new Date(b.endDate);
     return now >= start && now <= end;
   }
 
@@ -123,7 +139,7 @@ export class Banner implements OnInit {
   deleteBanner(id: string) {
     if (!confirm('¿Estás seguro de eliminar este banner?')) return;
     
-    this.isLoading = true;
+    this.isLoading.set(true);
     // Asegurarse de que el ID es válido
     if (!id || id.length < 5) return; 
 
@@ -135,7 +151,7 @@ export class Banner implements OnInit {
       error: (err) => {
         console.error(err);
         this.toastr.error('Error al eliminar banner');
-        this.isLoading = false;
+        this.isLoading.set(false);
       }
     });
   }
@@ -163,51 +179,50 @@ export class Banner implements OnInit {
   }
 
   async saveBanner() {
-    this.isLoading = true;
+    this.isLoading.set(true);
     try {
-      if(this.viewMode() === 'edit') {
-         // Create banner using service
-         const bannerData = {
+         const bannerData: any = {
            titulo: this.banner.title,
            descripcion: this.banner.subtitle,
            textoBoton: this.banner.ctaText,
            link: this.banner.link,
            redireccion: this.banner.ctaAction,
-           fechaInicio: new Date(this.banner.startDate || new Date()),
-           fechaFin: new Date(this.banner.endDate || new Date()),
-           fechaExpiracion: new Date(this.banner.expirationDate || new Date()),
-           imagen: this.selectedFile || undefined
+           fechaInicio: this.banner.startDate ? new Date(this.banner.startDate) : new Date(),
+           fechaFin: this.banner.endDate ? new Date(this.banner.endDate) : new Date(),
+           fechaExpiracion: this.banner.expirationDate ? new Date(this.banner.expirationDate) : new Date(),
          };
          
-         this.bannerService.crearBanner(bannerData).subscribe({
+         if (this.selectedFile) {
+            bannerData['imagen'] = this.selectedFile;
+         }
+
+         let request$;
+         if (this.banner.id) {
+            request$ = this.bannerService.actualizarBanner(this.banner.id, bannerData);
+         } else {
+            request$ = this.bannerService.crearBanner(bannerData);
+         }
+         
+         request$.subscribe({
             next: (response) => {
-              this.toastr.success('Banner enviado correctamente', 'Éxito');
-              // Optionally refresh list or handle response
+              this.toastr.success(this.banner.id ? 'Banner actualizado correctamente' : 'Banner creado correctamente', 'Éxito');
               this.viewMode.set('list');
-              
-              // Recargar desde API
               this.cargarBanners();
+               this.isLoading.set(false);
             },
             error: (err) => {
+               this.isLoading.set(false);
                console.error(err);
-               this.toastr.error('Error al enviar banner', 'Error');
+               this.toastr.error('Error al guardar banner', 'Error');
             },
             complete: () => {
-              this.isLoading = false;
+              this.isLoading.set(false);
             }
          });
-         return; // async logic handled in subscription
-      }
-      
-      this.updateLocalList();
-      this.toastr.success('Banner guardado localmente', 'Éxito');
-      this.viewMode.set('list');
     } catch (e) {
       this.toastr.error('No se pudo guardar', 'Error');
-    } finally {
-      if(this.viewMode() !== 'edit')
-        this.isLoading = false;
-    }
+      this.isLoading.set(false);
+    } 
   }
   
   private updateLocalList() {

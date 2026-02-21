@@ -12,12 +12,13 @@ import { RegisterRequest } from '../../../shared/interfaces/register.interface';
 import { ToastrService } from 'ngx-toastr';
 import { GoogleSigninButtonModule, SocialAuthService, SocialUser } from '@abacritt/angularx-social-login';
 import { AuthService } from '../../../shared/services/auth.service';
+import { LoaderComponent } from '../../../shared/components/loader/loader';
 
 @Component({
   selector: 'app-business-register',
   standalone: true,
   imports: [ReactiveFormsModule, CommonModule, MultiSelectModule, InputMaskModule, CheckboxModule, SelectModule,
-    FormsModule, GoogleSigninButtonModule, RouterLink,RouterModule],
+    FormsModule, GoogleSigninButtonModule, RouterLink, RouterModule, LoaderComponent],
   templateUrl: './business-register.html',
   styleUrl: './business-register.css',
 })
@@ -36,9 +37,11 @@ export class BusinessRegisterComponent implements OnInit, OnDestroy {
   
   // MODAL
   showWelcomeModal = signal<boolean>(false);
+  isApproved = signal<boolean>(false);
 
   // CONTROL DE FLUJO
   step = signal(1);
+  loading = signal<boolean>(false);
   registroMetodo = signal<'EMAIL' | 'GOOGLE' | null>(null);
   tiposRegistro = { negocio: true, servicio: true, inmueble: true };
   
@@ -349,6 +352,8 @@ export class BusinessRegisterComponent implements OnInit, OnDestroy {
       return;
     }
 
+    this.loading.set(true);
+
     const form = this.registerForm.value;
     const typeMap: any = { 'NEGOCIO': 1, 'SERVICIO': 2, 'INMUEBLE': 3 };
     const tipoId = typeMap[form.registrationType] || 1;
@@ -385,7 +390,8 @@ export class BusinessRegisterComponent implements OnInit, OnDestroy {
 
     console.log('Enviando registro:', req);
 
-    this.registerService.registerBusiness(req).subscribe({
+    this.loading.set(true);
+            this.registerService.registerBusiness(req).subscribe({
         next: (res) => {
             console.log('Registro exitoso:', res);
             
@@ -411,19 +417,23 @@ export class BusinessRegisterComponent implements OnInit, OnDestroy {
                 this.appAuthService.user.set(user);
                 this.appAuthService.loggedIn.set(true);
 
-                // Mostramos el modal en lugar de navegar y mostrar toasts dispersos
+                // Mostramos el modal
+                this.isApproved.set(!!res.aprobado);
                 this.showWelcomeModal.set(true);
+               
                 this.clearState();
+                this.loading.set(false);
 
             } else {
                 this.toastr.success('Registro completado con éxito', 'Bienvenido');
                 this.clearState();
                 this.router.navigate(['/business-auth']); 
+                this.loading.set(false);
             }
         },
         error: (err) => {
             console.error('Error en registro:', err);
-            
+            this.loading.set(false);
             // Si es error 400 y tiene lista de errores (formato estándar API)
             if (err.status === 400 && err.error?.errors) {
                 const validationErrors = err.error.errors;

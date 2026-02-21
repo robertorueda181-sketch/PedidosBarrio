@@ -48,6 +48,26 @@ export class BannerService {
     return this.http.post(`${this.apiUrl}/banner`, formData);
   }
 
+  actualizarBanner(id: string, data: BannerData): Observable<any> {
+    const formData = new FormData();
+
+    if (data.titulo) formData.append('titulo', data.titulo);
+    if (data.descripcion) formData.append('descripcion', data.descripcion);
+    if (data.textoBoton) formData.append('textoBoton', data.textoBoton);
+    if (data.link) formData.append('link', data.link);
+    if (data.redireccion) formData.append('redireccion', data.redireccion);
+    
+    formData.append('fechaInicio', data.fechaInicio.toISOString());
+    formData.append('fechaFin', data.fechaFin.toISOString());
+    formData.append('fechaExpiracion', data.fechaExpiracion.toISOString());
+    
+    if (data.imagen) {
+      formData.append('imagen', data.imagen, data.imagen.name);
+    }
+
+    return this.http.put(`${this.apiUrl}/banner/${id}`, formData);
+  }
+
   obtenerBanners(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/banner`);
   }
