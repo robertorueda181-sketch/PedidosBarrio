@@ -10,7 +10,7 @@ import { DatePickerModule } from 'primeng/datepicker';
 interface BannerConfig {
   title: string;
   subtitle: string;
-  imageUrl: string;
+  urlImagen: string;
   ctaText: string;
   ctaAction: string; // ID of the section or URL
   startDate?: Date;
@@ -68,7 +68,7 @@ export class Banner implements OnInit {
           id: b.bannerID, 
           title: b.titulo,
           subtitle: b.descripcion,
-          imageUrl: b.imagenUrl || 'https://images.unsplash.com/photo-1517433367423-c7e5b0f35086?w=1600', // URL imagen
+          urlImagen: b.urlImagen || 'https://images.unsplash.com/photo-1517433367423-c7e5b0f35086?w=1600', // URL imagen
           ctaText: b.textoBoton,
           ctaAction: b.redireccion,
           startDate: b.fechaInicio ? new Date(b.fechaInicio) : undefined,
@@ -107,7 +107,7 @@ export class Banner implements OnInit {
       id: '',
       title: '',
       subtitle: '',
-      imageUrl: 'https://images.unsplash.com/photo-1517433367423-c7e5b0f35086?w=1600',
+      urlImagen: 'https://images.unsplash.com/photo-1517433367423-c7e5b0f35086?w=1600',
       ctaText: 'Ver Más',
       ctaAction: 'productos',
       startDate: now,
@@ -166,7 +166,7 @@ export class Banner implements OnInit {
       this.selectedFile = file;
       const reader = new FileReader();
       reader.onload = (e: any) => {
-        this.banner.imageUrl = e.target.result;
+        this.banner.urlImagen = e.target.result;
         this.showImageModal.set(false);
       };
       reader.readAsDataURL(file);
@@ -174,7 +174,7 @@ export class Banner implements OnInit {
   }
 
   selectStockImage(url: string) {
-    this.banner.imageUrl = url;
+    this.banner.urlImagen = url;
     this.showImageModal.set(false);
   }
 
@@ -194,8 +194,10 @@ export class Banner implements OnInit {
          
          if (this.selectedFile) {
             bannerData['imagen'] = this.selectedFile;
+         } else if (this.banner.urlImagen && !this.banner.urlImagen.startsWith('data:')) {
+            bannerData['imagenUrl'] = this.banner.urlImagen;
          }
-
+         console.log('Datos a enviar:', bannerData);
          let request$;
          if (this.banner.id) {
             request$ = this.bannerService.actualizarBanner(this.banner.id, bannerData);
@@ -209,6 +211,7 @@ export class Banner implements OnInit {
               this.viewMode.set('list');
               this.cargarBanners();
                this.isLoading.set(false);
+               this.selectedFile = null; // Reset file input after successful upload
             },
             error: (err) => {
                this.isLoading.set(false);

@@ -21,7 +21,7 @@
                     class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden group hover:shadow-md transition-all">
                     <!-- Image -->
                     <div class="h-40 overflow-hidden relative">
-                        <img [src]="item.imageUrl"
+                        <img [src]="item.urlImagen || 'assets/default-banner.webp'" alt="Banner Image"
                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
                         <div class="absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest backdrop-blur-md shadow-sm"
                             [ngClass]="isActive(item) ? 'bg-green-100/90 text-green-700' : 'bg-gray-100/90 text-gray-500'">
@@ -152,7 +152,7 @@
                     <button (click)="showImageModal.set(true)"
                         class="w-full flex items-center justify-between p-4 bg-gray-50 border border-gray-100 rounded-xl hover:bg-gray-100 transition-all group">
                         <div class="flex items-center gap-4">
-                            <img [src]="banner.imageUrl" class="w-16 h-10 rounded bg-white shadow-sm object-cover">
+                            <img [src]="banner.urlImagen" class="w-16 h-10 rounded bg-white shadow-sm object-cover">
                             <span class="text-sm font-bold text-gray-700">Cambiar Imagen de Portada</span>
                         </div>
                         <i class="pi pi-images text-cyan-600 group-hover:scale-110 transition-transform text-xl"></i>
@@ -228,7 +228,7 @@
             <i class="pi pi-times"></i> Salir de Vista Previa
         </button>
         <div class="relative w-full flex-1 overflow-hidden">
-            <img [src]="banner.imageUrl" class="w-full h-full object-cover" />
+            <img [src]="banner.urlImagen" class="w-full h-full object-cover" />
             <div class="absolute inset-0 bg-black/40 flex flex-col items-center justify-center text-center p-20">
                 <span class="text-cyan-300 uppercase tracking-[0.5em] font-light mb-6 text-2xl">{{ banner.subtitle
                     }}</span>
