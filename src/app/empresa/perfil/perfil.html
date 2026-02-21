@@ -131,9 +131,8 @@
                   <i class="pi pi-facebook text-blue-600 mr-2"></i>Facebook
                 </label>
                 <div class="flex flex-col md:flex-row items-start md:items-center gap-2">
-                  <span class="text-sm text-gray-500">facebook.com/</span>
-                  <input pInputText [(ngModel)]="companyProfile.socialMedia.facebook" placeholder="tu-pagina"
-                    class="flex-1 w-full">
+                  <input pInputText [(ngModel)]="companyProfile.socialMedia.facebook"
+                    placeholder="Link de tu página o usuario" class="flex-1 w-full">
                 </div>
               </div>
 
@@ -143,9 +142,8 @@
                   <i class="pi pi-instagram text-pink-600 mr-2"></i>Instagram
                 </label>
                 <div class="flex flex-col md:flex-row items-start md:items-center gap-2">
-                  <span class="text-sm text-gray-500">instagram.com/</span>
-                  <input pInputText [(ngModel)]="companyProfile.socialMedia.instagram" placeholder="tu-usuario"
-                    class="flex-1 w-full">
+                  <input pInputText [(ngModel)]="companyProfile.socialMedia.instagram"
+                    placeholder="Link de tu página o usuario" class="flex-1 w-full">
                 </div>
               </div>
 
@@ -155,9 +153,8 @@
                   <i class="pi pi-twitter text-blue-400 mr-2"></i>Twitter / X
                 </label>
                 <div class="flex flex-col md:flex-row items-start md:items-center gap-2">
-                  <span class="text-sm text-gray-500">twitter.com/</span>
-                  <input pInputText [(ngModel)]="companyProfile.socialMedia.twitter" placeholder="tu-usuario"
-                    class="flex-1 w-full">
+                  <input pInputText [(ngModel)]="companyProfile.socialMedia.twitter"
+                    placeholder="Link de tu página o usuario" class="flex-1 w-full">
                 </div>
               </div>
 
@@ -167,20 +164,24 @@
                   <i class="pi pi-video text-gray-900 mr-2"></i>TikTok
                 </label>
                 <div class="flex flex-col md:flex-row items-start md:items-center gap-2">
-                  <span class="text-sm text-gray-500">tiktok.com/@</span>
-                  <input pInputText [(ngModel)]="companyProfile.socialMedia.tiktok" placeholder="tu-usuario"
-                    class="flex-1 w-full">
+                  <input pInputText [(ngModel)]="companyProfile.socialMedia.tiktok"
+                    placeholder="Link de tu página o usuario" class="flex-1 w-full">
                 </div>
               </div>
 
               <!-- WhatsApp -->
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">
-                  <i class="pi pi-whatsapp text-green-600 mr-2"></i>WhatsApp Business
+                  <i class="pi pi-whatsapp text-green-600 mr-2"></i>WhatsApp
                 </label>
-                <input pInputText [(ngModel)]="companyProfile.socialMedia.whatsapp" placeholder="+51 999 999 999"
-                  class="w-full">
-                <small class="text-gray-500 block mt-1">Número con código de país</small>
+                <div class="flex gap-2">
+                  <!-- Prefijo fijo -->
+                  <input pInputText [value]="+51" disabled class="w-20 text-center font-bold" />
+                  <p-inputMask mask="999 999 999" [(ngModel)]="companyProfile.socialMedia.whatsapp"
+                    placeholder="999 999 999" inputmode="numeric"></p-inputMask>
+
+
+                </div>
               </div>
             </div>
           </p-tabpanel>
@@ -208,18 +209,14 @@
                   <i class="pi pi-phone mr-2"></i>Teléfono Principal *
                 </label>
                 <div class="flex gap-2">
-                <!-- Prefijo fijo -->
-                <input
-                  pInputText
-                  [value]="+51"
-                  disabled
-                  class="w-20 text-center font-bold"
-                />
+                  <!-- Prefijo fijo -->
+                  <input pInputText [value]="+51" disabled class="w-20 text-center font-bold" />
 
-                <input pInputText pInputMask="999 999 999" [min]="900000000" [max]="999999999" [(ngModel)]="companyProfile.contact.phone" mode="tel" placeholder="99-999999" />
-    
-              
-              </div>
+                  <p-inputMask mask="999 999 999" [(ngModel)]="companyProfile.contact.phone" placeholder="999 999 999"
+                    inputmode="numeric"></p-inputMask>
+
+
+                </div>
               </div>
 
 
@@ -228,21 +225,17 @@
                 <label class="block text-sm font-medium text-gray-700 mb-2">
                   <i class="pi pi-phone mr-2"></i>Teléfono Secundario (Opcional)
                 </label>
-                 <div>
-             
-                <div class="flex gap-2">
-                <!-- Prefijo fijo -->
-                <input
-                  pInputText
-                  [value]="+51"
-                  disabled
-                  class="w-20 text-center font-bold"
-                />
-               <input pInputText pInputMask="999 999 999" [min]="900000000" [max]="999999999" [(ngModel)]="companyProfile.contact.phone2" placeholder="99-999999" />
-      
-              </div>
-              </div>
-                
+                <div>
+
+                  <div class="flex gap-2">
+                    <!-- Prefijo fijo -->
+                    <input pInputText [value]="+51" disabled class="w-20 text-center font-bold" />
+                    <p-inputMask mask="999 999 999" [(ngModel)]="companyProfile.contact.phone2"
+                      placeholder="999 999 999" inputmode="numeric"></p-inputMask>
+
+                  </div>
+                </div>
+
               </div>
             </div>
           </p-tabpanel>

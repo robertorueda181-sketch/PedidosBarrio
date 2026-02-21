@@ -94,6 +94,8 @@ export class BusinessRegisterComponent implements OnInit, OnDestroy {
   });
 
   constructor() {
+    localStorage.removeItem('userType')
+    localStorage.removeItem('business_register_state');
     // Leer flags de config.json
     const config = (window as any).appConfig || {};
     if (config.registroTipos) {
@@ -166,7 +168,9 @@ export class BusinessRegisterComponent implements OnInit, OnDestroy {
   }
 
   restoreState() {
+
     const stored = localStorage.getItem('business_register_state');
+        console.log('Restaurando estado de registro desde localStorage',stored);
     if (stored) {
       const state = JSON.parse(stored);
       this.step.set(state.step || 1);

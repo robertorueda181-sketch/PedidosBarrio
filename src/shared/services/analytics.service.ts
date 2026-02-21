@@ -1,8 +1,9 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { CookieService } from './cookie.service';
+import { AppConfigService } from './app-config.service';
 
 export interface PageView {
   pageUrl: string;
@@ -48,6 +49,7 @@ export class AnalyticsService {
   private sessionId: string;
   private pageStartTime: Date | null = null;
   private currentPage: string = '';
+  private appConfig = inject(AppConfigService);
 
   constructor(
     private http: HttpClient,
@@ -70,43 +72,7 @@ export class AnalyticsService {
     this.saveUserActivity(activity);
   }
 
-  /**
-   * Registra una vista de página
-   */
-  trackPageView(pageName: string, pageUrl: string): void {
-    // Guardar duración de la página anterior
-    if (this.currentPage && this.pageStartTime) {
-      const duration = Math.round((new Date().getTime() - this.pageStartTime.getTime()) / 1000);
-      this.savePageDuration(this.currentPage, duration);
-    }
 
-    // Actualizar tiempo de inicio para nueva página
-    this.pageStartTime = new Date();
-    this.currentPage = pageUrl;
-
-    const pageView: PageView = {
-      pageUrl,
-      pageName,
-      timestamp: new Date(),
-      sessionId: this.sessionId,
-      userId: this.getUserId(),
-      referrer: document.referrer,
-      userAgent: navigator.userAgent,
-      deviceType: this.getDeviceType(),
-      duration: 0
-    };
-
-    // Guardar en historial de cookies
-    this.addToPageHistory(pageName, pageUrl);
-
-    // Enviar al backend (no esperar respuesta para no bloquear)
-    this.http.post(`${this.apiUrl}/analytics/pageview`, pageView)
-      .pipe(catchError(err => {
-        console.error('Error al registrar vista:', err);
-        return of(null);
-      }))
-      .subscribe();
-  }
 
   /**
    * Registra un evento personalizado
@@ -198,29 +164,6 @@ export class AnalyticsService {
       const v = c === 'x' ? r : (r & 0x3 | 0x8);
       return v.toString(16);
     });
-  }
-
-  /**
-   * Registra cuando el usuario abandona la página
-   */
-  trackPageLeave(): void {
-    if (!this.pageStartTime || !this.currentPage) return;
-
-    const duration = Math.round((new Date().getTime() - this.pageStartTime.getTime()) / 1000);
-    
-    // Guardar duración en cookies
-    this.savePageDuration(this.currentPage, duration);
-    
-    // Usar sendBeacon para enviar datos incluso al cerrar
-    const data = JSON.stringify({
-      pageUrl: window.location.href,
-      sessionId: this.sessionId,
-      duration
-    });
-
-    if (navigator.sendBeacon) {
-      navigator.sendBeacon(`${this.apiUrl}/analytics/duration`, data);
-    }
   }
 
   /**
@@ -347,6 +290,24 @@ export class AnalyticsService {
   /**
    * Obtiene estadísticas locales del usuario
    */
+
+  /**
+   * Tracks a company view by sending the company code and current URL to the backend.
+   * Endpoint: api/PageViews/track
+   */
+  trackCompanyView(codigoEmpresa: string): void {
+    const endpoint = `${this.appConfig.apiUrl}/PageViews/track`;
+    const payload = {
+      codigoEmpresa: codigoEmpresa,
+      url: window.location.href
+    };
+    
+    this.http.post(endpoint, payload).subscribe({
+      next: () => console.log('View tracked successfully'),
+      error: (err) => console.error('Error tracking company view', err)
+    });
+  }
+
   getLocalStats(): any {
     const activity = this.getUserActivity();
     

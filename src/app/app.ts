@@ -20,23 +20,10 @@ export class App {
   private analyticsService = inject(AnalyticsService);
 
   constructor(private router: Router) {
-    // Mostrar loader por 5 segundos al iniciar
+    // Mostrar loader por 0.5 segundos al iniciar
     setTimeout(() => {
       this.isLoading.set(false);
     }, 500);
-
-    // Registrar vistas de página en cada navegación
-    this.router.events.pipe(
-      filter(event => event instanceof NavigationEnd)
-    ).subscribe((event: any) => {
-      const pageName = this.getPageName(event.urlAfterRedirects);
-      this.analyticsService.trackPageView(pageName, event.urlAfterRedirects);
-    });
-
-    // Registrar cuando el usuario abandona la página
-    window.addEventListener('beforeunload', () => {
-      this.analyticsService.trackPageLeave();
-    });
   }
 
   protected readonly title = signal('Espacio Online');

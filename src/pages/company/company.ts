@@ -3,6 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { NegocioService, NegocioDetalle } from '../../shared/services/negocio.service';
+import { AnalyticsService } from '../../shared/services/analytics.service';
 
 interface CartItem {
   id: number;
@@ -22,6 +23,7 @@ interface CartItem {
 export class Company implements OnInit {
   private route = inject(ActivatedRoute);
   private negocioService = inject(NegocioService);
+  private analyticsService = inject(AnalyticsService);
   private sanitizer = inject(DomSanitizer);
   
   codigoempresa: string | null = null;
@@ -100,6 +102,9 @@ export class Company implements OnInit {
       next: (data) => {
         this.company.set(data);
         this.loading.set(false);
+        if (data.empresaID) {
+          this.analyticsService.trackCompanyView(data.nombre);
+        }
       },
       error: (err) => {
         console.error('Error loading company:', err);

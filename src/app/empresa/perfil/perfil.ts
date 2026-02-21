@@ -16,7 +16,6 @@ import { EmpresaService } from '../../../shared/services/empresa.service';
 import { SelectModule } from 'primeng/select';
 import { CheckboxModule } from 'primeng/checkbox';
 import * as L from 'leaflet';
-import { InputNumberModule } from 'primeng/inputnumber';
 import { InputMaskModule } from 'primeng/inputmask';
 
 interface Address {
@@ -130,9 +129,9 @@ export class Perfil implements OnInit {
         lat: -12.0464,
         lng: -77.0428,
         isMain: true,
-        distrito: 'Miraflores',
-        provincia: 'Lima',
-        departamento: 'Lima'
+        distrito: '150505',
+        provincia: '1505',
+        departamento: '15'
       }
     ]
   };
@@ -180,11 +179,11 @@ export class Perfil implements OnInit {
               const foundDist = dataDist.find(d => d.code == distId || d.name === distId);
               if (foundDist) distId = foundDist.code;
               this.addrDist.set(distId);
-              
+              console.log('Id de direccion:',this.companyProfile.addresses[0].id );
               if(this.companyProfile.addresses[0].id == '0') {
-                this.addrDept.set('0');
-                this.addrProv.set('0');  
-                this.addrDist.set('0');
+                this.addrDept.set('15');
+                this.addrProv.set('1505');  
+                this.addrDist.set('150505');
               }
             });
           }
@@ -300,16 +299,16 @@ export class Perfil implements OnInit {
           this.companyProfile.name = data.nombre || '';
           this.companyProfile.description = data.descripcion || '';
           this.companyProfile.logo = data.logoUrl || '';
-          this.companyProfile.contact.phone = data.telefonoPrincipal || '';
+          this.companyProfile.contact.phone = (data.telefonoPrincipal || '').toString().trim();
           this.companyProfile.contact.email = data.email || '';
-          this.companyProfile.contact.phone2 = data.telefonoSec || '';
+          this.companyProfile.contact.phone2 = (data.telefonoSec || '').toString().trim();
 
           this.companyProfile.socialMedia = {
             facebook: data.facebook || '',
             instagram: data.instagram || '',
             twitter: data.twitter || '',
             tiktok: data.tiktok || '',
-            whatsapp: data.whatsapp || ''
+            whatsapp: (data.whatsapp || '').toString().trim()
           };
 
           // Map flat address fields to Address object
@@ -361,8 +360,8 @@ export class Perfil implements OnInit {
     const payload = {
       nombre: this.companyProfile.name,
       descripcion: this.companyProfile.description,
-      telefono: this.companyProfile.contact.phone.toString(),
-      telefono2: (this.companyProfile.contact.phone2 ?? "").toString(),
+      telefono: (this.companyProfile.contact.phone ?? "").replace(/\D/g, '').toString().trim(),
+      telefono2: (this.companyProfile.contact.phone2 ?? "").replace(/\D/g, '').toString().trim(),
       correo: this.companyProfile.contact.email,
       urlLogo: this.companyProfile.logo,
       redesSociales: {
@@ -370,7 +369,7 @@ export class Perfil implements OnInit {
         instagram: this.companyProfile.socialMedia.instagram,
         twitter: this.companyProfile.socialMedia.twitter,
         tiktok: this.companyProfile.socialMedia.tiktok,
-        whatsapp: this.companyProfile.socialMedia.whatsapp
+        whatsapp: (this.companyProfile.socialMedia.whatsapp ?? "").replace(/\D/g, '').toString().trim()
       },
       direccion: {
         direccionCompleta: currentAddress.address,

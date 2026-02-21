@@ -55,6 +55,7 @@ export class BusinessAuth implements OnDestroy {
     googleBtnWidth: number = 300; 
 
     constructor() {
+        localStorage.removeItem('userType')
         // Disable automatic registration globally while on this page
         this.authService.autoRegisterSocial = false;
         
@@ -71,17 +72,7 @@ export class BusinessAuth implements OnDestroy {
             console.log('Auth effect - LoggedIn:', isLoggedIn, 'Step:', currentStep, 'IsRegistering:', isRegistering, 'HasToken:', hasToken, 'IsNavigating:', this.isNavigating, 'User:', user?.email);
 
             if (isLoggedIn && user) {
-                // Registration flow: Capture social data and move to step 2
-                if (isRegistering && currentStep === 1 && !this.socialUser) {
-                    console.log('✅ Flow: Registration - Proceeding to step 2');
-                    this.socialUser = user;
-                    this.email.set(user.email || '');
-                    this.personFirstName.set(user.firstName || '');
-                    this.personLastName.set(user.lastName || '');
-                    this.nextStep();
-                } 
-                // Login flow: Attempt login if not already authenticated
-                else if (!isRegistering && !hasToken && !this.isNavigating) {
+                if (!isRegistering && !hasToken && !this.isNavigating) {
                     console.log('✅ Flow: Social Login - Authenticating with backend');
                     this.isNavigating = true;
                     const loginData: LoginRequest = {
