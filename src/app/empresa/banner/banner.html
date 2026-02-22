@@ -40,11 +40,11 @@
                         <div class="space-y-1 text-xs text-gray-400 font-medium">
                             <div class="flex items-center gap-2">
                                 <i class="pi pi-calendar-plus text-cyan-600"></i>
-                                <span>Desde: {{ item.startDate | date:'dd/MM/yyyy HH:mm' }}</span>
+                                <span>Desde: {{ item.startDate | date:'dd/MM/yyyy' }}</span>
                             </div>
                             <div class="flex items-center gap-2">
                                 <i class="pi pi-calendar-minus text-red-400"></i>
-                                <span>Hasta: {{ item.endDate | date:'dd/MM/yyyy HH:mm' }}</span>
+                                <span>Hasta: {{ item.endDate | date:'dd/MM/yyyy' }}</span>
                             </div>
                         </div>
 

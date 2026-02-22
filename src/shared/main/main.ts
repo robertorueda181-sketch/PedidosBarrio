@@ -65,21 +65,16 @@ export class Main implements OnInit {
             ctaText: b.textoBoton
           }));
         } else {
-             // Fallback default banners if API returns empty
-             this.banners = [
-                { url: 'assets/banner1.avif', title: 'Descubre lo mejor de tu barrio', subtitle: 'Apoya a los negocios locales y encuentra todo lo que necesitas.' },
-                { url: 'assets/banner.avif', title: 'Servicios a tu alcance', subtitle: 'Encuentra profesionales calificados para cada necesidad.' },
-                { url: 'assets/fondo.avif', title: 'Tu próximo hogar te espera', subtitle: 'Explora nuestra selección exclusiva de inmuebles.' }
-              ];
+               this.banners = [
+            { url: 'assets/banner.png', title: 'Bienvenido a espacio online', subtitle: 'Puedes registrar tu negocio 100% gratis' }
+          ];
         }
       },
       error: (err) => {
         console.error('Error loading banners', err);
          // Fallback default banners on error
          this.banners = [
-            { url: 'assets/banner1.avif', title: 'Descubre lo mejor de tu barrio', subtitle: 'Apoya a los negocios locales y encuentra todo lo que necesitas.' },
-            { url: 'assets/banner.avif', title: 'Servicios a tu alcance', subtitle: 'Encuentra profesionales calificados para cada necesidad.' },
-            { url: 'assets/fondo.avif', title: 'Tu próximo hogar te espera', subtitle: 'Explora nuestra selección exclusiva de inmuebles.' }
+            { url: 'assets/banner.png', title: 'Bienvenido a espacio online', subtitle: 'Puedes registrar tu negocio 100% gratis' }
           ];
       }
     });

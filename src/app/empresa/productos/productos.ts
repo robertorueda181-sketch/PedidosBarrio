@@ -302,33 +302,6 @@ export class ProductosComponent {
     }
   }
 
-  deleteCategory(categoryId: number) {
-    this.confirmationService.confirm({
-      message: '¿Estás seguro de eliminar esta categoría? Los productos asociados no se eliminarán.',
-      header: 'Confirmar eliminación',
-      icon: 'pi pi-exclamation-triangle',
-      acceptLabel: 'Sí, eliminar',
-      rejectLabel: 'Cancelar',
-      rejectButtonStyleClass: 'p-button-text',
-      accept: () => {
-        this.productoService.eliminarCategoria(categoryId).subscribe({
-          next: () => {
-            this.categories.update(cats => cats.filter(c => c.id !== categoryId));
-            if (this.selectedCategoryId === categoryId) {
-              this.selectedCategoryId = this.categories()[0]?.id || null;
-            }
-            this.updateProductCounts();
-            this.toastr.success('La categoría se ha eliminado correctamente', 'Categoría eliminada');
-          },
-          error: (error) => {
-            console.error('Error al eliminar categoría:', error);
-            this.toastr.error('No se pudo eliminar la categoría', 'Error');
-          }
-        });
-      }
-    });
-  }
-
   toggleFavorite(categoryId: number) {
     this.categories.update(cats => {
       const category = cats.find(c => c.id === categoryId);

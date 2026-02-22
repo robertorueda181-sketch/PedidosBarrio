@@ -91,6 +91,7 @@ export class SearchResultsComponent implements OnInit {
     }
 
     onSearch() {
+        console.log('pruebq')
         if (this.searchQuery().trim()) {
             this.router.navigate([], {
                 relativeTo: this.route,
