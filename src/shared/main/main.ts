@@ -34,7 +34,7 @@ export class Main implements OnInit {
   currentSlide = signal<number>(1); // Empieza en el primero real
   isTransitioning = signal<boolean>(false);
   showAllCategories = signal<boolean>(false);
-  banners: any[] = [];
+  banners= signal<any[]>([]);
 
   responsiveOptions = [
     { breakpoint: '1400px', numVisible: 4, numScroll: 4 },
@@ -56,26 +56,27 @@ export class Main implements OnInit {
   loadBanners() {
     this.bannerService.obtenerBannersPublicos().subscribe({
       next: (data) => {
+        console.log('Banners:', data);
         if (data && data.length > 0) {
-          this.banners = data.map(b => ({
+          this.banners.set(data.map(b => ({
             url: b.urlImagen || 'assets/default-banner.webp', // Fallback image
             title: b.titulo,
             subtitle: b.descripcion,
             link: b.link,
             ctaText: b.textoBoton
-          }));
+          })));
         } else {
-               this.banners = [
+               this.banners.set([
             { url: 'assets/banner.png', title: 'Bienvenido a espacio online', subtitle: 'Puedes registrar tu negocio 100% gratis' }
-          ];
+          ]);
         }
       },
       error: (err) => {
         console.error('Error loading banners', err);
          // Fallback default banners on error
-         this.banners = [
+         this.banners.set([
             { url: 'assets/banner.png', title: 'Bienvenido a espacio online', subtitle: 'Puedes registrar tu negocio 100% gratis' }
-          ];
+          ]);
       }
     });
   }
@@ -93,9 +94,12 @@ export class Main implements OnInit {
   }
 
   get infiniteBanners() {
-    if (!this.banners || this.banners.length === 0) return [];
+    console.log('Calculando infiniteBanners con', this.banners());
+    const banners = this.banners();
+    if (!banners || banners.length === 0) return [];
+     // console.log('Calculando infiniteBanners con',[banners[banners.length - 1], ...banners, banners[0]]);
     // Clona el último al inicio y el primero al final
-    return [this.banners[this.banners.length - 1], ...this.banners, this.banners[0]];
+    return [banners[banners.length - 1], ...banners, banners[0]];
   }
 
   startAutoSlide() {
@@ -108,8 +112,9 @@ export class Main implements OnInit {
     if (this.isTransitioning()) return;
     this.isTransitioning.set(true);
     this.currentSlide.update(prev => prev + 1);
+    const banners = this.banners();
     setTimeout(() => {
-      if (this.currentSlide() === this.banners.length + 1) {
+      if (this.currentSlide() === banners.length + 1) {
         // Sin transición, vuelve al primero real
         this.isTransitioning.set(false);
         this.currentSlide.set(1);
@@ -123,11 +128,12 @@ export class Main implements OnInit {
     if (this.isTransitioning()) return;
     this.isTransitioning.set(true);
     this.currentSlide.update(prev => prev - 1);
+    const banners = this.banners();
     setTimeout(() => {
       if (this.currentSlide() === 0) {
         // Sin transición, vuelve al último real
         this.isTransitioning.set(false);
-        this.currentSlide.set(this.banners.length);
+        this.currentSlide.set(banners.length);
       } else {
         this.isTransitioning.set(false);
       }
