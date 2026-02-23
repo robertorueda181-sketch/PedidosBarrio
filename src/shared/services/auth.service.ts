@@ -117,6 +117,8 @@ export class AuthService {
     private clearSession() {
         localStorage.removeItem(this.TOKEN_KEY);
         localStorage.removeItem(this.USER_KEY);
+        // Do NOT nullify 'user' immediately upon logout if it causes re-triggering of effects unwantedly? 
+        // Actually, clearing it is correct.
         this.user.set(null);
         this.loggedIn.set(false);
     }

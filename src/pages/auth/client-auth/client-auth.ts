@@ -43,6 +43,7 @@ export class ClientAuthComponent implements OnDestroy {
 
   isLoading = signal(false);
   activeTabIndex = signal(0); // 0: Login, 1: Register
+  registerStep = signal(1); // 1: Credentials/Social, 2: Personal Info
   socialUser: SocialUser | null = null;
   private isNavigating = false;
 
@@ -51,12 +52,19 @@ export class ClientAuthComponent implements OnDestroy {
     password: ['', [Validators.required]]
   });
 
+  documentTypes = [
+    { label: 'DNI', value: 'DNI' },
+    { label: 'Carnet Ext.', value: 'CE' }
+  ];
+
   registerForm: FormGroup = this.fb.group({
+    tipoDocumento: ['DNI', Validators.required],
     dni: ['', [Validators.required, Validators.pattern(/^[0-9]+$/), Validators.minLength(8), Validators.maxLength(8)]],
     nombres: ['', [Validators.required, Validators.minLength(3)]],
+    apellidos: ['', [Validators.required, Validators.minLength(3)]],
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(6)]],
-    telefono: ['', [Validators.required, Validators.pattern(/^[0-9]+$/), Validators.minLength(9), Validators.maxLength(9)]],
+    telefono: ['', [Validators.pattern(/^[0-9]+$/), Validators.minLength(9), Validators.maxLength(9)]],
     confirmPassword: ['', [Validators.required]],
     terms: [false, Validators.requiredTrue]
   }, { validators: this.passwordMatchValidator });
@@ -81,65 +89,49 @@ export class ClientAuthComponent implements OnDestroy {
         localStorage.removeItem('user_data');
     }
 
+
+    // Subscribe to document type changes
+    this.registerForm.get('tipoDocumento')?.valueChanges.subscribe(type => {
+        const dniControl = this.registerForm.get('dni');
+        if (type === 'DNI') {
+            dniControl?.clearValidators();
+            // DNI: 8 digits only numbers
+            dniControl?.setValidators([Validators.required, Validators.pattern(/^[0-9]+$/), Validators.minLength(8), Validators.maxLength(8)]);
+        } else {
+            dniControl?.clearValidators();
+            // CE: Alphanumeric, usually 9-12 chars
+            dniControl?.setValidators([Validators.required, Validators.minLength(8), Validators.maxLength(12)]);
+        }
+        dniControl?.updateValueAndValidity();
+    });
+
     effect(() => {
         const isLoggedIn = this.authService.loggedIn();
         const socialUser = this.authService.user();
         const hasToken = !!localStorage.getItem('auth_token');
 
         if (isLoggedIn && socialUser && !hasToken && !this.isNavigating) {
-            console.log('ClientAuth: Google Link Detected', { socialUser });
+            console.log('ClientAuth: Google Link Detected (New Flow)', { socialUser });
             this.isNavigating = true;
-            this.isLoading.set(true);
+            this.isLoading.set(false); // Stop loading, let user confirm data
+            this.socialUser = socialUser; 
             
-            // Try to login with Google (assuming user might already exist)
-            const googleAuthPayload: ClientGoogleLoginRequest = {
-                dni: "0",
-                nombres: `${socialUser.firstName} ${socialUser.lastName}`,
-                contrasena: "",
-                telefono: "0",
-                provider: "google",
-                idToken: socialUser.idToken || "",
-                googleId: socialUser.id || "",
-                email: socialUser.email || ""
-            };
+            // Switch to Register Tab and Pre-fill
+            this.activeTabIndex.set(1);
+            this.registerStep.set(2);
             
-            this.registerService.loginClientGoogle(googleAuthPayload).subscribe({
-                next: (res) => {
-                    // If login successful (user existed and backend allowed login without explicit DNI check or DNI was already there? 
-                    // Actually, if user exists, backend probably has DNI. If backend updates user with "0", that's bad.
-                    // Assuming backend ignores "0" if user exists, or returns success.)
-                    if (res && res.token) {
-                         this.authService.saveSession(res.token, socialUser);
-                         this.toastr.success('Inicio de sesión exitoso con Google', 'Bienvenido');
-                         localStorage.setItem('userType', 'CLIENTE');
-                         this.router.navigate(['/']); 
-                    }
-                },
-                error: (err) => {
-                    // If error (likely user not found or validation failed due to missing DNI for new user)
-                    console.warn('Google Login failed (likely new user needing DNI):', err);
-                    this.isLoading.set(false);
-                    this.isNavigating = false; // Allow interaction
-                    this.socialUser = socialUser; // Store for form
-                    
-                    // Switch to Register Tab and Pre-fill
-                    this.activeTabIndex.set(1);
-                    this.registerForm.patchValue({
-                        nombres: `${socialUser.firstName} ${socialUser.lastName}`.trim(),
-                        email: socialUser.email
-                    });
-                     
-                    this.toastr.info('Para culminar el registro, por favor complete su DNI y teléfono.', 'Completar Registro');
-                }
+            // Clear password requirements for Google users
+            this.registerForm.get('password')?.clearValidators();
+            this.registerForm.get('confirmPassword')?.clearValidators();
+            this.registerForm.get('password')?.updateValueAndValidity();
+            this.registerForm.get('confirmPassword')?.updateValueAndValidity();
+
+            this.registerForm.patchValue({
+                nombres: (socialUser.firstName || '').trim(),
+                apellidos: (socialUser.lastName || '').trim(),
+                email: socialUser.email
             });
-        }
-    });
-                },
-                complete: () => {
-                    this.isLoading.set(false);
-                    this.isNavigating = false;
-                }
-            });
+             
         }
     });
 
@@ -200,14 +192,47 @@ export class ClientAuthComponent implements OnDestroy {
     }
 
     this.isLoading.set(true);
-    const { dni, nombres, email, password, telefono } = this.registerForm.value;
+    const { dni, nombres, apellidos, email, password, telefono } = this.registerForm.value;
+
+    if (this.socialUser) {
+        // Complete Google Registration
+        const payload: ClientGoogleLoginRequest = {
+            dni: dni,
+            nombres: `${nombres} ${apellidos}`,
+            email: email, 
+            contrasena: password || "", 
+            telefono: telefono || "", 
+            provider: 'google',
+            idToken: this.socialUser.idToken || '',
+            googleId: this.socialUser.id || '',
+        };
+        
+        // NOW we call the Google Login API with the complete data (DNI, Phone)
+        this.registerService.loginClientGoogle(payload).subscribe({
+            next: (res) => {
+                 if(res && res.token) {
+                    this.authService.saveSession(res.token, this.socialUser!);
+                    this.toastr.success('Registro completado con Google', 'Bienvenido');
+                    localStorage.setItem('userType', 'CLIENTE');
+                    this.router.navigate(['/']);
+                 }
+            },
+            error: (err) => {
+                 this.toastr.error(err.error?.message || 'Error al completar registro con Google', 'Error');
+                 this.isLoading.set(false);
+            },
+            complete: () => this.isLoading.set(false)
+        });
+
+        return;
+    }
 
     const payload: ClientRegisterRequest = {
       dni: dni,
-      nombres: nombres,
+      nombres: `${nombres} ${apellidos}`,
       email: email,
       contrasena: password,
-      telefono: telefono,
+      telefono: telefono || "",
       tipoUsuario: 'CLIENTE'
     };
     
@@ -229,8 +254,53 @@ export class ClientAuthComponent implements OnDestroy {
     });
   }
 
+  nextRegisterStep() {
+      // If manually registering (step 1 -> 2)
+      if (!this.socialUser) {
+          const email = this.registerForm.get('email');
+          const password = this.registerForm.get('password');
+          const confirmPassword = this.registerForm.get('confirmPassword');
+
+          if (email?.invalid || password?.invalid || confirmPassword?.invalid) {
+            // Mark all relevant controls as touched to show errors
+              if (email?.invalid) email?.markAsTouched();
+              if (password?.invalid) password?.markAsTouched();
+              if (confirmPassword?.invalid) confirmPassword?.markAsTouched();
+              
+              if (password?.value !== confirmPassword?.value) {
+                  this.toastr.warning('Las contraseñas no coinciden', 'Atención');
+              } else {
+                  this.toastr.warning('Por favor complete todos los campos obligatorios.', 'Atención');
+              }
+              return; 
+          }
+      }
+      
+      this.registerStep.set(2);
+  }
+
+  prevRegisterStep() {
+      // If social user goes back, we should probably reset? 
+      // Or allow editing email?
+      // For now just go back.
+      this.registerStep.set(this.registerStep() - 1);
+  }
+
   toggleTab(index: number) {
     this.activeTabIndex.set(index);
+    this.registerStep.set(1); 
+    if (index === 0) {
+        this.socialUser = null; 
+        this.resetValidators();
+    }
+  }
+
+  private resetValidators() {
+      this.registerForm.get('password')?.setValidators([Validators.required, Validators.minLength(6)]);
+      this.registerForm.get('confirmPassword')?.setValidators([Validators.required]);
+      this.registerForm.get('password')?.updateValueAndValidity();
+      this.registerForm.get('confirmPassword')?.updateValueAndValidity();
   }
 }
+
 
