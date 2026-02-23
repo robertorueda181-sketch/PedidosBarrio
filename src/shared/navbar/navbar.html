@@ -96,39 +96,84 @@
             </span>
         </button>
 
+        <!-- Auth Actions (Desktop) -->
         <div class="relative hidden sm:block">
-          <button
-            class="bg-gradient-to-r from-space-secondary-from to-space-secondary-to hover:from-cyan-400 hover:to-blue-500 transition-all text-white font-bold px-6 py-2.5 rounded-full shadow-lg shadow-cyan-500/50 hover:shadow-cyan-400/70 flex items-center space-x-2 ring-2 ring-cyan-400/30 hover:ring-cyan-400/50"
-            (click)="toggleSubmenu()">
-            <span>✨ Iniciar sesión</span>
-            <svg class="w-4 h-4 transition-transform duration-200" [class.rotate-180]="isSubmenuOpen()" fill="none"
-              stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-            </svg>
-          </button>
+          <!-- Logged In -->
+          <ng-container *ngIf="authService.loggedIn(); else guestTemplate">
+              <button
+                class="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 transition-all text-white font-bold px-4 py-2.5 rounded-full shadow-lg shadow-cyan-500/30 hover:shadow-cyan-400/50 flex items-center space-x-2 ring-1 ring-cyan-400/30"
+                (click)="toggleSubmenu()">
+              
+                <div *ngIf="!authService.user()?.photoUrl" class="w-6 h-6 rounded-full bg-cyan-800 flex items-center justify-center text-xs border border-cyan-400">
+                    {{ (authService.user()?.firstName || 'U').charAt(0) }}
+                </div>
+                
+                <span class="truncate max-w-[120px]">{{ authService.user()?.firstName || 'Usuario' }}</span>
+                <svg class="w-4 h-4 transition-transform duration-200" [class.rotate-180]="isSubmenuOpen()" fill="none"
+                  stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </button>
 
-          <!-- Dropdown Registrar -->
-          <div *ngIf="isSubmenuOpen()"
-            class="absolute right-0 mt-3 w-56 bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl shadow-2xl shadow-cyan-500/30 z-[9999] py-2 border-2 border-cyan-500/30 animate-in fade-in slide-in-from-top-2 duration-200">
-            <button
-              class="w-full text-left px-5 py-3 text-sm text-gray-300 hover:bg-cyan-500/20 hover:text-cyan-400 transition-colors flex items-center space-x-3 rounded-xl mx-1"
-              (click)="navigateToRegistro('empresa')">
-              <span class="text-xl">💼</span>
-              <div class="flex flex-col">
-                <span class="font-bold">Soy empresa</span>
-                <span class="text-xs text-gray-500">Registra tu negocio</span>
+              <!-- Dropdown Menu -->
+              <div *ngIf="isSubmenuOpen()"
+                class="absolute right-0 mt-3 w-56 bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl shadow-2xl shadow-cyan-500/30 z-[9999] py-2 border border-cyan-500/30 animate-in fade-in slide-in-from-top-2 duration-200">
+                
+                <div class="px-4 py-2 border-b border-gray-700/50">
+                    <p class="text-sm text-gray-400">Hola,</p>
+                    <p class="font-bold text-white truncate">{{ authService.user()?.name }}</p>
+                </div>
+
+                <a [routerLink]="userProfileLink()" (click)="isSubmenuOpen.set(false)"
+                  class="block w-full text-left px-4 py-2.5 text-sm text-gray-300 hover:bg-cyan-500/10 hover:text-cyan-400 transition-colors flex items-center space-x-3 cursor-pointer">
+                  <i class="pi pi-user text-lg"></i>
+                  <span>Editar Perfil</span>
+                </a>
+                
+                <button
+                  class="block w-full text-left px-4 py-2.5 text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors flex items-center space-x-3"
+                  (click)="logout(); isSubmenuOpen.set(false)">
+                  <i class="pi pi-sign-out text-lg"></i>
+                  <span>Cerrar Sesión</span>
+                </button>
               </div>
-            </button>
-            <button
-              class="w-full text-left px-5 py-3 text-sm text-gray-300 hover:bg-cyan-500/20 hover:text-cyan-400 transition-colors flex items-center space-x-3 rounded-xl mx-1"
-              (click)="navigateToRegistro('cliente')">
-              <span class="text-xl">🚀</span>
-              <div class="flex flex-col">
-                <span class="font-bold">Soy cliente</span>
-                <span class="text-xs text-gray-500">Busca servicios</span>
+          </ng-container>
+
+          <!-- Guest (Not Logged In) -->
+          <ng-template #guestTemplate>
+              <button
+                class="bg-gradient-to-r from-space-secondary-from to-space-secondary-to hover:from-cyan-400 hover:to-blue-500 transition-all text-white font-bold px-6 py-2.5 rounded-full shadow-lg shadow-cyan-500/50 hover:shadow-cyan-400/70 flex items-center space-x-2 ring-2 ring-cyan-400/30 hover:ring-cyan-400/50"
+                (click)="toggleSubmenu()">
+                <span>✨ Iniciar sesión</span>
+                <svg class="w-4 h-4 transition-transform duration-200" [class.rotate-180]="isSubmenuOpen()" fill="none"
+                  stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </button>
+
+              <!-- Dropdown Registrar -->
+              <div *ngIf="isSubmenuOpen()"
+                class="absolute right-0 mt-3 w-56 bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl shadow-2xl shadow-cyan-500/30 z-[9999] py-2 border-2 border-cyan-500/30 animate-in fade-in slide-in-from-top-2 duration-200">
+                <button
+                  class="w-full text-left px-5 py-3 text-sm text-gray-300 hover:bg-cyan-500/20 hover:text-cyan-400 transition-colors flex items-center space-x-3 rounded-xl mx-1"
+                  (click)="navigateToRegistro('empresa')">
+                  <span class="text-xl">💼</span>
+                  <div class="flex flex-col">
+                    <span class="font-bold">Soy empresa</span>
+                    <span class="text-xs text-gray-500">Registra tu negocio</span>
+                  </div>
+                </button>
+                <button
+                  class="w-full text-left px-5 py-3 text-sm text-gray-300 hover:bg-cyan-500/20 hover:text-cyan-400 transition-colors flex items-center space-x-3 rounded-xl mx-1"
+                  (click)="navigateToRegistro('cliente')">
+                  <span class="text-xl">🚀</span>
+                  <div class="flex flex-col">
+                    <span class="font-bold">Soy cliente</span>
+                    <span class="text-xs text-gray-500">Busca servicios</span>
+                  </div>
+                </button>
               </div>
-            </button>
-          </div>
+          </ng-template>
         </div>
 
         <!-- Mobile menu button -->
@@ -175,15 +220,39 @@
         class="block px-4 py-3 rounded-xl text-base font-bold text-gray-300 hover:bg-cyan-500/20 hover:text-cyan-400 transition-colors">Inmuebles</a>
 
       <div class="pt-4 border-t border-cyan-500/20 mt-4">
-        <p class="px-4 text-xs font-bold text-cyan-500 uppercase tracking-widest mb-2">✨ Iniciar Sesión</p>
-        <button (click)="navigateToRegistro('empresa'); isMenuOpen.set(false)"
-          class="w-full text-left px-4 py-3 rounded-xl text-base font-bold text-gray-300 hover:bg-cyan-500/20 hover:text-cyan-400 transition-colors flex items-center space-x-3">
-          <span>💼</span> <span>Soy empresa</span>
-        </button>
-        <button (click)="navigateToRegistro('cliente'); isMenuOpen.set(false)"
-          class="w-full text-left px-4 py-3 rounded-xl text-base font-bold text-gray-300 hover:bg-cyan-500/20 hover:text-cyan-400 transition-colors flex items-center space-x-3">
-          <span>🚀</span> <span>Soy cliente</span>
-        </button>
+        <ng-container *ngIf="authService.loggedIn()">
+            <div class="px-4 mb-4 flex items-center space-x-3">
+                <div *ngIf="!authService.user()?.photoUrl" class="w-10 h-10 rounded-full bg-cyan-800 flex items-center justify-center text-lg border-2 border-cyan-400 text-white font-bold">
+                    {{ (authService.user()?.firstName || 'U').charAt(0) }}
+                </div>
+                <div>
+                    <p class="text-sm text-gray-400">Hola,</p>
+                    <p class="text-white font-bold">{{ authService.user()?.name || authService.user()?.firstName }}</p>
+                </div>
+            </div>
+
+            <a [routerLink]="userProfileLink()" (click)="isMenuOpen.set(false)"
+               class="block px-4 py-3 rounded-xl text-base font-bold text-cyan-400 hover:bg-cyan-500/20 transition-colors mb-2">
+               👤 Editar Perfil
+            </a>
+            
+            <button (click)="logout(); isMenuOpen.set(false)"
+              class="w-full text-left px-4 py-3 rounded-xl text-base font-bold text-red-400 hover:bg-red-500/20 transition-colors flex items-center space-x-2">
+              <i class="pi pi-sign-out"></i> <span>Cerrar Sesión</span>
+            </button>
+        </ng-container>
+
+        <ng-container *ngIf="!authService.loggedIn()">
+            <p class="px-4 text-xs font-bold text-cyan-500 uppercase tracking-widest mb-2">✨ Iniciar Sesión</p>
+            <button (click)="navigateToRegistro('empresa'); isMenuOpen.set(false)"
+              class="w-full text-left px-4 py-3 rounded-xl text-base font-bold text-gray-300 hover:bg-cyan-500/20 hover:text-cyan-400 transition-colors flex items-center space-x-3">
+              <span>💼</span> <span>Soy empresa</span>
+            </button>
+            <button (click)="navigateToRegistro('cliente'); isMenuOpen.set(false)"
+              class="w-full text-left px-4 py-3 rounded-xl text-base font-bold text-gray-300 hover:bg-cyan-500/20 hover:text-cyan-400 transition-colors flex items-center space-x-3">
+              <span>🚀</span> <span>Soy cliente</span>
+            </button>
+        </ng-container>
       </div>
     </div>
   </div>

@@ -3,6 +3,7 @@ import { Router, RouterLink, RouterModule } from '@angular/router';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LocationService } from '../services/location.service';
+import { AuthService } from '../services/auth.service';
 import { SelectModule } from 'primeng/select';
 import * as L from 'leaflet';
 
@@ -15,7 +16,31 @@ import * as L from 'leaflet';
 })
 export class Navbar implements OnInit {
     private locationService = inject(LocationService);
+    public authService = inject(AuthService);
     private platformId = inject(PLATFORM_ID);
+    
+    // Computed based on auth state
+    userProfileLink = computed(() => {
+        if (!this.authService.loggedIn()) return '/ingreso';
+        // Basic check, ideally this should come from auth service or user state
+        const type = this.getUserType();
+        return type === 'EMPRESA' ? '/empresa/perfil' : '/mi-perfil';
+    });
+
+    getUserType(): string | null {
+        if (isPlatformBrowser(this.platformId)) {
+            return localStorage.getItem('userType');
+        }
+        return null;
+    }
+
+    logout() {
+        this.authService.signOut();
+        if (isPlatformBrowser(this.platformId)) {
+            localStorage.removeItem('userType');
+        }
+        this.router.navigate(['/']);
+    }
     
     isSubmenuOpen = signal(false);
     isMenuOpen = signal(false);

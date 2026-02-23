@@ -113,25 +113,63 @@ export class ClientAuthComponent implements OnDestroy {
         if (isLoggedIn && socialUser && !hasToken && !this.isNavigating) {
             console.log('ClientAuth: Google Link Detected (New Flow)', { socialUser });
             this.isNavigating = true;
-            this.isLoading.set(false); // Stop loading, let user confirm data
+            this.isLoading.set(true); 
             this.socialUser = socialUser; 
-            
-            // Switch to Register Tab and Pre-fill
-            this.activeTabIndex.set(1);
-            this.registerStep.set(2);
-            
-            // Clear password requirements for Google users
-            this.registerForm.get('password')?.clearValidators();
-            this.registerForm.get('confirmPassword')?.clearValidators();
-            this.registerForm.get('password')?.updateValueAndValidity();
-            this.registerForm.get('confirmPassword')?.updateValueAndValidity();
 
-            this.registerForm.patchValue({
-                nombres: (socialUser.firstName || '').trim(),
-                apellidos: (socialUser.lastName || '').trim(),
-                email: socialUser.email
+            // Attempt to login with Google credentials first
+            const credentials: ClientGoogleLoginRequest = {
+                dni: '',
+                nombres: socialUser.firstName || '',
+                contrasena: '',
+                telefono: '',
+                provider: 'google',
+                idToken: socialUser.idToken || '',
+                googleId: socialUser.id || '',
+                email: socialUser.email || ''
+            };
+
+            this.registerService.loginClientGoogle(credentials).subscribe({
+                next: (res: any) => {
+                    console.log('Google Auth Response:', res);
+                    
+                    // Backend returns: { Success: true, Data: { Token: '...' } } (PascalCase or camelCase)
+                    const token = res?.data?.token || res?.Data?.Token || res?.token;
+                    
+                    if (token) {
+                        this.authService.saveSession(token, socialUser);
+                        this.toastr.success('Bienvenido de nuevo', 'Inicio de sesión exitoso');
+                        localStorage.setItem('userType', 'CLIENTE');
+                    } else {
+                        // If success is false or no token, treating as "not registered" 
+                        // verify logic later with console.log output
+                        if (res?.success === false || res?.Success === false) {
+                            throw new Error("User not registered or login failed"); 
+                        }
+                        throw new Error("No token returned in response");
+                    }
+                    this.isLoading.set(false);
+                },
+                error: (err) => {
+                    console.log('Google login failed, proceeding to registration', err);
+                    this.isLoading.set(false);
+                    
+                    // Switch to Register Tab and Pre-fill
+                    this.activeTabIndex.set(1);
+                    this.registerStep.set(2);
+                    
+                    // Clear password requirements for Google users
+                    this.registerForm.get('password')?.clearValidators();
+                    this.registerForm.get('confirmPassword')?.clearValidators();
+                    this.registerForm.get('password')?.updateValueAndValidity();
+                    this.registerForm.get('confirmPassword')?.updateValueAndValidity();
+        
+                    this.registerForm.patchValue({
+                        nombres: (socialUser.firstName || '').trim(),
+                        apellidos: (socialUser.lastName || '').trim(),
+                        email: socialUser.email
+                    });
+                }
             });
-             
         }
     });
 
