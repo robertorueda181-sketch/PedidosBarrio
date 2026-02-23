@@ -2,7 +2,7 @@ import { Component, inject, OnInit, signal, ChangeDetectorRef } from '@angular/c
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
-import { ClientService, ClientAddress, ClientProfile } from '../../../shared/services/client.service';
+import { ClientService, ClientAddress, ClientProfile, ClientAddressRequest } from '../../../shared/services/client.service';
 import { LocationService, LocationItem } from '../../../shared/services/location.service';
 import { AuthService } from '../../../shared/services/auth.service';
 // PrimeNG
@@ -71,6 +71,7 @@ export class ClientProfileComponent implements OnInit {
   addrDist = signal('');
   addrRef = signal('');
   addrIsMain = signal(false);
+  addrZip = signal('');
 
   // Location Data
   departments = signal<LocationItem[]>([]);
@@ -173,22 +174,26 @@ export class ClientProfileComponent implements OnInit {
     this.selectedAddressId.set(addr.id);
     
     this.addrName.set(addr.nombre);
-    this.addrLine.set(addr.direccion);
+    this.addrLine.set(addr.direccionTexto);
     this.addrLat.set(addr.latitud);
     this.addrLng.set(addr.longitud);
     this.addrRef.set(addr.referencia || '');
     this.addrIsMain.set(addr.esPrincipal);
+    this.addrZip.set(addr.codigoPostal || '');
 
-    // Load dependent dropdowns
-    this.addrDept.set(addr.departamentoId);
-    if (addr.departamentoId) {
-        this.locationService.getProvinces(addr.departamentoId).subscribe(p => {
+    // Reverse lookup for dropdowns (Name -> Code)
+    const dept = this.departments().find(d => this.isMatch(d.name, addr.departamento));
+    if (dept) {
+        this.addrDept.set(dept.code);
+        this.locationService.getProvinces(dept.code).subscribe(p => {
             this.provinces.set(p);
-            this.addrProv.set(addr.provinciaId);
-            if(addr.provinciaId) {
-                this.locationService.getDistricts(addr.provinciaId).subscribe(d => {
+            const prov = p.find(pr => this.isMatch(pr.name, addr.provincia));
+            if (prov) {
+                this.addrProv.set(prov.code);
+                this.locationService.getDistricts(prov.code).subscribe(d => {
                     this.districts.set(d);
-                    this.addrDist.set(addr.distritoId);
+                    const dist = d.find(di => this.isMatch(di.name, addr.distrito));
+                    if(dist) this.addrDist.set(dist.code);
                 });
             }
         });
@@ -204,20 +209,25 @@ export class ClientProfileComponent implements OnInit {
         return;
     }
 
-    const payload: Omit<ClientAddress, 'id'> = {
+    const deptName = this.departments().find(d => d.code == this.addrDept())?.name || '';
+    const provName = this.provinces().find(p => p.code == this.addrProv())?.name || '';
+    const distName = this.districts().find(d => d.code == this.addrDist())?.name || '';
+
+    const payload: ClientAddressRequest = {
         nombre: this.addrName(),
-        direccion: this.addrLine(),
+        direccionTexto: this.addrLine(),
         latitud: this.addrLat(),
         longitud: this.addrLng(),
-        departamentoId: this.addrDept(),
-        provinciaId: this.addrProv(),
-        distritoId: this.addrDist(),
+        departamento: deptName,
+        provincia: provName,
+        distrito: distName,
         referencia: this.addrRef(),
-        esPrincipal: this.addrIsMain()
+        esPrincipal: this.addrIsMain(),
+        codigoPostal: this.addrZip()
     };
 
     if (this.isEditingAddress() && this.selectedAddressId()) {
-        this.clientService.updateAddress(this.selectedAddressId()!, payload as Partial<ClientAddress>).subscribe({
+        this.clientService.updateAddress(this.selectedAddressId()!, payload).subscribe({
             next: () => {
                 this.toastr.success('Dirección actualizada');
                 this.loadAddresses();
@@ -259,6 +269,7 @@ export class ClientProfileComponent implements OnInit {
       this.addrDist.set('');
       this.addrRef.set('');
       this.addrIsMain.set(false);
+      this.addrZip.set('');
       // Don't reset lists immediately if caching is desired, but good for clean state
       this.provinces.set([]);
       this.districts.set([]);
@@ -335,53 +346,110 @@ export class ClientProfileComponent implements OnInit {
     }, 100);
   }
 
-  private reverseGeocode(lat: number, lng: number) {
+  private reverseGeocode(lat: number, lng: number, forceUpdateAddress: boolean = false) {
       if(!this.locationService) return;
       this.locationService.reverseGeocode(lat, lng).subscribe((data: any) => {
           if (data && (data.display_name || data.address)) {
-              if(!this.addrLine()) {
+              if(!this.addrLine() || forceUpdateAddress) {
                   this.addrLine.set(data.display_name);
               }
               if (data.address) {
                 this.matchLocation(data.address);
+                if (data.address.postcode) {
+                    this.addrZip.set(data.address.postcode);
+                }
               }
           }
       });
   }
 
   private matchLocation(address: any) {
-       // Match Department
-       const deptName = address.state || address.region || address.city;
-       if (!deptName) return;
+       const deptCandidate = address.state || address.region || address.province || '';
+       const provCandidate = address.county || address.state_district || address.city || address.region || '';
+       const distCandidate = address.suburb || address.neighbourhood || address.village || address.town || address.hamlet || address.quarter || address.municipality || '';
 
-       const dept = this.departments().find(d => this.isMatch(d.name, deptName));
+       // 1. Buscar Departamento (Nombre -> ID)
+       const dept = this.departments().find(d => this.isMatch(d.name, deptCandidate));
+       
        if (dept) {
            this.addrDept.set(dept.code);
            this.locationService.getProvinces(dept.code).subscribe(provs => {
                this.provinces.set(provs);
                
-               // Match Province
-               const provName = address.province || address.county || address.city; 
-               const prov = provs.find(p => this.isMatch(p.name, provName));
+               // 2. Buscar Provincia (Nombre -> ID)
+               const prov = provs.find(p => this.isMatch(p.name, provCandidate))
+                   || provs.find(p => this.isMatch(p.name, distCandidate));
                
                if (prov) {
                    this.addrProv.set(prov.code);
                    this.locationService.getDistricts(prov.code).subscribe(dists => {
                        this.districts.set(dists);
                        
-                       // Match District
-                       const distName = address.suburb || address.neighbourhood || address.town || address.city_district;
-                       const dist = dists.find(d => this.isMatch(d.name, distName));
-                       if(dist) this.addrDist.set(dist.code);
+                       // 3. Buscar Distrito (Nombre -> ID)
+                       const dist = dists.find(d => this.isMatch(d.name, distCandidate))
+                           || dists.find(d => this.isMatch(d.name, address.road || '')) 
+                           || dists.find(d => this.isMatch(d.name, provCandidate));
+
+                       if(dist) {
+                           this.addrDist.set(dist.code);
+                       } else {
+                           console.warn('Distrito no encontrado. Candidatos:', distCandidate);
+                           this.addrDist.set('');
+                       }
                    });
+               } else {
+                   console.warn('Provincia no encontrada. Candidatos:', provCandidate);
+                   this.addrProv.set('');
+                   this.addrDist.set('');
+                   this.districts.set([]);
                }
            });
+       } else {
+            console.warn('Departamento no encontrado. Candidatos:', deptCandidate);
+            this.addrDept.set('');
+            this.addrProv.set('');
+            this.addrDist.set('');
+            this.provinces.set([]);
+            this.districts.set([]);
        }
   }
 
-  private isMatch(local: string, remote: string) {
-      if(!local || !remote) return false;
-      const normalize = (s: string) => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-      return normalize(local) === normalize(remote) || normalize(remote).includes(normalize(local));
+  private isMatch(localName: string, externalName: string): boolean {
+    if (!localName || !externalName) return false;
+    const clean = (s: string) => s.toLowerCase()
+      .replace(/departamento de |provincia de |distrito de |región de |municipalidad de |gobierno regional de /gi, '')
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9 ]/g, '').trim();
+    const cL = clean(localName);
+    const cE = clean(externalName);
+    return cL === cE || cE.includes(cL) || cL.includes(cE);
+  }
+
+  async getCurrentLocation() {
+    this.toastr.info('Obteniendo tu ubicación actual...', 'Geolocalización');
+    try {
+        const position = await this.locationService.getCurrentPosition();
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        
+        this.addrLat.set(lat);
+        this.addrLng.set(lng);
+
+        if (this.map) {
+            this.map.setView([lat, lng], 16);
+            if (this.marker) {
+                this.marker.setLatLng([lat, lng]);
+            } else {
+                this.marker = L.marker([lat, lng], { draggable: true }).addTo(this.map);
+            }
+        }
+        
+        // Reverse Geocode and Update Form
+        this.reverseGeocode(lat, lng, true);
+        this.toastr.success('Ubicación actualizada');
+    } catch (error) {
+        console.error('Error getting location', error);
+        this.toastr.error('No se pudo obtener tu ubicación. Por favor permite el acceso o inténtalo nuevamente.');
+    }
   }
 }

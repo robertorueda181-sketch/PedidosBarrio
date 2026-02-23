@@ -77,7 +77,7 @@ export class ClientAuthComponent implements OnDestroy {
     if (this.authService.isAuthenticated()) {
         const userType = localStorage.getItem('userType');
         if (userType === 'CLIENTE') {
-             this.router.navigate(['/']);
+             this.router.navigate(['/mi-perfil']);
              return;
         } else {
             // If logged in as something else (e.g. EMPRESA), we should clear it to allow new login
@@ -139,6 +139,7 @@ export class ClientAuthComponent implements OnDestroy {
                         this.authService.saveSession(token, socialUser);
                         this.toastr.success('Bienvenido de nuevo', 'Inicio de sesión exitoso');
                         localStorage.setItem('userType', 'CLIENTE');
+                        this.router.navigate(['/mi-perfil']);
                     } else {
                         // If success is false or no token, treating as "not registered" 
                         // verify logic later with console.log output
@@ -212,7 +213,7 @@ export class ClientAuthComponent implements OnDestroy {
       next: (res) => {
         this.toastr.success('Bienvenido de nuevo', 'Inicio de sesión exitoso');
         localStorage.setItem('userType', 'CLIENTE');
-        this.router.navigate(['/']);
+        this.router.navigate(['/mi-perfil']);
       },
       error: (err) => {
         console.error('Login error', err);
@@ -252,7 +253,7 @@ export class ClientAuthComponent implements OnDestroy {
                     this.authService.saveSession(res.token, this.socialUser!);
                     this.toastr.success('Registro completado con Google', 'Bienvenido');
                     localStorage.setItem('userType', 'CLIENTE');
-                    this.router.navigate(['/']);
+                    this.router.navigate(['/mi-perfil']);
                  }
             },
             error: (err) => {

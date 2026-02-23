@@ -11,17 +11,21 @@ export interface ClientProfile {
   fotoUrl?: string; // Optional
 }
 
-export interface ClientAddress {
-  id: string;
-  nombre: string; // "Casa", "Trabajo"
-  direccion: string;
+export interface ClientAddressRequest {
+  nombre: string;
+  direccionTexto: string;
+  referencia: string;
   latitud: number;
   longitud: number;
-  departamentoId: string;
-  provinciaId: string;
-  distritoId: string;
-  referencia?: string;
+  departamento: string;
+  provincia: string;
+  distrito: string;
+  codigoPostal: string;
   esPrincipal: boolean;
+}
+
+export interface ClientAddress extends ClientAddressRequest {
+  id: string;
 }
 
 @Injectable({
@@ -32,30 +36,31 @@ export class ClientService {
   private appConfig = inject(AppConfigService);
 
   private get apiUrl() {
-    return this.appConfig.apiUrl + '/Client'; // Adjust base URL as needed
+    return this.appConfig.apiUrl + '/Clientes'; // Updated base URL to match convention
   }
 
   getProfile(): Observable<ClientProfile> {
-    return this.http.get<ClientProfile>(`${this.apiUrl}/profile`);
+      // Assuming profile endpoint is also under /Clientes
+    return this.http.get<ClientProfile>(`${this.apiUrl}/Perfil`);
   }
 
   updateProfile(data: Partial<ClientProfile>): Observable<any> {
-    return this.http.put(`${this.apiUrl}/profile`, data);
+    return this.http.put(`${this.apiUrl}/Perfil`, data);
   }
 
   getAddresses(): Observable<ClientAddress[]> {
-    return this.http.get<ClientAddress[]>(`${this.apiUrl}/addresses`);
+    return this.http.get<ClientAddress[]>(`${this.apiUrl}/Direcciones`);
   }
 
-  addAddress(address: Omit<ClientAddress, 'id'>): Observable<ClientAddress> {
-    return this.http.post<ClientAddress>(`${this.apiUrl}/addresses`, address);
+  addAddress(address: ClientAddressRequest): Observable<ClientAddress> {
+    return this.http.post<ClientAddress>(`${this.apiUrl}/Direcciones`, address);
   }
 
-  updateAddress(id: string, address: Partial<ClientAddress>): Observable<any> {
-    return this.http.put(`${this.apiUrl}/addresses/${id}`, address);
+  updateAddress(id: string, address: Partial<ClientAddressRequest>): Observable<any> {
+    return this.http.put(`${this.apiUrl}/Direcciones/${id}`, address);
   }
 
   deleteAddress(id: string): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/addresses/${id}`);
+    return this.http.delete(`${this.apiUrl}/Direcciones/${id}`);
   }
 }
