@@ -21,6 +21,25 @@ export class LocationService {
     private readonly PROVS_URL = 'assets/data/ubigeo_provincias.json';
     private readonly DISTS_URL = 'assets/data/ubigeo_distritos.json';
 
+    getCurrentPosition(): Promise<GeolocationPosition> {
+        return new Promise((resolve, reject) => {
+            if (!navigator.geolocation) {
+                reject('Geolocalización no soportada por el navegador');
+            } else {
+                navigator.geolocation.getCurrentPosition(resolve, reject);
+            }
+        });
+    }
+
+    saveLocation(location: any) {
+        localStorage.setItem('user_location', JSON.stringify(location));
+    }
+
+    getSavedLocation(): any {
+        const saved = localStorage.getItem('user_location');
+        return saved ? JSON.parse(saved) : null;
+    }
+
     private getDepartmentsData(): Observable<any[]> {
         if (!this.depts$) {
             this.depts$ = this.http.get<any[]>(this.DEPTS_URL).pipe(shareReplay(1));
@@ -64,5 +83,11 @@ export class LocationService {
                 .map(d => ({ name: d.name, code: d.id }))
             )
         );
+    }
+
+    reverseGeocode(lat: number, lon: number): Observable<any> {
+        // Using OpenStreetMap Nominatim API for reverse geocoding
+        const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`;
+        return this.http.get(url);
     }
 }

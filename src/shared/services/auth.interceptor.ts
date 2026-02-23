@@ -20,12 +20,21 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         catchError((error) => {
             // Si el token ha expirado o es inválido (401 Unauthorized)
             if (error.status === 401) {
+                const userType = localStorage.getItem('userType');
+                const isClient = userType === 'CLIENTE' || window.location.hash.includes('client-auth') || window.location.pathname.includes('client-auth');
+
                 // Limpiar sesión
                 localStorage.removeItem('auth_token');
                 localStorage.removeItem('user_data');
+                // userType can be kept or cleared? probably cleared.
+                localStorage.removeItem('userType');
                 
-                // Redirigir a business auth
-                router.navigate(['/business-auth']);
+                // Redirigir según el tipo de usuario o la ruta actual
+                if (isClient) {
+                    router.navigate(['/client-auth']);
+                } else {
+                    router.navigate(['/business-auth']);
+                }
             }
             
             return throwError(() => error);

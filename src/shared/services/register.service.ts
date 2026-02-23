@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { RegisterRequest, SocialUserRequest } from '../interfaces/register.interface';
 import { LoginRequest } from '../interfaces/login.interface';
+import { ClientGoogleLoginRequest, ClientRegisterRequest } from '../interfaces/client-auth.interface';
 import { AppConfigService } from './app-config.service';
 
 @Injectable({
@@ -19,6 +20,11 @@ export class RegisterService {
     registerBusiness(data: RegisterRequest): Observable<any> {
         return this.http.post(`${this.appConfigService.apiUrl}/Auth/Register/business`, data);
     }
+
+    registerClient(data: ClientRegisterRequest): Observable<any> {
+        return this.http.post(`${this.appConfigService.apiUrl}/Auth/Register/client`, data);
+    }
+
 
 
     login(data: LoginRequest): Observable<any> {
@@ -41,5 +47,9 @@ export class RegisterService {
 
     verifyCode(correo: string, codigo: string): Observable<any> {
         return this.http.post(`${this.appConfigService.apiUrl}/Verificacion/verificar-codigo`, { correo, codigo });
+    }
+
+    loginClientGoogle(data: ClientGoogleLoginRequest): Observable<any> {
+        return this.http.post(`${this.appConfigService.apiUrl}/Clientes/Auth/GoogleAuth`, data);
     }
 }

@@ -1,4 +1,4 @@
-import { Component, signal, OnInit, inject } from '@angular/core';
+import { Component, signal, OnInit, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { Inmueble, InmuebleService } from '../services/inmueble.service';
@@ -93,14 +93,13 @@ export class Main implements OnInit {
     return this.categorias().slice(0, 6);
   }
 
-  get infiniteBanners() {
+  infiniteBanners = computed(() => {
     console.log('Calculando infiniteBanners con', this.banners());
     const banners = this.banners();
     if (!banners || banners.length === 0) return [];
-     // console.log('Calculando infiniteBanners con',[banners[banners.length - 1], ...banners, banners[0]]);
     // Clona el último al inicio y el primero al final
     return [banners[banners.length - 1], ...banners, banners[0]];
-  }
+  });
 
   startAutoSlide() {
     setInterval(() => {

@@ -82,17 +82,12 @@ export class Company implements OnInit {
 
   ngOnInit() {
     this.route.paramMap.subscribe(params => {
-      this.codigoempresa = params.get('codigoempresa');
-      if (this.codigoempresa) {
+      const newCode = params.get('codigoempresa');
+      if (newCode && newCode !== this.codigoempresa) {
+        this.codigoempresa = newCode;
         this.loadCompany(this.codigoempresa);
       }
     });
-
-    // Initial load if param is already present (though subscribe handles it too, good for safety)
-    const initialCode = this.route.snapshot.paramMap.get('codigoempresa');
-    if (initialCode && !this.company()) {
-        this.loadCompany(initialCode);
-    }
   }
 
   loadCompany(nombre: string) {

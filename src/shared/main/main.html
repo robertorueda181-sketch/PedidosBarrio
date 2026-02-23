@@ -5,7 +5,7 @@
   <div class="absolute inset-0 flex transition-transform duration-700 ease-in-out"
     [class.transition-none]="isTransitioning() === false"
     [style.transform]="'translateX(' + (-currentSlide() * 100) + '%)'">
-    @for (banner of infiniteBanners; track $index) {
+    @for (banner of infiniteBanners(); track $index) {
     <div class="min-w-full h-full relative overflow-hidden bg-gray-900/50">
       <!-- Background blurred image for ambiance -->
       <div class="absolute inset-0 z-0">

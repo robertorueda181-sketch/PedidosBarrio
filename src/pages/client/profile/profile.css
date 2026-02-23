@@ -1,0 +1,27 @@
+.profile-container {
+    padding-top: 2rem;
+    padding-bottom: 4rem;
+}
+
+.address-card {
+    transition: all 0.2s ease-in-out;
+    border: 1px solid #e5e7eb;
+}
+
+.address-card:hover {
+    border-color: #3b82f6;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Map specific styles */
+#addressMap {
+    z-index: 1; /* Ensure map is below dialog overlays if usage of modals */
+    min-height: 400px;
+}
+
+/* TabView styling overrides if needed */
+:host ::ng-deep .p-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link {
+    color: #3b82f6;
+    border-color: #3b82f6;
+}

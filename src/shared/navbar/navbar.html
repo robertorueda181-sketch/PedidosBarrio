@@ -1,10 +1,4 @@
-<!-- Barra superior anuncio -->
-<!-- <div class="bg-[#1A365D] text-white font-bold p-2 text-center text-sm md:text-base">
-  <span class="mx-2">🔈 ¿Tienes un negocio? ¡Regístrate <a class="text-[#96C2DB] hover:underline"
-      routerLink="/registro-negocio">Aquí!</a></span>
-</div> -->
 
-<!-- Estrellas espaciales para el navbar -->
 <style>
     @keyframes twinkle-nav {
         0%, 100% { opacity: 1; }
@@ -74,7 +68,7 @@
         </div>
 
         <!-- Desktop Menu -->
-        <div class="hidden md:flex items-center space-x-8">
+        <div class="hidden lg:flex items-center space-x-8">
           <a routerLink="/" routerLinkActive="text-cyan-400 border-b-2 border-cyan-400 shadow-[0_2px_8px_rgba(34,211,238,0.4)]"
             [routerLinkActiveOptions]="{exact: true}"
             class="text-gray-300 hover:text-cyan-400 font-semibold transition-all py-2">Inicio</a>
@@ -89,19 +83,32 @@
 
       <!-- Actions -->
       <div class="flex items-center space-x-4">
+        
+        <!-- Location Selector (Desktop) -->
+        <button (click)="openLocationModal()" 
+            class="hidden lg:flex items-center space-x-2 text-gray-300 hover:text-cyan-400 transition-colors px-3 py-2 rounded-lg hover:bg-cyan-500/10 border border-transparent hover:border-cyan-500/30">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-cyan-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            <span class="text-sm font-medium truncate max-w-[150px]">
+                {{ currentLocation()?.districtName ? currentLocation()?.districtName + ', ' + currentLocation()?.departmentName : 'Seleccionar Ubicación' }}
+            </span>
+        </button>
+
         <div class="relative hidden sm:block">
           <button
             class="bg-gradient-to-r from-space-secondary-from to-space-secondary-to hover:from-cyan-400 hover:to-blue-500 transition-all text-white font-bold px-6 py-2.5 rounded-full shadow-lg shadow-cyan-500/50 hover:shadow-cyan-400/70 flex items-center space-x-2 ring-2 ring-cyan-400/30 hover:ring-cyan-400/50"
             (click)="toggleSubmenu()">
             <span>✨ Iniciar sesión</span>
-            <svg class="w-4 h-4 transition-transform duration-200" [class.rotate-180]="isSubmenuOpen" fill="none"
+            <svg class="w-4 h-4 transition-transform duration-200" [class.rotate-180]="isSubmenuOpen()" fill="none"
               stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
             </svg>
           </button>
 
           <!-- Dropdown Registrar -->
-          <div *ngIf="isSubmenuOpen"
+          <div *ngIf="isSubmenuOpen()"
             class="absolute right-0 mt-3 w-56 bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl shadow-2xl shadow-cyan-500/30 z-[9999] py-2 border-2 border-cyan-500/30 animate-in fade-in slide-in-from-top-2 duration-200">
             <button
               class="w-full text-left px-5 py-3 text-sm text-gray-300 hover:bg-cyan-500/20 hover:text-cyan-400 transition-colors flex items-center space-x-3 rounded-xl mx-1"
@@ -125,12 +132,12 @@
         </div>
 
         <!-- Mobile menu button -->
-        <div class="md:hidden flex items-center">
+        <div class="lg:hidden flex items-center">
           <button (click)="toggleMenu()" class="text-cyan-400 p-2 rounded-lg hover:bg-cyan-500/20 transition-colors">
             <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path *ngIf="!isMenuOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              <path *ngIf="!isMenuOpen()" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M4 6h16M4 12h16M4 18h16" />
-              <path *ngIf="isMenuOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              <path *ngIf="isMenuOpen()" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
@@ -140,24 +147,40 @@
   </div>
 
   <!-- Mobile Menu -->
-  <div *ngIf="isMenuOpen" class="md:hidden bg-gradient-to-b from-gray-900 to-gray-800 border-t border-cyan-500/20 animate-in slide-in-from-top duration-300">
+  <div *ngIf="isMenuOpen()" class="lg:hidden bg-gradient-to-b from-gray-900 to-gray-800 border-t border-cyan-500/20 animate-in slide-in-from-top duration-300">
     <div class="px-4 pt-2 pb-6 space-y-2">
-      <a routerLink="/" (click)="isMenuOpen = false"
+      
+      <!-- Mobile Location -->
+      <button (click)="openLocationModal(); isMenuOpen.set(false)" 
+        class="w-full mb-4 px-4 py-3 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-gray-300 flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-cyan-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+          <span class="font-bold text-sm">
+            {{ currentLocation()?.districtName ? currentLocation()?.districtName : 'Seleccionar Ubicación' }}
+          </span>
+        </div>
+        <span class="text-xs text-cyan-400 font-bold">CAMBIAR</span>
+      </button>
+
+      <a routerLink="/" (click)="isMenuOpen.set(false)"
         class="block px-4 py-3 rounded-xl text-base font-bold text-gray-300 hover:bg-cyan-500/20 hover:text-cyan-400 transition-colors">Inicio</a>
-      <a routerLink="/negocios" (click)="isMenuOpen = false"
+      <a routerLink="/negocios" (click)="isMenuOpen.set(false)"
         class="block px-4 py-3 rounded-xl text-base font-bold text-gray-300 hover:bg-cyan-500/20 hover:text-cyan-400 transition-colors">Negocios</a>
-      <a routerLink="/servicios" (click)="isMenuOpen = false"
+      <a routerLink="/servicios" (click)="isMenuOpen.set(false)"
         class="block px-4 py-3 rounded-xl text-base font-bold text-gray-300 hover:bg-cyan-500/20 hover:text-cyan-400 transition-colors">Servicios</a>
-      <a routerLink="/inmueble" (click)="isMenuOpen = false"
+      <a routerLink="/inmueble" (click)="isMenuOpen.set(false)"
         class="block px-4 py-3 rounded-xl text-base font-bold text-gray-300 hover:bg-cyan-500/20 hover:text-cyan-400 transition-colors">Inmuebles</a>
 
       <div class="pt-4 border-t border-cyan-500/20 mt-4">
         <p class="px-4 text-xs font-bold text-cyan-500 uppercase tracking-widest mb-2">✨ Iniciar Sesión</p>
-        <button (click)="navigateToRegistro('empresa'); isMenuOpen = false"
+        <button (click)="navigateToRegistro('empresa'); isMenuOpen.set(false)"
           class="w-full text-left px-4 py-3 rounded-xl text-base font-bold text-gray-300 hover:bg-cyan-500/20 hover:text-cyan-400 transition-colors flex items-center space-x-3">
           <span>💼</span> <span>Soy empresa</span>
         </button>
-        <button (click)="navigateToRegistro('cliente'); isMenuOpen = false"
+        <button (click)="navigateToRegistro('cliente'); isMenuOpen.set(false)"
           class="w-full text-left px-4 py-3 rounded-xl text-base font-bold text-gray-300 hover:bg-cyan-500/20 hover:text-cyan-400 transition-colors flex items-center space-x-3">
           <span>🚀</span> <span>Soy cliente</span>
         </button>
@@ -165,3 +188,161 @@
     </div>
   </div>
 </nav>
+
+<!-- Location Modal -->
+<div *ngIf="showLocationModal()" class="fixed inset-0 z-[2000] overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+  <!-- Backdrop -->
+  <div class="fixed inset-0 bg-gray-900/80 backdrop-blur-sm transition-opacity" (click)="closeLocationModal()"></div>
+
+  <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+    <div class="relative transform overflow-hidden rounded-2xl bg-[#0F172A] border border-cyan-500/30 text-left shadow-2xl shadow-cyan-500/20 transition-all sm:my-8 sm:w-full sm:max-w-lg w-full">
+      
+      <!-- Close Button -->
+      <div class="absolute right-4 top-4 z-10">
+        <button (click)="closeLocationModal()" type="button" class="rounded-md text-gray-400 hover:text-white focus:outline-none">
+          <span class="sr-only">Cerrar</span>
+          <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="px-6 py-6 sm:p-8">
+        <div class="text-center mb-6">
+          <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-cyan-500/10 mb-4 ring-1 ring-cyan-500/50">
+            <svg class="h-6 w-6 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold leading-6 text-white" id="modal-title">Selecciona tu ubicación</h3>
+          <p class="mt-2 text-sm text-gray-400">
+            Para mostrarte los mejores negocios cerca de ti.
+          </p>
+        </div>
+
+        <div class="space-y-6">
+          <!-- Current Location Button -->
+          <button (click)="getCurrentLocation()" 
+             [disabled]="isLoadingLocation()"
+             class="w-full flex items-center justify-center gap-2 rounded-xl bg-cyan-500/10 px-4 py-3 text-sm font-semibold text-cyan-400 ring-1 ring-inset ring-cyan-500/30 hover:bg-cyan-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+            <svg *ngIf="!isLoadingLocation()" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
+            </svg>
+            <svg *ngIf="isLoadingLocation()" class="animate-spin -ml-1 mr-3 h-5 w-5 text-cyan-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            {{ isLoadingLocation() ? 'Obteniendo ubicación...' : 'Usar mi ubicación actual' }}
+          </button>
+
+          <div class="relative flex py-2 items-center">
+            <div class="flex-grow border-t border-gray-700"></div>
+            <span class="flex-shrink-0 mx-4 text-gray-500 text-xs uppercase">O selecciona manualmente</span>
+            <div class="flex-grow border-t border-gray-700"></div>
+          </div>
+
+          <!-- Manual Selection Form -->
+          <div class="space-y-4">
+            <!-- Departamento -->
+            <div>
+              <label class="block text-sm font-medium text-gray-300 mb-1">Departamento</label>
+              <p-select 
+                [options]="departments()" 
+                [ngModel]="selectedDepartment()" 
+                (ngModelChange)="selectedDepartment.set($event)"
+                (onChange)="onDepartmentChange()" 
+                optionLabel="name" 
+                optionValue="code" 
+                [filter]="true" 
+                filterBy="name"
+                [showClear]="true"
+                placeholder="Selecciona un departamento"
+                styleClass="w-full text-left"
+                [style]="{'width':'100%','border-color': '#374151', 'border-radius': '0.75rem'}">
+              </p-select>
+            </div>
+
+            <!-- Provincia -->
+            <div>
+              <label class="block text-sm font-medium text-gray-300 mb-1">Provincia</label>
+              <p-select 
+                [options]="provinces()" 
+                [ngModel]="selectedProvince()" 
+                (ngModelChange)="selectedProvince.set($event)"
+                (onChange)="onProvinceChange()" 
+                optionLabel="name" 
+                optionValue="code"
+                [disabled]="!selectedDepartment()"
+                [filter]="true" 
+                filterBy="name"
+                [showClear]="true"
+                placeholder="Selecciona una provincia"
+                styleClass="w-full text-left"
+                [style]="{'width':'100%', 'border-color': '#374151', 'color': 'white', 'border-radius': '0.75rem'}">
+              </p-select>
+            </div>
+
+            <!-- Distrito -->
+            <div>
+              <label class="block text-sm font-medium text-gray-300 mb-1">Distrito</label>
+              <p-select 
+                [options]="districts()" 
+                [ngModel]="selectedDistrict()" 
+                (ngModelChange)="selectedDistrict.set($event)"
+                (onChange)="onDistrictChange()" 
+                optionLabel="name" 
+                optionValue="code"
+                [disabled]="!selectedProvince()"
+                [filter]="true" 
+                filterBy="name"
+                [showClear]="true"
+                placeholder="Selecciona un distrito"
+                styleClass="w-full text-left"
+                [style]="{'width':'100%', 'border-color': '#374151', 'color': 'white', 'border-radius': '0.75rem'}">
+              </p-select>
+            </div>
+
+            <!-- Map Selector -->
+            <div>
+              <label class="block text-sm font-medium text-gray-300 mb-2 flex justify-between">
+                <span>Seleccionar en Mapa</span>
+                <span *ngIf="isReverseGeocoding()" class="text-cyan-400 text-xs animate-pulse">Buscando ubicación... <i class="pi pi-spin pi-spinner ml-1"></i></span>
+              </label>
+              <div id="map" class="h-64 w-full rounded-xl border border-gray-700 overflow-hidden relative z-0"></div>
+              <p class="text-xs text-gray-400 mt-2 text-center flex items-center justify-center gap-2" *ngIf="latitude() && longitude()">
+                <span>Coordenadas: {{ latitude() | number:'1.5-5' }}, {{ longitude() | number:'1.5-5' }}</span>
+              </p>
+            </div>
+          </div>
+
+          <!-- Error Message -->
+          <div *ngIf="locationError()" class="rounded-md bg-red-900/30 p-3 border border-red-500/30">
+            <div class="flex">
+              <div class="flex-shrink-0">
+                <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd" />
+                </svg>
+              </div>
+              <div class="ml-3">
+                <p class="text-sm font-medium text-red-400">{{ locationError() }}</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="mt-8 flex gap-3">
+          <button type="button" (click)="closeLocationModal()"
+            class="flex-1 rounded-xl bg-gray-800 px-3 py-2.5 text-sm font-semibold text-white shadow-sm ring-1 ring-inset ring-gray-600 hover:bg-gray-700 transition-all">
+            Cancelar
+          </button>
+          <button type="button" (click)="saveLocation()" [disabled]="!selectedDistrict() && !latitude()"
+            class="flex-1 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 px-3 py-2.5 text-sm font-semibold text-white shadow-sm hover:from-cyan-400 hover:to-blue-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-cyan-500/25">
+            Guardar Ubicación
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

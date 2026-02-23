@@ -17,6 +17,8 @@ export const routes: Routes = [
     component: Layout,
     children: [
       { path: '', component: Main },
+      { path: 'ingreso', loadComponent: () => import('../pages/auth/client-auth/client-auth').then(m => m.ClientAuthComponent) },
+      { path: 'mi-perfil', loadComponent: () => import('../pages/client/profile/profile').then(m => m.ClientProfileComponent), canActivate: [authGuard] },
       { path: 'registro-inmueble', component: RegisterInmueble, canActivate: [authGuard] },
       { path: 'inmueble', component: InmuebleComponent },
       { path: 'inmueble/:id', loadComponent: () => import('./pages/inmueble-detalle/inmueble-detalle').then(m => m.InmuebleDetalle) },

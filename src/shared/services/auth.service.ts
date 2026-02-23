@@ -61,10 +61,12 @@ export class AuthService {
         );
     }
 
-    signOut() {
-        this.socialAuthService.signOut();
+    signOut(redirect: boolean = true) {
+        this.socialAuthService.signOut().catch(err => console.debug('No social session to sign out'));
         this.clearSession();
-        this.router.navigate(['/business-auth']);
+        if (redirect) {
+            this.router.navigate(['/business-auth']);
+        }
     }
 
     getToken(): string | null {
@@ -104,6 +106,12 @@ export class AuthService {
     public saveSession(token: string, user: SocialUser) {
         localStorage.setItem(this.TOKEN_KEY, token);
         localStorage.setItem(this.USER_KEY, JSON.stringify(user));
+    }
+
+    public logout() {
+        this.socialAuthService.signOut().catch(() => {});
+        this.clearSession();
+        this.router.navigate(['/']);
     }
 
     private clearSession() {
