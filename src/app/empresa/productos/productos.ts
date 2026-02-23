@@ -509,8 +509,13 @@ export class ProductosComponent {
           }
         },
         error: (error) => {
-          console.error('Error al actualizar producto:', error);
-          this.toastr.error('No se pudo actualizar el producto', 'Error');
+          console.error('Error al crear producto:', error.error);
+           if (error.status === 400 && error.error) {
+              this.toastr.error(error.error.detail, 'Error');
+          } else {
+             this.toastr.error('No se pudo crear el producto', 'Error');
+          }
+          
         }
       });
     } else {
@@ -558,8 +563,11 @@ export class ProductosComponent {
           }
         },
         error: (error) => {
-          console.error('Error al crear producto:', error);
-          this.toastr.error('No se pudo crear el producto', 'Error');
+           if (error.status === 400 && error.error) {
+             this.toastr.error(error.error.detail, 'Error');
+          } else {
+             this.toastr.error('No se pudo crear el producto', 'Error');
+          }
         }
       });
     }
