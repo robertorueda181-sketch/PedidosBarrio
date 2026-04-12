@@ -1,0 +1,55 @@
+<div class="min-h-screen bg-slate-950 text-white">
+  <div class="max-w-7xl mx-auto px-6 py-16">
+    <div class="max-w-3xl">
+      <p class="text-xs font-bold uppercase tracking-[0.35em] text-amber-300 mb-4">Catálogo de plantillas</p>
+      <h1 class="text-4xl md:text-5xl font-black tracking-tight">Plantillas disponibles para {{ company()?.nombre || codigoempresa() }}</h1>
+      <p class="mt-5 text-lg text-white/70 leading-relaxed">
+        Esta página separa las plantillas del detalle del negocio para que puedas revisar cada opción por separado y previsualizarla con los datos reales del negocio.
+      </p>
+    </div>
+
+    @if (loading()) {
+    <div class="mt-12 rounded-3xl border border-white/10 bg-white/5 p-10 text-white/70">Cargando plantillas…</div>
+    }
+
+    @if (error()) {
+    <div class="mt-12 rounded-3xl border border-red-500/30 bg-red-500/10 p-10 text-red-200">{{ error() }}</div>
+    }
+
+    @if (!loading() && !error()) {
+    <div class="mt-12 grid grid-cols-1 lg:grid-cols-3 gap-8">
+      @for (template of templates; track template.id) {
+      <article class="overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.03] shadow-2xl">
+        <div class="h-56 p-8 flex flex-col justify-between" [style.background]="'linear-gradient(135deg, ' + template.accent + ', #111827)'">
+          <div class="inline-flex w-fit rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.2em]">
+            Vista previa {{ template.id }}
+          </div>
+          <div>
+            <h2 class="text-2xl font-black leading-tight">{{ template.sampleTitle }}</h2>
+            <p class="mt-3 text-sm text-white/75">{{ template.sampleSubtitle }}</p>
+          </div>
+        </div>
+
+        <div class="p-8">
+          <div class="flex items-center justify-between gap-4 mb-4">
+            <h3 class="text-xl font-black">{{ template.name }}</h3>
+            @if (currentTemplate() === template.id) {
+            <span class="rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-bold uppercase tracking-[0.15em] text-emerald-300">Actual</span>
+            }
+          </div>
+
+          <p class="text-white/70 leading-relaxed min-h-16">{{ template.description }}</p>
+
+          <div class="mt-8 flex flex-wrap gap-3">
+            <a [routerLink]="['/negocio', codigoempresa()]" [queryParams]="{ template: template.id }"
+              class="inline-flex items-center justify-center rounded-2xl bg-white px-5 py-3 text-sm font-black uppercase tracking-[0.18em] text-slate-950">
+              Ver template {{ template.id }}
+            </a>
+          </div>
+        </div>
+      </article>
+      }
+    </div>
+    }
+  </div>
+</div>

@@ -1,306 +1,920 @@
-<div class="website-builder h-screen flex flex-col overflow-hidden">
-  <!-- Header -->
-  <div class="bg-white shadow-sm border-b border-gray-200 px-6 py-4 z-10">
-    <div class="flex items-center justify-between">
-      <div>
-        <h1 class="text-2xl font-semibold text-gray-900">Constructor de Sitio Web</h1>
-        <p class="text-sm text-gray-600">Crea y personaliza tu página web profesional</p>
-      </div>
-      <div class="flex items-center space-x-4">
-        <!-- View Mode Toggles -->
-        <div class="bg-gray-100 p-1 rounded-lg flex items-center" *ngIf="selectedTemplate">
-          <button (click)="viewMode = 'desktop'" [class.bg-white]="viewMode === 'desktop'"
-            [class.shadow-sm]="viewMode === 'desktop'"
-            class="p-2 rounded-md text-gray-600 hover:text-gray-900 transition-all">
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-            </svg>
-          </button>
-          <button (click)="viewMode = 'mobile'" [class.bg-white]="viewMode === 'mobile'"
-            [class.shadow-sm]="viewMode === 'mobile'"
-            class="p-2 rounded-md text-gray-600 hover:text-gray-900 transition-all">
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-            </svg>
-          </button>
+<div class="mi-sitio-builder space-y-6">
+  @if (isMobilePreviewOpen() && shouldUsePreviewPopup()) {
+  <div class="mi-sitio-preview-backdrop" (click)="closeMobilePreview()">
+    <div class="mi-sitio-preview-modal" (click)="$event.stopPropagation()">
+      <div class="mi-sitio-preview-shell">
+        <div class="mi-sitio-preview-phone-wrap">
+          <div class="mi-sitio-preview-phone">
+            <div class="mi-sitio-preview-phone-screen">
+                <div class="mi-sitio-preview-statusbar" aria-hidden="true">
+                  <span class="mi-sitio-preview-statusbar__time">9:41</span>
+                  <div class="mi-sitio-preview-statusbar__icons">
+                    <span>📶</span>
+                    <span>📡</span>
+                    <span>🔋</span>
+                  </div>
+                </div>
+              <app-company-template-three
+                [business]="previewBusiness()"
+                [styles]="previewStyles()"
+                [config]="previewConfig()"
+                [pageData]="pageData()"
+                [previewMode]="'embedded-mobile'"
+                [mapUrl]="null"
+                [whatsappUrl]="previewWhatsappUrl()">
+              </app-company-template-three>
+            </div>
+          </div>
         </div>
 
-        <button (click)="saveWebsite()" [disabled]="isSaving || !selectedTemplate"
-          class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed">
-          <svg *ngIf="isSaving" class="animate-spin -ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-            </path>
-          </svg>
-          {{ isSaving ? 'Guardando...' : 'Guardar' }}
-        </button>
-        <button (click)="previewWebsite()" [disabled]="!selectedTemplate"
-          class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
-          <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-          </svg>
-          Previsualizar
-        </button>
-        <button (click)="publishWebsite()" [disabled]="!selectedTemplate"
-          class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed">
-          <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-          </svg>
-          Publicar
-        </button>
+        <div class="mi-sitio-preview-meta">
+          <span class="mi-sitio-preview-meta-badge">Preview mobile</span>
+          <h3>Así se verá en celular</h3>
+          <p>
+            Revisa proporciones, legibilidad y el orden de las secciones en un formato tipo smartphone.
+          </p>
+          <ul>
+            <li>Haz clic fuera del modal para cerrarlo.</li>
+            <li>Usa <strong>Ver web</strong> para abrir la vista completa en una pestaña aparte.</li>
+            <li>Guarda el borrador antes de salir si quieres conservar los cambios.</li>
+          </ul>
+
+          <div class="flex flex-wrap gap-3 pt-2">
+            <button (click)="closeMobilePreview()"
+              class="rounded-2xl border border-white/15 px-4 py-2 text-sm font-bold text-white/85 transition hover:bg-white/10">
+              Cerrar
+            </button>
+            <a [href]="previewWebUrl()" target="_blank" rel="noopener noreferrer" (click)="saveDraft()"
+              class="rounded-2xl bg-cyan-400 px-4 py-2 text-sm font-black text-slate-950 transition hover:bg-cyan-300 inline-flex items-center justify-center">
+              Abrir vista web
+            </a>
+          </div>
+        </div>
       </div>
     </div>
   </div>
+  }
 
-  <div class="flex flex-1 overflow-hidden bg-gray-100">
-    <!-- Sidebar Controls -->
-    <div class="w-80 bg-white border-r border-gray-200 flex flex-col overflow-y-auto shadow-lg z-10">
-
-      <!-- State 1: Template Selection -->
-      <div *ngIf="!selectedTemplate" class="p-6">
-        <h2 class="text-lg font-semibold text-gray-900 mb-4">Elige una Plantilla</h2>
-        <div class="space-y-4">
-          <div *ngFor="let template of templates" (click)="selectTemplate(template)"
-            class="cursor-pointer border border-gray-200 rounded-lg p-4 hover:border-blue-500 hover:shadow-md transition-all duration-200 group">
-            <div
-              class="aspect-video bg-gray-100 rounded mb-3 flex items-center justify-center group-hover:bg-gray-200 transition-colors">
-              <svg class="w-12 h-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
-            </div>
-            <h3 class="font-semibold text-gray-900">{{ template.name }}</h3>
-            <p class="text-sm text-gray-600 mt-1">{{ template.description }}</p>
-          </div>
-        </div>
+  <header class="mi-sitio-builder__header rounded-[2rem] bg-slate-950 px-6 py-6 text-white shadow-2xl">
+    <div class="mi-sitio-builder__header-inner flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+      <div>
+        <p class="text-xs font-black uppercase tracking-[0.35em] text-cyan-300">Mi Sitio</p>
+        <h1 class="mt-2 text-3xl font-black tracking-tight">Editor del template</h1>
+        <p class="mt-2 max-w-3xl text-sm text-white/70">
+          Ajusta colores, secciones, productos, galería y videos. La previsualización se actualiza al instante.
+        </p>
       </div>
 
-      <!-- State 2: Editor Controls -->
-      <div *ngIf="selectedTemplate" class="flex flex-col h-full">
-        <!-- Back / Breadcrumb -->
-        <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between bg-gray-50">
-          <div class="flex items-center">
-            <button *ngIf="currentSection" (click)="currentSection = null"
-              class="mr-2 text-gray-500 hover:text-gray-700">
-              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
-            <span class="font-medium text-gray-900">{{ currentSection ? 'Editar Sección' : 'Estructura' }}</span>
-          </div>
-          <button *ngIf="!currentSection" (click)="selectTemplate(null)"
-            class="text-xs text-blue-600 hover:text-blue-800">
-            Cambiar Plantilla
+      <div class="mi-sitio-builder__actions flex flex-wrap items-center gap-3">
+        @if (!isInlinePreviewVisible()) {
+        <button (click)="openMobilePreview()"
+          class="rounded-2xl border border-white/15 px-4 py-2 text-sm font-bold text-white/85 transition hover:bg-white/10">
+          {{ mobilePreviewActionLabel() }}
+        </button>
+        } @else {
+        <button (click)="scrollToInlinePreview()"
+          class="rounded-2xl border border-white/15 px-4 py-2 text-sm font-bold text-white/85 transition hover:bg-white/10">
+          Ir al preview
+        </button>
+        }
+
+        <a [href]="previewWebUrl()" target="_blank" rel="noopener noreferrer" (click)="saveDraft()"
+          class="rounded-2xl border border-cyan-400/40 bg-cyan-400/15 px-4 py-2 text-sm font-bold text-cyan-200 transition hover:bg-cyan-400/25 inline-flex items-center justify-center">
+          Ver web
+        </a>
+
+        <button (click)="resetDraft()"
+          class="rounded-2xl border border-white/15 px-4 py-2 text-sm font-bold text-white/85 transition hover:bg-white/10">
+          Restaurar demo
+        </button>
+
+        <button (click)="saveDraft()"
+          class="rounded-2xl bg-cyan-400 px-5 py-2 text-sm font-black text-slate-950 transition hover:bg-cyan-300">
+          Guardar borrador
+        </button>
+      </div>
+    </div>
+
+    @if (lastSavedAt()) {
+    <p class="mt-4 text-xs text-white/60">Último guardado: {{ lastSavedAt() | date:'dd/MM/yyyy HH:mm:ss' }}</p>
+    }
+  </header>
+
+  <div class="mi-sitio-builder__layout" [class.mi-sitio-builder__layout--with-preview]="isInlinePreviewVisible()">
+    <aside class="mi-sitio-builder__sidebar space-y-6 xl:max-h-[calc(100vh-11rem)] xl:overflow-y-auto xl:pr-2">
+      <section class="mi-sitio-builder__card rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm">
+        <p class="text-xs font-black uppercase tracking-[0.28em] text-cyan-500">Estructura del sitio</p>
+        <h2 class="mt-3 text-lg font-black text-slate-950">Activa y luego edita</h2>
+        <p class="mt-2 text-sm text-slate-500">
+          En esta columna eliges qué secciones estarán visibles y cuál quieres editar. A la derecha se muestran los campos de la sección activa.
+        </p>
+      </section>
+
+      <section class="mi-sitio-builder__card rounded-[1.75rem] border border-slate-200 bg-white p-4 shadow-sm">
+        <div class="space-y-3">
+          @for (section of editorSections; track section.key) {
+          <button
+            type="button"
+            class="mi-sitio-builder__section-item w-full rounded-[1.35rem] border px-4 py-4 text-left transition"
+            [class.mi-sitio-builder__section-item--active]="isEditorSectionSelected(section.key)"
+            [class.mi-sitio-builder__section-item--disabled]="!isEditorSectionEnabled(section.key)"
+            (click)="selectEditorSection(section.key)">
+            <div class="flex items-start justify-between gap-3">
+              <div class="min-w-0">
+                <div class="flex flex-wrap items-center gap-2">
+                  <span class="text-sm font-black text-slate-900">{{ section.label }}</span>
+                  @if (!section.toggleable) {
+                  <span class="rounded-full bg-slate-100 px-2 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Fija</span>
+                  }
+                  @if (section.toggleable && isEditorSectionEnabled(section.key)) {
+                  <span class="rounded-full bg-emerald-50 px-2 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-emerald-600">Activa</span>
+                  }
+                </div>
+                <p class="mt-2 text-sm text-slate-500">{{ section.description }}</p>
+              </div>
+
+              @if (section.toggleable) {
+              <label class="mi-sitio-builder__toggle inline-flex shrink-0 cursor-pointer items-center gap-2" (click)="$event.stopPropagation()">
+                <input
+                  type="checkbox"
+                  [checked]="isEditorSectionEnabled(section.key)"
+                  (change)="toggleSection($any(section.key), $any($event.target).checked)"
+                  class="h-4 w-4 rounded border-slate-300 text-cyan-500 focus:ring-cyan-500" />
+              </label>
+              }
+            </div>
           </button>
+          }
         </div>
+      </section>
+    </aside>
 
-        <!-- Section List (Structure View) -->
-        <div *ngIf="!currentSection" class="flex-1 overflow-y-auto p-6">
-          <div class="mb-6">
-            <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Agregar Sección</h3>
-            <div class="grid grid-cols-3 gap-2">
-              <button (click)="addSection('text')"
-                class="flex flex-col items-center justify-center p-3 border border-gray-200 rounded hover:bg-blue-50 hover:border-blue-300 transition-all">
-                <svg class="w-6 h-6 text-gray-400 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
-                </svg>
-                <span class="text-xs text-gray-600">Texto</span>
-              </button>
-              <button (click)="addSection('hero')"
-                class="flex flex-col items-center justify-center p-3 border border-gray-200 rounded hover:bg-blue-50 hover:border-blue-300 transition-all">
-                <svg class="w-6 h-6 text-gray-400 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-                <span class="text-xs text-gray-600">Hero</span>
-              </button>
-              <button (click)="addSection('gallery')"
-                class="flex flex-col items-center justify-center p-3 border border-gray-200 rounded hover:bg-blue-50 hover:border-blue-300 transition-all">
-                <svg class="w-6 h-6 text-gray-400 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-                <span class="text-xs text-gray-600">Galería</span>
-              </button>
-            </div>
-          </div>
-
+    <section class="mi-sitio-builder__workspace space-y-6 min-w-0">
+      <section class="mi-sitio-builder__card rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm">
+        <p class="text-xs font-black uppercase tracking-[0.28em] text-cyan-500">Editor de sección</p>
+        <div class="mt-3 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
           <div>
-            <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Tus Secciones</h3>
-            <div class="space-y-2">
-              <div *ngFor="let section of selectedTemplate.sections; let i = index"
-                (mouseenter)="setHoveredSection(section)" (mouseleave)="setHoveredSection(null)"
-                class="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg shadow-sm hover:border-blue-400 transition-all cursor-pointer"
-                [class.ring-2]="hoveredSection?.id === section.id"
-                [class.ring-blue-400]="hoveredSection?.id === section.id">
-                <div class="flex items-center space-x-3" (click)="selectSection(section)">
-                  <span class="text-gray-400 font-mono text-xs">{{ i + 1 }}</span>
-                  <span class="text-sm font-medium text-gray-700">{{ section.title }}</span>
-                </div>
-                <div class="flex items-center space-x-1">
-                  <button (click)="moveSection(section.id, 'up')" [disabled]="i === 0"
-                    class="p-1 text-gray-400 hover:text-blue-600 disabled:opacity-30">
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
-                    </svg>
-                  </button>
-                  <button (click)="moveSection(section.id, 'down')"
-                    [disabled]="i === selectedTemplate.sections.length - 1"
-                    class="p-1 text-gray-400 hover:text-blue-600 disabled:opacity-30">
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </button>
-                  <button (click)="removeSection(section.id)" class="p-1 text-gray-400 hover:text-red-600">
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-            </div>
+            <h2 class="text-2xl font-black text-slate-950">{{ selectedEditorMeta().label }}</h2>
+            <p class="mt-2 max-w-3xl text-sm text-slate-500">{{ selectedEditorMeta().description }}</p>
           </div>
+          @if (selectedEditorMeta().toggleable) {
+          <span class="inline-flex w-fit items-center rounded-full px-3 py-1 text-xs font-black uppercase tracking-[0.2em]"
+            [class.bg-emerald-50]="isEditorSectionEnabled(selectedEditorMeta().key)"
+            [class.text-emerald-600]="isEditorSectionEnabled(selectedEditorMeta().key)"
+            [class.bg-rose-50]="!isEditorSectionEnabled(selectedEditorMeta().key)"
+            [class.text-rose-500]="!isEditorSectionEnabled(selectedEditorMeta().key)">
+            {{ isEditorSectionEnabled(selectedEditorMeta().key) ? 'Visible' : 'Oculta' }}
+          </span>
+          }
         </div>
+      </section>
 
-        <!-- Section Editor (Detail View) -->
-        <div *ngIf="currentSection" class="flex-1 overflow-y-auto p-6">
-          <div class="space-y-6">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Título</label>
-              <input [(ngModel)]="currentSection.title" type="text"
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
-            </div>
+      @switch (selectedEditorSection()) {
+        @case ('branding') {
+        <section class="mi-sitio-builder__card rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm">
+          <div class="grid gap-4 sm:grid-cols-2">
+            <label class="block sm:col-span-2">
+              <span class="mb-2 block text-sm font-semibold text-slate-700">Nombre del negocio</span>
+              <input [ngModel]="previewBusiness().nombre" (ngModelChange)="updateBusinessField('nombre', $event)"
+                class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400" />
+            </label>
 
-            <div>
-              <div class="flex justify-between items-center mb-2">
-                <label class="block text-sm font-medium text-gray-700">Contenido</label>
-                <label
-                  class="cursor-pointer inline-flex items-center px-2 py-1 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none">
-                  <svg class="-ml-0.5 mr-1 h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                  Insertar Imagen
-                  <input type="file" (change)="onEditorImageUpload($event)" class="hidden" accept="image/*">
-                </label>
-              </div>
-              <div class="border border-gray-300 rounded-md overflow-hidden">
-                <ngx-editor-menu [editor]="editor" [toolbar]="toolbar"></ngx-editor-menu>
-                <ngx-editor [(ngModel)]="currentSection.content" [editor]="editor" [placeholder]="'Escribe aquí...'"
-                  class="min-h-[200px]"></ngx-editor>
-              </div>
-            </div>
+            <label class="block sm:col-span-2">
+              <span class="mb-2 block text-sm font-semibold text-slate-700">Descripción general</span>
+              <textarea [ngModel]="previewBusiness().descripcion" (ngModelChange)="updateBusinessField('descripcion', $event)"
+                rows="4" class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400"></textarea>
+            </label>
 
-            <div *ngIf="currentSection.type === 'gallery'">
-              <label class="block text-sm font-medium text-gray-700 mb-2">Imágenes</label>
-              <div class="grid grid-cols-2 gap-2">
-                <div *ngFor="let image of currentSection.images; let i = index" class="relative group aspect-square">
-                  <img [src]="image" class="w-full h-full object-cover rounded-lg">
-                  <button (click)="removeImage(currentSection, i)"
-                    class="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
+            <label class="block">
+              <span class="mb-2 block text-sm font-semibold text-slate-700">WhatsApp</span>
+              <input [ngModel]="previewBusiness().whatsapp" (ngModelChange)="updateBusinessField('whatsapp', $event)"
+                class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400" />
+            </label>
+
+            <label class="block">
+              <span class="mb-2 block text-sm font-semibold text-slate-700">Correo</span>
+              <input [ngModel]="previewBusiness().email" (ngModelChange)="updateBusinessField('email', $event)"
+                class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400" />
+            </label>
+
+            <label class="block">
+              <span class="mb-2 block text-sm font-semibold text-slate-700">Dirección</span>
+              <input [ngModel]="previewBusiness().direccion" (ngModelChange)="updateBusinessField('direccion', $event)"
+                class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400" />
+            </label>
+
+            <label class="block">
+              <span class="mb-2 block text-sm font-semibold text-slate-700">Teléfono</span>
+              <input [ngModel]="previewBusiness().telefono" (ngModelChange)="updateBusinessField('telefono', $event)"
+                class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400" />
+            </label>
+
+            <label class="block sm:col-span-2">
+              <span class="mb-2 block text-sm font-semibold text-slate-700">Imagen de fondo</span>
+              <input [ngModel]="previewBusiness().urlBanner" (ngModelChange)="updateBusinessField('urlBanner', $event)"
+                placeholder="https://..."
+                class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400" />
+              <span class="mt-2 block text-xs text-slate-500">Se usa como fondo principal del hero en la preview.</span>
+
+              <div class="mi-sitio-builder__media-card mt-3 rounded-[1.35rem] border border-slate-200 p-3">
+                <div class="mi-sitio-builder__media-preview rounded-[1.1rem] bg-slate-100">
+                  @if (previewBusiness().urlBanner) {
+                  <img [src]="previewBusiness().urlBanner!" alt="Preview imagen de fondo" class="mi-sitio-builder__media-image" />
+                  } @else {
+                  <div class="mi-sitio-builder__media-empty">Aquí verás la imagen de fondo</div>
+                  }
                 </div>
-                <label
-                  class="border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center aspect-square cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-all">
-                  <input type="file" accept="image/*" (change)="onImageUpload($event, currentSection)" class="hidden">
-                  <svg class="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                  </svg>
-                </label>
+
+                <div class="mt-3 flex flex-wrap gap-3">
+                  <label class="rounded-2xl bg-slate-950 px-4 py-2 text-sm font-black text-white transition hover:bg-slate-800 cursor-pointer">
+                    Cargar desde tu PC
+                    <input type="file" accept="image/*" class="hidden" (change)="uploadBusinessImage($event, 'urlBanner')" />
+                  </label>
+
+                  @if (previewBusiness().urlBanner) {
+                  <button type="button" (click)="clearBusinessImage('urlBanner')"
+                    class="rounded-2xl border border-rose-200 px-4 py-2 text-sm font-bold text-rose-500 transition hover:bg-rose-50">
+                    Quitar imagen
+                  </button>
+                  }
+                </div>
+              </div>
+            </label>
+
+            <label class="block sm:col-span-2">
+              <span class="mb-2 block text-sm font-semibold text-slate-700">Logo</span>
+              <input [ngModel]="previewBusiness().logoUrl" (ngModelChange)="updateBusinessField('logoUrl', $event)"
+                placeholder="https://..."
+                class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400" />
+              <span class="mt-2 block text-xs text-slate-500">Si lo dejas vacío, el template mostrará el nombre del negocio en su lugar.</span>
+
+              <div class="mi-sitio-builder__media-card mt-3 rounded-[1.35rem] border border-slate-200 p-3">
+                <div class="mi-sitio-builder__media-preview mi-sitio-builder__media-preview--logo rounded-[1.1rem] bg-slate-100">
+                  @if (previewBusiness().logoUrl) {
+                  <img [src]="previewBusiness().logoUrl!" alt="Preview logo" class="mi-sitio-builder__media-image mi-sitio-builder__media-image--logo" />
+                  } @else {
+                  <div class="mi-sitio-builder__media-empty">Aquí verás el logo cargado</div>
+                  }
+                </div>
+
+                <div class="mt-3 flex flex-wrap gap-3">
+                  <label class="rounded-2xl bg-slate-950 px-4 py-2 text-sm font-black text-white transition hover:bg-slate-800 cursor-pointer">
+                    Cargar desde tu PC
+                    <input type="file" accept="image/*" class="hidden" (change)="uploadBusinessImage($event, 'logoUrl')" />
+                  </label>
+
+                  @if (previewBusiness().logoUrl) {
+                  <button type="button" (click)="clearBusinessImage('logoUrl')"
+                    class="rounded-2xl border border-rose-200 px-4 py-2 text-sm font-bold text-rose-500 transition hover:bg-rose-50">
+                    Quitar logo
+                  </button>
+                  }
+                </div>
+              </div>
+            </label>
+          </div>
+
+          <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <label class="block">
+              <span class="mb-2 block text-sm font-semibold text-slate-700">Color primario</span>
+              <input type="color" [ngModel]="pageData().theme.colors.primary" (ngModelChange)="updateThemeColor('primary', $event)"
+                class="h-12 w-full rounded-2xl border border-slate-200" />
+            </label>
+            <label class="block">
+              <span class="mb-2 block text-sm font-semibold text-slate-700">Color secundario</span>
+              <input type="color" [ngModel]="pageData().theme.colors.secondary" (ngModelChange)="updateThemeColor('secondary', $event)"
+                class="h-12 w-full rounded-2xl border border-slate-200" />
+            </label>
+            <label class="block">
+              <span class="mb-2 block text-sm font-semibold text-slate-700">Fondo</span>
+              <input type="color" [ngModel]="pageData().theme.colors.background" (ngModelChange)="updateThemeColor('background', $event)"
+                class="h-12 w-full rounded-2xl border border-slate-200" />
+            </label>
+            <label class="block">
+              <span class="mb-2 block text-sm font-semibold text-slate-700">Texto</span>
+              <input type="color" [ngModel]="pageData().theme.colors.text_main" (ngModelChange)="updateThemeColor('text_main', $event)"
+                class="h-12 w-full rounded-2xl border border-slate-200" />
+            </label>
+          </div>
+        </section>
+        }
+
+        @case ('hero') {
+          @if (heroSection(); as hero) {
+          <section class="mi-sitio-builder__card rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm space-y-6">
+            <div class="grid gap-4 sm:grid-cols-2">
+              <label class="block sm:col-span-2">
+                <span class="mb-2 block text-sm font-semibold text-slate-700">Overline</span>
+                <input [ngModel]="hero.content.overline" (ngModelChange)="updateHeroField('overline', $event)"
+                  class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400" />
+              </label>
+              <label class="block sm:col-span-2">
+                <span class="mb-2 block text-sm font-semibold text-slate-700">Título</span>
+                <input [ngModel]="hero.content.title" (ngModelChange)="updateHeroField('title', $event)"
+                  class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400" />
+              </label>
+              <label class="block sm:col-span-2">
+                <span class="mb-2 block text-sm font-semibold text-slate-700">Subtítulo</span>
+                <textarea [ngModel]="hero.content.subtitle" (ngModelChange)="updateHeroField('subtitle', $event)" rows="4"
+                  class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400"></textarea>
+              </label>
+
+              <label class="block sm:col-span-2">
+                <span class="mb-2 block text-sm font-semibold text-slate-700">Imagen destacada del hero</span>
+                <input [ngModel]="previewBusiness().urlBanner" (ngModelChange)="updateBusinessField('urlBanner', $event)"
+                  placeholder="https://..."
+                  class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400" />
+                <span class="mt-2 block text-xs text-slate-500">Esta imagen se usa como fondo principal del hero y se refleja en la previsualización.</span>
+
+                <div class="mi-sitio-builder__media-card mt-3 rounded-[1.35rem] border border-slate-200 p-3">
+                  <div class="mi-sitio-builder__media-preview rounded-[1.1rem] bg-slate-100">
+                    @if (previewBusiness().urlBanner) {
+                    <img [src]="previewBusiness().urlBanner!" alt="Preview imagen destacada del hero" class="mi-sitio-builder__media-image" />
+                    } @else {
+                    <div class="mi-sitio-builder__media-empty">Aquí verás la imagen destacada del hero</div>
+                    }
+                  </div>
+
+                  <div class="mt-3 flex flex-wrap gap-3">
+                    <label class="rounded-2xl bg-slate-950 px-4 py-2 text-sm font-black text-white transition hover:bg-slate-800 cursor-pointer">
+                      Cargar desde tu PC
+                      <input type="file" accept="image/*" class="hidden" (change)="uploadBusinessImage($event, 'urlBanner')" />
+                    </label>
+
+                    @if (previewBusiness().urlBanner) {
+                    <button type="button" (click)="clearBusinessImage('urlBanner')"
+                      class="rounded-2xl border border-rose-200 px-4 py-2 text-sm font-bold text-rose-500 transition hover:bg-rose-50">
+                      Quitar imagen
+                    </button>
+                    }
+                  </div>
+                </div>
+              </label>
+            </div>
+
+            <div class="grid gap-4 lg:grid-cols-2">
+              <div class="rounded-[1.5rem] border border-slate-200 p-4">
+                <h3 class="font-black text-slate-900">CTA principal</h3>
+                <div class="mt-4 grid gap-3">
+                  <input [ngModel]="hero.content.primary_cta.text" (ngModelChange)="updateHeroCta('primary_cta', 'text', $event)" placeholder="Texto"
+                    class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400" />
+                  <input [ngModel]="hero.content.primary_cta.link" (ngModelChange)="updateHeroCta('primary_cta', 'link', $event)" placeholder="#reservas"
+                    class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400" />
+                </div>
+              </div>
+
+              <div class="rounded-[1.5rem] border border-slate-200 p-4">
+                <h3 class="font-black text-slate-900">CTA secundario</h3>
+                <div class="mt-4 grid gap-3">
+                  <input [ngModel]="hero.content.secondary_cta.text" (ngModelChange)="updateHeroCta('secondary_cta', 'text', $event)" placeholder="Texto"
+                    class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400" />
+                  <input [ngModel]="hero.content.secondary_cta.link" (ngModelChange)="updateHeroCta('secondary_cta', 'link', $event)" placeholder="#menu"
+                    class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400" />
+                </div>
               </div>
             </div>
 
-            <!-- Settings (Example) -->
-            <div class="pt-4 border-t border-gray-200">
-              <h4 class="text-sm font-medium text-gray-900 mb-3">Estilos</h4>
-              <div class="grid grid-cols-2 gap-4">
+            <div class="rounded-[1.5rem] border border-slate-200 p-4">
+              <div class="flex items-center justify-between gap-3">
+                <h3 class="font-black text-slate-900">Métricas rápidas</h3>
+                <button (click)="addHeroStat()" class="rounded-2xl bg-slate-950 px-4 py-2 text-sm font-black text-white">Añadir</button>
+              </div>
+              <div class="mt-4 space-y-4">
+                @for (stat of hero.content.stats; track stat.label + '-' + $index; let i = $index) {
+                <div class="rounded-[1.25rem] border border-slate-200 p-4">
+                  <div class="grid gap-3 sm:grid-cols-[160px_minmax(0,1fr)_auto] sm:items-center">
+                    <input [ngModel]="stat.value" (ngModelChange)="updateHeroStat(i, 'value', $event)" placeholder="12+"
+                      class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400" />
+                    <input [ngModel]="stat.label" (ngModelChange)="updateHeroStat(i, 'label', $event)" placeholder="Clientes felices"
+                      class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400" />
+                    <button (click)="removeHeroStat(i)" class="rounded-2xl border border-rose-200 px-4 py-3 text-sm font-bold text-rose-500">Quitar</button>
+                  </div>
+                </div>
+                }
+              </div>
+            </div>
+          </section>
+          }
+        }
+
+        @case ('about_us') {
+          @if (aboutSection(); as about) {
+          <section class="mi-sitio-builder__card rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm space-y-6">
+            <div class="grid gap-4 sm:grid-cols-2">
+              <label class="block sm:col-span-2">
+                <span class="mb-2 block text-sm font-semibold text-slate-700">Overline</span>
+                <input [ngModel]="about.content.overline" (ngModelChange)="updateAboutField('overline', $event)"
+                  class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400" />
+              </label>
+              <label class="block sm:col-span-2">
+                <span class="mb-2 block text-sm font-semibold text-slate-700">Título</span>
+                <input [ngModel]="about.content.title" (ngModelChange)="updateAboutField('title', $event)"
+                  class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400" />
+              </label>
+              <label class="block sm:col-span-2">
+                <span class="mb-2 block text-sm font-semibold text-slate-700">Descripción principal</span>
+                <textarea [ngModel]="about.content.description" (ngModelChange)="updateAboutField('description', $event)" rows="4"
+                  class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400"></textarea>
+              </label>
+              <label class="block sm:col-span-2">
+                <span class="mb-2 block text-sm font-semibold text-slate-700">Descripción secundaria</span>
+                <textarea [ngModel]="about.content.secondary_description" (ngModelChange)="updateAboutField('secondary_description', $event)" rows="3"
+                  class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400"></textarea>
+              </label>
+            </div>
+
+            <div class="grid gap-4 lg:grid-cols-2">
+              <div class="rounded-[1.5rem] border border-slate-200 p-4">
+                <h3 class="font-black text-slate-900">CTA de la sección</h3>
+                <div class="mt-4 grid gap-3">
+                  <input [ngModel]="about.content.cta.text" (ngModelChange)="updateAboutCta('text', $event)" placeholder="Texto del botón"
+                    class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400" />
+                  <input [ngModel]="about.content.cta.link" (ngModelChange)="updateAboutCta('link', $event)" placeholder="#reservas"
+                    class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400" />
+                </div>
+              </div>
+
+              <div class="rounded-[1.5rem] border border-slate-200 p-4">
+                <h3 class="font-black text-slate-900">Imagen destacada</h3>
+                <div class="mt-4 grid gap-3">
+                  <input [ngModel]="about.content.image_highlight.url" (ngModelChange)="updateAboutHighlight('url', $event)" placeholder="URL de imagen"
+                    class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400" />
+                  <input [ngModel]="about.content.image_highlight.badge_text" (ngModelChange)="updateAboutHighlight('badge_text', $event)" placeholder="Texto del badge"
+                    class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400" />
+                  <input type="number" step="0.1" [ngModel]="about.content.image_highlight.rating" (ngModelChange)="updateAboutHighlightRating($event)" placeholder="4.8"
+                    class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400" />
+                </div>
+
+                <div class="mi-sitio-builder__media-card mt-4 rounded-[1.35rem] border border-slate-200 p-3">
+                  <div class="mi-sitio-builder__media-preview rounded-[1.1rem] bg-slate-100">
+                    @if (about.content.image_highlight.url) {
+                    <img [src]="about.content.image_highlight.url" alt="Preview imagen sobre nosotros" class="mi-sitio-builder__media-image" />
+                    } @else {
+                    <div class="mi-sitio-builder__media-empty">Aquí verás la imagen de Sobre nosotros</div>
+                    }
+                  </div>
+
+                  <div class="mt-3 flex flex-wrap gap-3">
+                    <label class="rounded-2xl bg-slate-950 px-4 py-2 text-sm font-black text-white transition hover:bg-slate-800 cursor-pointer">
+                      Cargar desde tu PC
+                      <input type="file" accept="image/*" class="hidden" (change)="uploadAboutHighlightImage($event)" />
+                    </label>
+
+                    @if (about.content.image_highlight.url) {
+                    <button type="button" (click)="clearAboutHighlightImage()"
+                      class="rounded-2xl border border-rose-200 px-4 py-2 text-sm font-bold text-rose-500 transition hover:bg-rose-50">
+                      Quitar imagen
+                    </button>
+                    }
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="rounded-[1.5rem] border border-slate-200 p-4">
+              <div class="flex items-center justify-between gap-3">
+                <h3 class="font-black text-slate-900">Diferenciales</h3>
+                <button (click)="addAboutFeature()" class="rounded-2xl bg-slate-950 px-4 py-2 text-sm font-black text-white">Añadir</button>
+              </div>
+              <div class="mt-4 space-y-4">
+                @for (feature of about.content.features; track feature.label + '-' + $index; let i = $index) {
+                <div class="rounded-[1.25rem] border border-slate-200 p-4">
+                  <div class="grid gap-3 sm:grid-cols-[minmax(0,180px)_minmax(0,1fr)_auto] sm:items-center">
+                    <input [ngModel]="feature.label" (ngModelChange)="updateAboutFeature(i, 'label', $event)" placeholder="Etiqueta"
+                      class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400" />
+                    <input [ngModel]="feature.detail" (ngModelChange)="updateAboutFeature(i, 'detail', $event)" placeholder="Detalle"
+                      class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400" />
+                    <button (click)="removeAboutFeature(i)" class="rounded-2xl border border-rose-200 px-4 py-3 text-sm font-bold text-rose-500">Quitar</button>
+                  </div>
+                </div>
+                }
+              </div>
+            </div>
+          </section>
+          }
+        }
+
+        @case ('menu') {
+          @if (menuSection(); as menu) {
+          <section class="mi-sitio-builder__card rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm space-y-6">
+            <div class="grid gap-4 sm:grid-cols-2">
+              <input [ngModel]="menu.content.overline" (ngModelChange)="updateMenuField('overline', $event)" placeholder="Overline"
+                class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400 sm:col-span-2" />
+              <input [ngModel]="menu.content.title" (ngModelChange)="updateMenuField('title', $event)" placeholder="Título de la sección"
+                class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400 sm:col-span-2" />
+              <textarea [ngModel]="menu.content.description" (ngModelChange)="updateMenuField('description', $event)" rows="3" placeholder="Descripción"
+                class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400 sm:col-span-2"></textarea>
+              <input [ngModel]="menu.content.all_categories_label" (ngModelChange)="updateMenuField('all_categories_label', $event)" placeholder="Etiqueta de todas las categorías"
+                class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400" />
+              <input [ngModel]="menu.content.order_button_text" (ngModelChange)="updateMenuField('order_button_text', $event)" placeholder="Texto del botón"
+                class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400" />
+            </div>
+
+            <div class="rounded-[1.5rem] border border-slate-200 p-4">
+              <div class="flex items-center justify-between gap-4">
                 <div>
-                  <label class="block text-xs text-gray-500 mb-1">Fondo</label>
-                  <input type="color" [ngModel]="currentSection.settings.backgroundColor"
-                    (ngModelChange)="currentSection.settings.backgroundColor = $event"
-                    (input)="currentSection.settings.backgroundColor = $any($event.target).value"
-                    class="w-full h-8 rounded cursor-pointer">
+                  <h3 class="font-black text-slate-900">Productos</h3>
+                  <p class="text-sm text-slate-500">Administra lo que se mostrará en la carta desde el módulo real de productos.</p>
                 </div>
+                <button (click)="openProductsManager('new')" class="rounded-2xl bg-slate-950 px-4 py-2 text-sm font-black text-white">Añadir</button>
+              </div>
+
+              <div class="mt-4 rounded-[1.25rem] border border-cyan-100 bg-cyan-50/70 px-4 py-3 text-sm text-slate-600">
+                Los productos y sus imágenes se editan en <strong>Empresa &gt; Productos</strong>. Aquí solo ves lo configurado para la preview del sitio.
+              </div>
+
+              @if (previewBusiness().productos.length > 0) {
+              <div class="mt-5 grid gap-4 lg:grid-cols-2">
+                @for (product of previewBusiness().productos; track product.productoID) {
+                <div class="rounded-[1.5rem] border border-slate-200 p-4">
+                  <div class="flex items-start justify-between gap-3">
+                    <div class="min-w-0">
+                      <h4 class="font-black text-slate-800">{{ product.nombre }}</h4>
+                      <p class="mt-1 text-sm text-slate-500">{{ product.categoria?.descripcion || 'Sin categoría' }}</p>
+                    </div>
+                    <button (click)="openProductsManager('edit', product)" class="rounded-2xl border border-slate-200 px-3 py-2 text-xs font-black text-slate-700 transition hover:bg-slate-50">Editar</button>
+                  </div>
+
+                  <div class="mt-4 grid gap-4 sm:grid-cols-[96px_minmax(0,1fr)] sm:items-start">
+                    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-slate-100">
+                      <img [src]="product.urlImagen || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=80'" [alt]="product.nombre" class="h-24 w-full object-cover" />
+                    </div>
+
+                    <div class="min-w-0 space-y-2">
+                      <p class="text-sm text-slate-600">{{ product.descripcion || 'Sin descripción registrada.' }}</p>
+                      <div class="flex flex-wrap items-center gap-2 text-sm">
+                        <span class="rounded-full bg-slate-100 px-3 py-1 font-bold text-slate-700">S/ {{ product.precio | number:'1.2-2' }}</span>
+                        <span class="rounded-full bg-cyan-50 px-3 py-1 font-bold text-cyan-700">ID {{ product.productoID }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                }
+              </div>
+              } @else {
+              <div class="mt-5 rounded-[1.25rem] border border-dashed border-slate-300 p-6 text-center text-sm text-slate-500">
+                Aún no tienes productos configurados. Usa <strong>Añadir</strong> para abrir el mismo modal del módulo <strong>Productos</strong>.
+              </div>
+              }
+            </div>
+          </section>
+          } @else {
+          <section class="mi-sitio-builder__card rounded-[1.75rem] border border-dashed border-slate-300 bg-white p-8 text-center shadow-sm">
+            <p class="text-sm text-slate-500">Activa la sección <strong>Productos</strong> desde la columna izquierda para empezar a editarla.</p>
+          </section>
+          }
+        }
+
+        @case ('gallery') {
+          @if (gallerySection(); as gallery) {
+          <section class="mi-sitio-builder__card rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm space-y-6">
+            <div class="grid gap-4 sm:grid-cols-2">
+              <input [ngModel]="gallery.content.overline" (ngModelChange)="updateGalleryField('overline', $event)" placeholder="Overline"
+                class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400 sm:col-span-2" />
+              <input [ngModel]="gallery.content.title" (ngModelChange)="updateGalleryField('title', $event)" placeholder="Título"
+                class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400 sm:col-span-2" />
+              <textarea [ngModel]="gallery.content.description" (ngModelChange)="updateGalleryField('description', $event)" rows="3" placeholder="Descripción"
+                class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400 sm:col-span-2"></textarea>
+            </div>
+
+            <div class="rounded-[1.5rem] border border-slate-200 p-4">
+              <div class="flex items-center justify-between gap-4">
                 <div>
-                  <label class="block text-xs text-gray-500 mb-1">Texto</label>
-                  <input type="color" [ngModel]="currentSection.settings.textColor"
-                    (ngModelChange)="currentSection.settings.textColor = $event"
-                    (input)="currentSection.settings.textColor = $any($event.target).value"
-                    class="w-full h-8 rounded cursor-pointer">
+                  <h3 class="font-black text-slate-900">Imágenes</h3>
+                  <p class="text-sm text-slate-500">Añade o quita imágenes del template.</p>
+                </div>
+                <button (click)="addGalleryItem()" class="rounded-2xl bg-slate-950 px-4 py-2 text-sm font-black text-white">Añadir</button>
+              </div>
+
+              <div class="mt-5 space-y-4">
+                @for (image of gallery.content.items; track image.url + '-' + $index; let i = $index) {
+                <div class="rounded-[1.5rem] border border-slate-200 p-4">
+                  <div class="flex items-center justify-between gap-3">
+                    <h4 class="font-black text-slate-800">Imagen {{ i + 1 }}</h4>
+                    <button (click)="removeGalleryItem(i)" class="text-sm font-bold text-rose-500">Quitar</button>
+                  </div>
+                  <div class="mt-4 grid gap-3">
+                    <input [ngModel]="image.url" (ngModelChange)="updateGalleryItem(i, 'url', $event)" placeholder="URL de imagen"
+                      class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400" />
+                    <input [ngModel]="image.alt" (ngModelChange)="updateGalleryItem(i, 'alt', $event)" placeholder="Texto alternativo"
+                      class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400" />
+                    <input [ngModel]="image.caption" (ngModelChange)="updateGalleryItem(i, 'caption', $event)" placeholder="Caption"
+                      class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400" />
+                  </div>
+                </div>
+                }
+              </div>
+            </div>
+          </section>
+          } @else {
+          <section class="mi-sitio-builder__card rounded-[1.75rem] border border-dashed border-slate-300 bg-white p-8 text-center shadow-sm">
+            <p class="text-sm text-slate-500">Activa la sección <strong>Galería</strong> desde la columna izquierda para editar sus imágenes.</p>
+          </section>
+          }
+        }
+
+        @case ('videos') {
+          @if (videoSection(); as videos) {
+          <section class="mi-sitio-builder__card rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm space-y-6">
+            <div class="grid gap-4 sm:grid-cols-2">
+              <input [ngModel]="videos.content.overline" (ngModelChange)="updateVideoField('overline', $event)" placeholder="Overline"
+                class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400 sm:col-span-2" />
+              <input [ngModel]="videos.content.title" (ngModelChange)="updateVideoField('title', $event)" placeholder="Título"
+                class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400 sm:col-span-2" />
+              <textarea [ngModel]="videos.content.description" (ngModelChange)="updateVideoField('description', $event)" rows="3" placeholder="Descripción"
+                class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400 sm:col-span-2"></textarea>
+            </div>
+
+            <div class="rounded-[1.5rem] border border-slate-200 p-4">
+              <div class="flex items-center justify-between gap-4">
+                <div>
+                  <h3 class="font-black text-slate-900">Videos</h3>
+                  <p class="text-sm text-slate-500">Acepta enlaces de YouTube o Vimeo para la preview.</p>
+                </div>
+                <button (click)="addVideoItem()" class="rounded-2xl bg-slate-950 px-4 py-2 text-sm font-black text-white">Añadir</button>
+              </div>
+
+              <div class="mt-5 space-y-4">
+                @for (video of videos.content.items; track video.url + '-' + $index; let i = $index) {
+                <div class="rounded-[1.5rem] border border-slate-200 p-4">
+                  <div class="flex items-center justify-between gap-3">
+                    <h4 class="font-black text-slate-800">Video {{ i + 1 }}</h4>
+                    <button (click)="removeVideoItem(i)" class="text-sm font-bold text-rose-500">Quitar</button>
+                  </div>
+                  <div class="mt-4 grid gap-3">
+                    <input [ngModel]="video.title" (ngModelChange)="updateVideoItem(i, 'title', $event)" placeholder="Título"
+                      class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400" />
+                    <input [ngModel]="video.url" (ngModelChange)="updateVideoItem(i, 'url', $event)" placeholder="URL del video"
+                      class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400" />
+                    <textarea [ngModel]="video.description" (ngModelChange)="updateVideoItem(i, 'description', $event)" rows="2" placeholder="Descripción"
+                      class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400"></textarea>
+                  </div>
+                </div>
+                }
+              </div>
+            </div>
+          </section>
+          } @else {
+          <section class="mi-sitio-builder__card rounded-[1.75rem] border border-dashed border-slate-300 bg-white p-8 text-center shadow-sm">
+            <p class="text-sm text-slate-500">Activa la sección <strong>Videos</strong> desde la columna izquierda para editarla.</p>
+          </section>
+          }
+        }
+
+        @case ('testimonials') {
+          @if (testimonialsSection(); as testimonials) {
+          <section class="mi-sitio-builder__card rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm space-y-6">
+            <div class="grid gap-4 sm:grid-cols-2">
+              <input [ngModel]="testimonials.content.overline" (ngModelChange)="updateTestimonialsField('overline', $event)" placeholder="Overline"
+                class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400 sm:col-span-2" />
+              <input [ngModel]="testimonials.content.title" (ngModelChange)="updateTestimonialsField('title', $event)" placeholder="Título"
+                class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400 sm:col-span-2" />
+              <textarea [ngModel]="testimonials.content.summary_text" (ngModelChange)="updateTestimonialsField('summary_text', $event)" rows="3" placeholder="Resumen"
+                class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400 sm:col-span-2"></textarea>
+            </div>
+
+            <div class="rounded-[1.5rem] border border-slate-200 p-4">
+              <div class="flex items-center justify-between gap-4">
+                <div>
+                  <h3 class="font-black text-slate-900">Reseñas</h3>
+                  <p class="text-sm text-slate-500">Edita testimonios individuales.</p>
+                </div>
+                <button (click)="addTestimonial()" class="rounded-2xl bg-slate-950 px-4 py-2 text-sm font-black text-white">Añadir</button>
+              </div>
+
+              <div class="mt-5 space-y-4">
+                @for (item of testimonials.content.items; track item.name + '-' + $index; let i = $index) {
+                <div class="rounded-[1.5rem] border border-slate-200 p-4">
+                  <div class="flex items-center justify-between gap-3">
+                    <h4 class="font-black text-slate-800">Testimonio {{ i + 1 }}</h4>
+                    <button (click)="removeTestimonial(i)" class="text-sm font-bold text-rose-500">Quitar</button>
+                  </div>
+                  <div class="mt-4 grid gap-3">
+                    <input [ngModel]="item.name" (ngModelChange)="updateTestimonialItem(i, 'name', $event)" placeholder="Nombre"
+                      class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400" />
+                    <input [ngModel]="item.role" (ngModelChange)="updateTestimonialItem(i, 'role', $event)" placeholder="Cargo o contexto"
+                      class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400" />
+                    <textarea [ngModel]="item.text" (ngModelChange)="updateTestimonialItem(i, 'text', $event)" rows="3" placeholder="Comentario"
+                      class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400"></textarea>
+                    <input type="number" min="0" max="5" step="0.1" [ngModel]="item.rating" (ngModelChange)="updateTestimonialRating(i, $event)" placeholder="Rating"
+                      class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400" />
+                  </div>
+                </div>
+                }
+              </div>
+            </div>
+          </section>
+          } @else {
+          <section class="mi-sitio-builder__card rounded-[1.75rem] border border-dashed border-slate-300 bg-white p-8 text-center shadow-sm">
+            <p class="text-sm text-slate-500">Activa la sección <strong>Testimonios</strong> desde la columna izquierda para editarla.</p>
+          </section>
+          }
+        }
+
+        @case ('reservation') {
+          @if (reservationSection(); as reservation) {
+          <section class="mi-sitio-builder__card rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm space-y-6">
+            <div class="grid gap-4 sm:grid-cols-2">
+              <input [ngModel]="reservation.content.overline" (ngModelChange)="updateReservationField('overline', $event)" placeholder="Overline"
+                class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400 sm:col-span-2" />
+              <input [ngModel]="reservation.content.title" (ngModelChange)="updateReservationField('title', $event)" placeholder="Título"
+                class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400 sm:col-span-2" />
+              <textarea [ngModel]="reservation.content.description" (ngModelChange)="updateReservationField('description', $event)" rows="3" placeholder="Descripción"
+                class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400 sm:col-span-2"></textarea>
+              <input [ngModel]="reservation.content.name_placeholder" (ngModelChange)="updateReservationField('name_placeholder', $event)" placeholder="Placeholder nombre"
+                class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400" />
+              <input [ngModel]="reservation.content.phone_placeholder" (ngModelChange)="updateReservationField('phone_placeholder', $event)" placeholder="Placeholder teléfono"
+                class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400" />
+              <input [ngModel]="reservation.content.guests_placeholder" (ngModelChange)="updateReservationField('guests_placeholder', $event)" placeholder="Placeholder invitados"
+                class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400" />
+              <input [ngModel]="reservation.content.occasion_placeholder" (ngModelChange)="updateReservationField('occasion_placeholder', $event)" placeholder="Placeholder ocasión"
+                class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400" />
+              <input [ngModel]="reservation.content.notes_placeholder" (ngModelChange)="updateReservationField('notes_placeholder', $event)" placeholder="Placeholder notas"
+                class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400 sm:col-span-2" />
+              <input [ngModel]="reservation.content.submit_text" (ngModelChange)="updateReservationField('submit_text', $event)" placeholder="Texto botón"
+                class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400" />
+              <input [ngModel]="reservation.content.success_text" (ngModelChange)="updateReservationField('success_text', $event)" placeholder="Texto éxito"
+                class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400" />
+              <textarea [ngModel]="reservation.content.help_text" (ngModelChange)="updateReservationField('help_text', $event)" rows="2" placeholder="Texto de ayuda"
+                class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400 sm:col-span-2"></textarea>
+            </div>
+
+            <div class="grid gap-6 lg:grid-cols-2">
+              <div class="rounded-[1.5rem] border border-slate-200 p-4">
+                <div class="flex items-center justify-between gap-3">
+                  <h3 class="font-black text-slate-900">Opciones de invitados</h3>
+                  <button (click)="addReservationOption('guest_options', 'Nueva opción')" class="rounded-2xl bg-slate-950 px-4 py-2 text-sm font-black text-white">Añadir</button>
+                </div>
+                <div class="mt-4 space-y-3">
+                  @for (option of reservation.content.guest_options; track option + '-' + $index; let i = $index) {
+                  <div class="flex items-center gap-3">
+                    <input [ngModel]="option" (ngModelChange)="updateReservationOption('guest_options', i, $event)"
+                      class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400" />
+                    <button (click)="removeReservationOption('guest_options', i)" class="rounded-2xl border border-rose-200 px-4 py-3 text-sm font-bold text-rose-500">Quitar</button>
+                  </div>
+                  }
+                </div>
+              </div>
+
+              <div class="rounded-[1.5rem] border border-slate-200 p-4">
+                <div class="flex items-center justify-between gap-3">
+                  <h3 class="font-black text-slate-900">Opciones de ocasión</h3>
+                  <button (click)="addReservationOption('occasion_options', 'Nueva ocasión')" class="rounded-2xl bg-slate-950 px-4 py-2 text-sm font-black text-white">Añadir</button>
+                </div>
+                <div class="mt-4 space-y-3">
+                  @for (option of reservation.content.occasion_options; track option + '-' + $index; let i = $index) {
+                  <div class="flex items-center gap-3">
+                    <input [ngModel]="option" (ngModelChange)="updateReservationOption('occasion_options', i, $event)"
+                      class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400" />
+                    <button (click)="removeReservationOption('occasion_options', i)" class="rounded-2xl border border-rose-200 px-4 py-3 text-sm font-bold text-rose-500">Quitar</button>
+                  </div>
+                  }
                 </div>
               </div>
             </div>
+          </section>
+          } @else {
+          <section class="mi-sitio-builder__card rounded-[1.75rem] border border-dashed border-slate-300 bg-white p-8 text-center shadow-sm">
+            <p class="text-sm text-slate-500">Activa la sección <strong>Reservas</strong> desde la columna izquierda para personalizar su formulario.</p>
+          </section>
+          }
+        }
+
+        @case ('contact') {
+          @if (contactSection(); as contact) {
+          <section class="mi-sitio-builder__card rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm space-y-6">
+            <div class="grid gap-4 sm:grid-cols-2">
+              <input [ngModel]="contact.content.overline" (ngModelChange)="updateContactField('overline', $event)" placeholder="Overline"
+                class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400 sm:col-span-2" />
+              <input [ngModel]="contact.content.title" (ngModelChange)="updateContactField('title', $event)" placeholder="Título"
+                class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400 sm:col-span-2" />
+              <input [ngModel]="contact.content.social_title" (ngModelChange)="updateContactField('social_title', $event)" placeholder="Título de redes"
+                class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400 sm:col-span-2" />
+              <input [ngModel]="contact.content.address_label" (ngModelChange)="updateContactField('address_label', $event)" placeholder="Etiqueta dirección"
+                class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400" />
+              <input [ngModel]="contact.content.default_address" (ngModelChange)="updateContactField('default_address', $event)" placeholder="Dirección por defecto"
+                class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400" />
+              <input [ngModel]="contact.content.phone_label" (ngModelChange)="updateContactField('phone_label', $event)" placeholder="Etiqueta teléfono"
+                class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400" />
+              <input [ngModel]="contact.content.default_phone" (ngModelChange)="updateContactField('default_phone', $event)" placeholder="Teléfono por defecto"
+                class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400" />
+              <input [ngModel]="contact.content.email_label" (ngModelChange)="updateContactField('email_label', $event)" placeholder="Etiqueta correo"
+                class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400" />
+              <input [ngModel]="contact.content.default_email" (ngModelChange)="updateContactField('default_email', $event)" placeholder="Correo por defecto"
+                class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400" />
+              <input [ngModel]="contact.content.hours_label" (ngModelChange)="updateContactField('hours_label', $event)" placeholder="Etiqueta horarios"
+                class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400" />
+              <input [ngModel]="contact.content.map_fallback_text" (ngModelChange)="updateContactField('map_fallback_text', $event)" placeholder="Texto alternativo del mapa"
+                class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400" />
+            </div>
+
+            <div class="rounded-[1.5rem] border border-slate-200 p-4">
+              <div class="flex items-center justify-between gap-4">
+                <div>
+                  <h3 class="font-black text-slate-900">Horarios</h3>
+                  <p class="text-sm text-slate-500">Controla las líneas visibles en la sección contacto.</p>
+                </div>
+                <button (click)="addContactHour()" class="rounded-2xl bg-slate-950 px-4 py-2 text-sm font-black text-white">Añadir</button>
+              </div>
+
+              <div class="mt-5 space-y-3">
+                @for (hour of contact.content.hours; track hour + '-' + $index; let i = $index) {
+                <div class="flex items-center gap-3">
+                  <input [ngModel]="hour" (ngModelChange)="updateContactHour(i, $event)"
+                    class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400" />
+                  <button (click)="removeContactHour(i)" class="rounded-2xl border border-rose-200 px-4 py-3 text-sm font-bold text-rose-500">Quitar</button>
+                </div>
+                }
+              </div>
+            </div>
+          </section>
+          } @else {
+          <section class="mi-sitio-builder__card rounded-[1.75rem] border border-dashed border-slate-300 bg-white p-8 text-center shadow-sm">
+            <p class="text-sm text-slate-500">Activa la sección <strong>Contacto</strong> desde la columna izquierda para editarla.</p>
+          </section>
+          }
+        }
+
+        @case ('footer') {
+          @if (footerSection(); as footer) {
+          <section class="mi-sitio-builder__card rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm">
+            <div class="grid gap-4 sm:grid-cols-2">
+              <input [ngModel]="footer.content.navigation_title" (ngModelChange)="updateFooterField('navigation_title', $event)" placeholder="Título navegación"
+                class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400" />
+              <input [ngModel]="footer.content.hours_title" (ngModelChange)="updateFooterField('hours_title', $event)" placeholder="Título horarios"
+                class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400" />
+              <input [ngModel]="footer.content.contact_title" (ngModelChange)="updateFooterField('contact_title', $event)" placeholder="Título contacto"
+                class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400 sm:col-span-2" />
+              <textarea [ngModel]="footer.content.description" (ngModelChange)="updateFooterField('description', $event)" rows="3" placeholder="Descripción"
+                class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400 sm:col-span-2"></textarea>
+              <input [ngModel]="footer.content.reservation_text" (ngModelChange)="updateFooterField('reservation_text', $event)" placeholder="Texto reserva"
+                class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400 sm:col-span-2" />
+              <input [ngModel]="footer.content.copyright_text" (ngModelChange)="updateFooterField('copyright_text', $event)" placeholder="Texto copyright"
+                class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400" />
+              <input [ngModel]="footer.content.credit_text" (ngModelChange)="updateFooterField('credit_text', $event)" placeholder="Texto crédito"
+                class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-400" />
+            </div>
+          </section>
+          }
+        }
+      }
+    </section>
+
+    @if (isInlinePreviewVisible()) {
+    <aside id="mi-sitio-inline-preview" class="mi-sitio-builder__preview-column min-w-0">
+      <section class="mi-sitio-builder__card mi-sitio-builder__preview-card rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm">
+        <div class="mi-sitio-builder__preview-head">
+          <div>
+            <p class="text-xs font-black uppercase tracking-[0.28em] text-cyan-500">Preview mobile</p>
+            <h2 class="mt-3 text-xl font-black text-slate-950">Vista previa fija</h2>
+            <p class="mt-2 text-sm text-slate-500">
+              Así se vería la web en celular mientras editas. Si necesitas validarla completa, ábrela en una pestaña nueva.
+            </p>
           </div>
+
+          <a [href]="previewWebUrl()" target="_blank" rel="noopener noreferrer" (click)="saveDraft()"
+            class="rounded-2xl border border-cyan-400/30 bg-cyan-400/10 px-4 py-2 text-sm font-bold text-cyan-700 transition hover:bg-cyan-400/20 inline-flex items-center justify-center">
+            Abrir en pestaña
+          </a>
         </div>
-      </div>
-    </div>
 
-    <!-- Canvas (Live Preview) -->
-    <div class="flex-1 overflow-y-auto bg-gray-100 p-8 flex justify-center relative">
-      <div *ngIf="selectedTemplate" class="bg-white shadow-2xl transition-all duration-300 ease-in-out origin-top"
-        [style.width]="viewMode === 'desktop' ? '100%' : '375px'" [style.min-height]="'calc(100vh - 100px)'">
-
-        <!-- Render Sections -->
-        <div *ngFor="let section of selectedTemplate.sections" class="relative group"
-          (mouseenter)="setHoveredSection(section)" (mouseleave)="setHoveredSection(null)"
-          (click)="selectSection(section)">
-
-          <!-- Overlay Controls -->
-          <div
-            class="absolute inset-0 border-2 border-transparent group-hover:border-blue-500 pointer-events-none z-10 transition-colors"
-            [class.border-blue-600]="currentSection?.id === section.id"
-            [class.bg-opacity-10]="currentSection?.id === section.id">
-          </div>
-
-          <!-- Action Buttons (Visible on Hover/Select) -->
-          <div class="absolute top-2 right-2 flex space-x-1 z-20 opacity-0 group-hover:opacity-100 transition-opacity"
-            [class.opacity-100]="currentSection?.id === section.id">
-            <span class="text-white text-xs px-2 py-1 rounded shadow-sm">{{ section.type }}</span>
-          </div>
-
-          <!-- Content -->
-          <div [ngClass]="getSectionClass(section)" [style.backgroundColor]="section.settings.backgroundColor"
-            [style.color]="section.settings.textColor" class="relative">
-            <div class="container mx-auto px-4 py-16" [innerHTML]="sanitizeHtml(section.content)"></div>
-
-            <div *ngIf="section.type === 'gallery' && section.images" class="container mx-auto px-4 pb-16">
-              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <img *ngFor="let image of section.images" [src]="image"
-                  class="w-full h-48 object-cover rounded-lg shadow-md">
+        <div class="mi-sitio-builder__inline-preview-shell">
+          <div class="mi-sitio-preview-phone-wrap">
+            <div class="mi-sitio-preview-phone">
+              <div class="mi-sitio-preview-phone-screen">
+                <div class="mi-sitio-preview-statusbar" aria-hidden="true">
+                  <span class="mi-sitio-preview-statusbar__time">9:41</span>
+                  <div class="mi-sitio-preview-statusbar__icons">
+                    <span>📶</span>
+                    <span>📡</span>
+                    <span>🔋</span>
+                  </div>
+                </div>
+                <app-company-template-three
+                  [business]="previewBusiness()"
+                  [styles]="previewStyles()"
+                  [config]="previewConfig()"
+                  [pageData]="pageData()"
+                  [previewMode]="'embedded-mobile'"
+                  [mapUrl]="null"
+                  [whatsappUrl]="previewWhatsappUrl()">
+                </app-company-template-three>
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- Empty State -->
-        <div *ngIf="selectedTemplate.sections.length === 0"
-          class="h-64 flex items-center justify-center text-gray-400 border-2 border-dashed border-gray-200 m-8 rounded-lg">
-          <p>Tu sitio está vacío. Agrega secciones desde el panel izquierdo.</p>
+          <div class="mi-sitio-builder__preview-notes rounded-[1.35rem] border border-slate-200 bg-slate-50 p-4">
+            <h3 class="text-sm font-black uppercase tracking-[0.18em] text-slate-800">Qué revisar</h3>
+            <ul class="mt-3 space-y-2 text-sm text-slate-600">
+              <li>• Jerarquía del hero y de los botones.</li>
+              <li>• Legibilidad de títulos y textos en pantalla angosta.</li>
+              <li>• Espaciado entre secciones y tarjetas.</li>
+              <li>• Cómo se comporta el menú del sitio en modo celular.</li>
+            </ul>
+          </div>
         </div>
-
-      </div>
-
-      <!-- No Template Selected State in Canvas -->
-      <div *ngIf="!selectedTemplate" class="flex items-center justify-center text-gray-400">
-        <div class="text-center">
-          <svg class="w-24 h-24 mx-auto mb-4 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-          </svg>
-          <p class="text-xl font-medium">Selecciona una plantilla para comenzar</p>
-        </div>
-      </div>
-    </div>
+      </section>
+    </aside>
+    }
   </div>
 </div>

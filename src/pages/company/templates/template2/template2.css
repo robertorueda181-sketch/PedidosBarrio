@@ -1,0 +1,40 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800&family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
+:host {
+  display: block;
+}
+
+.company-template-two {
+  --company-serif: 'Playfair Display', serif;
+  --company-sans: 'Outfit', sans-serif;
+  font-family: var(--company-sans);
+}
+
+.company-template-two__serif {
+  font-family: var(--company-serif);
+}
+
+.company-template-two__hero-offset {
+  margin-top: 4.75rem;
+}
+
+.company-template-two__hero-overlay {
+  pointer-events: none;
+}
+
+.company-template-two__logo {
+  filter: brightness(0) invert(1);
+}
+
+.company-template-two__logo--footer {
+  max-width: 160px;
+}
+
+.company-template-two__no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.company-template-two__no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

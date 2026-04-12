@@ -1,0 +1,346 @@
+@if (business(); as negocio) {
+<div class="company-template-two min-h-screen bg-[#f7f4ef]" [style.font-family]="styles().fontFamily">
+  <header class="fixed top-0 left-0 w-full z-50 border-b border-white/10 backdrop-blur-md"
+    [style.background-color]="styles().bannerColor + 'E6'">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center gap-4">
+      <div class="flex items-center gap-4 min-w-0">
+        @if (negocio.logoUrl) {
+        <img [src]="negocio.logoUrl" [alt]="negocio.nombre" class="h-10 md:h-12 w-auto object-contain company-template-two__logo">
+        } @else {
+        <div class="text-white font-black text-xl tracking-wide truncate">{{ negocio.nombre }}</div>
+        }
+      </div>
+
+      <nav class="hidden md:flex items-center space-x-8 text-xs font-bold tracking-[0.25em] uppercase text-white/90">
+        <a href="#hero" class="hover:text-white transition-colors">Inicio</a>
+        @for (categoria of filteredCategories(); track categoria) {
+        <button type="button" (click)="onScrollToSection('cat-' + (categoria.categoriaID ?? categoria.id ?? categoria.codigo))"
+          class="hover:text-white transition-colors cursor-pointer">{{ categoria.descripcion }}</button>
+        }
+      </nav>
+
+      <div class="flex items-center gap-3 shrink-0">
+        <button (click)="onToggleCart()" class="relative text-white hover:text-white/80 transition-colors">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9"></path>
+          </svg>
+          @if (cartCount() > 0) {
+          <span class="absolute -top-2 -right-2 bg-[#f3dec2] text-[#2a1408] text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center border-2"
+            [style.border-color]="styles().bannerColor">
+            {{ cartCount() }}
+          </span>
+          }
+        </button>
+
+        @if (whatsappUrl(); as whatsappLink) {
+        <a [href]="whatsappLink" target="_blank"
+          class="hidden md:inline-flex bg-[#f3dec2] text-[#2a1408] py-2.5 px-6 text-xs font-bold uppercase tracking-[0.2em] rounded-sm hover:bg-white transition-all">
+          Pedir ahora
+        </a>
+        }
+      </div>
+    </div>
+  </header>
+
+  <section id="hero" class="relative h-[60vh] min-h-[460px] flex items-center overflow-hidden company-template-two__hero-offset">
+    <div class="absolute inset-0 z-0">
+      @if (bannerSection()?.imageUrl) {
+      <img [src]="bannerSection()?.imageUrl!" [alt]="heroTitle()" class="w-full h-full object-cover brightness-[0.35]">
+      }
+      <div class="absolute inset-0 company-template-two__hero-overlay" [style.background]="'linear-gradient(to right, ' + styles().bannerColor + 'F0 0%, ' + styles().bannerColor + '99 55%, rgba(0,0,0,0.25) 100%)'"></div>
+    </div>
+
+    <div class="relative z-10 max-w-7xl mx-auto px-6 w-full text-white">
+      <div class="max-w-2xl">
+        <span class="block text-lg md:text-2xl uppercase tracking-[0.3em] mb-4 font-light text-[#f3dec2]">Bienvenidos a</span>
+        <h1 class="company-template-two__serif text-5xl md:text-6xl leading-tight mb-6">{{ heroTitle() }}</h1>
+        <p class="text-white/85 text-base md:text-lg leading-relaxed max-w-xl mb-8">{{ heroSubtitle() }}</p>
+        <div class="flex flex-wrap gap-4">
+          <button (click)="onScrollToSection('productos')" class="bg-[#f3dec2] text-[#1f130c] px-8 py-4 font-bold uppercase tracking-[0.2em] hover:bg-[#e7cba4] transition-all">
+            Explorar menú
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div id="productos" class="max-w-7xl mx-auto px-4 py-12 flex flex-col md:flex-row gap-8">
+    <aside class="hidden md:block w-64 sticky top-24 h-fit">
+      <div class="bg-white/70 rounded-xl p-6 border border-[#e8dccf] shadow-sm backdrop-blur-sm">
+        <h3 class="font-bold uppercase tracking-[0.2em] text-sm mb-6 pb-2 border-b text-[#3d2415] border-[#eed5ba]">Categorías</h3>
+        <ul class="space-y-4">
+          @for (categoria of filteredCategories(); track categoria) {
+          <li>
+            <button (click)="onScrollToSection('cat-' + (categoria.categoriaID ?? categoria.id ?? categoria.codigo))"
+              class="text-gray-600 hover:text-[#6f4020] font-medium transition-colors flex items-center justify-between w-full group">
+              {{ categoria.descripcion }}
+              <svg class="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+              </svg>
+            </button>
+          </li>
+          }
+        </ul>
+      </div>
+    </aside>
+
+    <main class="flex-1">
+      <div class="mb-10 grid grid-cols-1 md:grid-cols-[220px_1fr] gap-6 p-6 bg-white/70 rounded-[1.75rem] border border-[#e8dccf] shadow-sm backdrop-blur-sm">
+        <div class="rounded-2xl bg-white/80 border border-[#eee1d4] p-5">
+          <h3 class="font-bold uppercase tracking-[0.2em] text-sm mb-3 text-[#3d2415]">Categorías</h3>
+          <p class="text-sm text-gray-500">Explora nuestro menú por secciones.</p>
+        </div>
+
+        <div class="relative w-full">
+          <input type="text" [value]="searchTerm()" (input)="onUpdateSearchTerm($any($event.target).value)"
+            placeholder="¿Qué estás buscando? (Ej: Pizza, Hamburguesa, Postre...)"
+            class="w-full pl-14 pr-6 py-5 bg-white border-2 border-[#eee4da] rounded-2xl focus:outline-none focus:ring-4 focus:ring-[#f3dec2]/50 focus:border-[#8B4513] transition-all text-lg shadow-inner shadow-gray-50">
+          <div class="absolute left-5 top-1/2 -translate-y-1/2 text-[#8B4513]">
+            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      @if (!hasFilteredProducts()) {
+      <div class="text-center py-20 bg-white/70 rounded-2xl border border-dashed border-[#e8dccf]">
+        <div class="w-16 h-16 bg-[#f4ede5] rounded-full flex items-center justify-center mx-auto mb-4 text-[#b4906f]">
+          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+        </div>
+        <h3 class="text-[#3E1F0A] font-bold text-lg mb-2">No se encontraron productos</h3>
+        <p class="text-gray-500">Prueba con otros términos de búsqueda.</p>
+        <button (click)="onUpdateSearchTerm('')" class="mt-4 text-[#8B4513] font-bold hover:underline">Limpiar búsqueda</button>
+      </div>
+      }
+
+      @for (categoria of filteredCategories(); track categoria) {
+      <section [id]="'cat-' + (categoria.categoriaID ?? categoria.id ?? categoria.codigo)" class="mb-12 scroll-mt-28">
+        <h2 class="company-template-two__serif text-3xl text-[#3E1F0A] mb-8 border-l-4 border-[#8B4513] pl-4">{{ categoria.descripcion }}</h2>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          @for (producto of onGetProductsByCategory(categoria); track producto.productoID ?? producto.id ?? producto.nombre) {
+          <article class="bg-white border border-[#eee4da] rounded-2xl p-4 flex gap-4 hover:shadow-lg transition-all group">
+            <div class="flex-1 flex flex-col justify-between gap-3 min-w-0">
+              <div>
+                <h3 class="font-bold text-[#3E1F0A] text-lg mb-1 group-hover:text-[#8B4513] transition-colors">{{ producto.nombre }}</h3>
+                <p class="text-gray-500 text-sm line-clamp-2 mb-2">{{ producto.descripcion || 'Preparado con los mejores ingredientes de la casa.' }}</p>
+              </div>
+              <div class="flex items-center justify-between gap-3">
+                <span class="text-[#8B4513] font-bold">S/ {{ producto.precio | number:'1.2-2' }}</span>
+                <button (click)="onAddToCart(producto)"
+                  class="bg-[#f3dec2] text-[#3E1F0A] px-4 py-2 rounded-lg text-sm font-bold uppercase tracking-[0.15em] hover:bg-[#3E1F0A] hover:text-[#f3dec2] transition-colors shadow-sm">
+                  Agregar
+                </button>
+              </div>
+            </div>
+            <div class="w-24 h-24 md:w-32 md:h-32 shrink-0 rounded-xl overflow-hidden">
+              <img [src]="producto.urlImagen || 'https://dummyimage.com/320x320'" [alt]="producto.nombre" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+            </div>
+          </article>
+          }
+        </div>
+      </section>
+      }
+
+      @if (imageSections().length > 0) {
+      <section class="mt-14 space-y-8">
+        @for (section of imageSections(); track section.id) {
+        <div class="rounded-[2rem] bg-white p-6 md:p-8 border border-[#eee4da] shadow-sm">
+          <h3 class="company-template-two__serif text-3xl text-[#3E1F0A] mb-3">{{ section.title }}</h3>
+          @if (section.description) {
+          <p class="text-gray-500 mb-6">{{ section.description }}</p>
+          }
+          <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+            @for (image of section.images; track image.url) {
+            <figure class="overflow-hidden rounded-[1.5rem] bg-[#f4ede5] border border-[#eee4da] shadow-sm">
+              <img [src]="image.url" [alt]="image.alt" class="w-full h-64 object-cover hover:scale-105 transition-transform duration-500">
+              @if (image.caption) {
+              <figcaption class="p-4 text-sm text-gray-500">{{ image.caption }}</figcaption>
+              }
+            </figure>
+            }
+          </div>
+        </div>
+        }
+      </section>
+      }
+
+      @if (videoSections().length > 0) {
+      <section class="mt-14 space-y-8">
+        @for (section of videoSections(); track section.id) {
+        <div class="rounded-[2rem] bg-white p-6 md:p-8 border border-[#eee4da] shadow-sm">
+          <h3 class="company-template-two__serif text-3xl text-[#3E1F0A] mb-3">{{ section.title }}</h3>
+          @if (section.description) {
+          <p class="text-gray-500 mb-6">{{ section.description }}</p>
+          }
+          <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            @for (video of section.videos; track video.rawUrl) {
+            <article class="overflow-hidden rounded-[1.5rem] bg-[#20140d] text-white shadow-sm">
+              <div class="relative pt-[56.25%] bg-black">
+                <iframe [src]="video.safeUrl" class="absolute inset-0 w-full h-full border-0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowfullscreen></iframe>
+              </div>
+              <div class="p-5">
+                <h4 class="text-lg font-black">{{ video.title }}</h4>
+                @if (video.description) {
+                <p class="mt-2 text-sm text-white/70">{{ video.description }}</p>
+                }
+              </div>
+            </article>
+            }
+          </div>
+        </div>
+        }
+      </section>
+      }
+    </main>
+  </div>
+
+  <footer class="text-white pt-20 pb-10" [style.background-color]="styles().bannerColor">
+    <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+      <div class="space-y-6">
+        @if (negocio.logoUrl) {
+        <img [src]="negocio.logoUrl" [alt]="negocio.nombre" class="h-12 w-auto company-template-two__logo company-template-two__logo--footer">
+        } @else {
+        <h3 class="company-template-two__serif text-3xl">{{ negocio.nombre }}</h3>
+        }
+        <p class="text-white/70 text-sm leading-relaxed">
+          {{ negocio.descripcion || 'Llevamos lo mejor de nuestro negocio a tus manos con atención y calidad.' }}
+        </p>
+      </div>
+
+      <div>
+        <h4 class="text-[#f3dec2] font-bold uppercase tracking-[0.2em] mb-8">Enlaces</h4>
+        <ul class="space-y-4 text-sm text-white/70">
+          <li><a href="#hero" class="hover:text-white transition-colors">Inicio</a></li>
+          <li><a href="#productos" class="hover:text-white transition-colors">Nuestra carta</a></li>
+          @if (business()) {
+          <li><a href="#ubicacion-footer" class="hover:text-white transition-colors">Ubicación</a></li>
+          }
+        </ul>
+      </div>
+
+      <div id="ubicacion-footer">
+        <h4 class="text-[#f3dec2] font-bold uppercase tracking-[0.2em] mb-8">Contacto</h4>
+        <div class="space-y-4 text-sm text-white/70">
+          @if (negocio.direccion) {
+          <p>{{ negocio.direccion }}</p>
+          }
+          @if (negocio.telefono) {
+          <p>{{ negocio.telefono }}</p>
+          }
+          @if (negocio.whatsapp) {
+          <p>{{ negocio.whatsapp }}</p>
+          }
+          @if (negocio.email) {
+          <p>{{ negocio.email }}</p>
+          }
+        </div>
+      </div>
+
+      <div>
+        <h4 class="text-[#f3dec2] font-bold uppercase tracking-[0.2em] mb-8">Conectividad</h4>
+        <div class="space-y-4 text-sm text-white/70">
+          @if (negocio.facebook) {<a [href]="negocio.facebook" target="_blank" class="block hover:text-white">Facebook</a>}
+          @if (negocio.instagram) {<a [href]="negocio.instagram" target="_blank" class="block hover:text-white">Instagram</a>}
+          @if (negocio.twitter) {<a [href]="negocio.twitter" target="_blank" class="block hover:text-white">Twitter</a>}
+          @if (negocio.tiktok) {<a [href]="negocio.tiktok" target="_blank" class="block hover:text-white">TikTok</a>}
+        </div>
+      </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-6 pt-8 border-t border-white/10 text-center text-white/40 text-xs">
+      <p>&copy; {{ currentYear() }} {{ negocio.nombre }}. Todos los derechos reservados.</p>
+    </div>
+  </footer>
+
+  @if (cartCount() > 0 && !isCartOpen()) {
+  <button (click)="onToggleCart()"
+    class="md:hidden fixed bottom-6 right-6 z-[90] text-white p-4 rounded-full shadow-2xl flex items-center gap-3"
+    [style.background-color]="styles().bannerColor">
+    <div class="relative">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9"></path>
+      </svg>
+      <span class="absolute -top-2 -right-2 bg-[#f3dec2] text-[#2a1408] text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center border-2"
+        [style.border-color]="styles().bannerColor">
+        {{ cartCount() }}
+      </span>
+    </div>
+    <span class="font-bold text-sm">S/ {{ cartTotal() | number:'1.2-2' }}</span>
+  </button>
+  }
+
+  <div class="fixed inset-0 z-[110]" [class.pointer-events-none]="!isCartOpen()" [class.pointer-events-auto]="isCartOpen()">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-300" [class.opacity-0]="!isCartOpen()"
+      (click)="onToggleCart()"></div>
+
+    <div class="absolute top-0 right-0 h-full w-full max-w-md bg-white shadow-2xl transition-transform duration-300 transform pointer-events-auto"
+      [class.translate-x-full]="!isCartOpen()">
+      <div class="flex flex-col h-full">
+        <div class="p-6 border-b border-gray-100 flex justify-between items-center text-white" [style.background-color]="styles().bannerColor">
+          <h2 class="company-template-two__serif text-2xl">Tu Pedido</h2>
+          <button (click)="onToggleCart()" class="hover:rotate-90 transition-transform">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-6 space-y-6 company-template-two__no-scrollbar">
+          @if (cartItems().length === 0) {
+          <div class="h-full flex flex-col items-center justify-center text-center space-y-4">
+            <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center text-gray-300">
+              <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9"></path>
+              </svg>
+            </div>
+            <p class="text-gray-500 font-medium">Tu carrito está vacío</p>
+            <button (click)="onToggleCart()" class="font-bold uppercase text-xs tracking-[0.2em]" [style.color]="styles().bannerColor">Empezar a comprar</button>
+          </div>
+          } @else {
+          @for (item of cartItems(); track item.id) {
+          <div class="flex gap-4">
+            <div class="w-20 h-20 rounded-xl overflow-hidden shrink-0">
+              <img [src]="item.image || 'https://dummyimage.com/100x100'" [alt]="item.name" class="w-full h-full object-cover">
+            </div>
+            <div class="flex-1 flex flex-col justify-between">
+              <div class="flex justify-between items-start gap-3">
+                <h4 class="font-bold text-[#3E1F0A] text-sm">{{ item.name }}</h4>
+                <span class="font-bold text-sm">S/ {{ (item.price * item.quantity) | number:'1.2-2' }}</span>
+              </div>
+              <div class="flex items-center gap-4">
+                <div class="flex items-center border border-gray-200 rounded-lg">
+                  <button (click)="onUpdateQuantity(item.id, -1)" class="px-3 py-1 hover:bg-gray-50 text-[#8B4513] font-bold">-</button>
+                  <span class="px-2 text-sm font-bold w-8 text-center">{{ item.quantity }}</span>
+                  <button (click)="onUpdateQuantity(item.id, 1)" class="px-3 py-1 hover:bg-gray-50 text-[#8B4513] font-bold">+</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          }
+          }
+        </div>
+
+        @if (cartItems().length > 0) {
+        <div class="p-6 border-t border-gray-100 bg-gray-50 space-y-4">
+          <div class="flex justify-between items-center text-lg font-bold text-[#3E1F0A]">
+            <span>Total</span>
+            <span>S/ {{ cartTotal() | number:'1.2-2' }}</span>
+          </div>
+          <button (click)="onCheckout()"
+            class="w-full text-white py-4 rounded-xl font-bold uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-3"
+            [style.background-color]="styles().bannerColor">
+            Enviar Pedido
+          </button>
+        </div>
+        }
+      </div>
+    </div>
+  </div>
+</div>
+}

@@ -1,0 +1,149 @@
+<div class="company-products-page min-h-screen bg-slate-950 text-white">
+  <div class="company-products-page__hero">
+    <div class="company-products-page__container">
+      <a [routerLink]="backUrl()" class="company-products-page__back-link">← Volver al sitio</a>
+
+      <div class="company-products-page__hero-grid">
+        <div>
+          <p class="company-products-page__eyebrow">Catálogo</p>
+          <h1 class="company-products-page__title">{{ pageTitle() }}</h1>
+          <p class="company-products-page__description">{{ pageDescription() }}</p>
+        </div>
+
+        <div class="company-products-page__search-card">
+          <label class="company-products-page__search-label">Buscar producto</label>
+          <input
+            type="search"
+            [ngModel]="searchTerm()"
+            (ngModelChange)="updateSearchTerm($event)"
+            placeholder="Ej. lomo, ceviche, postre..."
+            class="company-products-page__search-input" />
+
+          <div class="company-products-page__meta-row">
+            <span>{{ visibleProducts().length }} resultados</span>
+            <span>{{ categories().length }} categorías</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="company-products-page__body">
+    <div class="company-products-page__container">
+      @if (loading()) {
+      <div class="company-products-page__state-card">Cargando productos...</div>
+      } @else if (error()) {
+      <div class="company-products-page__state-card company-products-page__state-card--error">{{ error() }}</div>
+      } @else {
+      <div class="company-products-page__filters">
+        <button
+          type="button"
+          class="company-products-page__filter-btn"
+          [class.company-products-page__filter-btn--active]="selectedCategory() === 'all'"
+          (click)="setActiveCategory('all')">
+          {{ menuSectionLabels().allCategoriesLabel }}
+        </button>
+
+        @for (category of categories(); track categoryKey(category)) {
+        <button
+          type="button"
+          class="company-products-page__filter-btn"
+          [class.company-products-page__filter-btn--active]="selectedCategory() === categoryKey(category)"
+          (click)="setActiveCategory(categoryKey(category))">
+          {{ category.descripcion }}
+        </button>
+        }
+      </div>
+
+      @if (visibleProducts().length > 0) {
+      <div class="company-products-page__grid">
+        @for (product of visibleProducts(); track productKey(product)) {
+        <article class="company-products-page__card">
+          <div class="company-products-page__image-wrap">
+            <img [src]="product.urlImagen || fallbackProductImage()" [alt]="product.nombre" class="company-products-page__image" />
+            <span class="company-products-page__tag">{{ productCategoryLabel(product) }}</span>
+          </div>
+
+          <div class="company-products-page__content">
+            <div>
+              <h2 class="company-products-page__product-title">{{ product.nombre }}</h2>
+              <p class="company-products-page__product-description">{{ product.descripcion || 'Producto disponible para pedido inmediato.' }}</p>
+            </div>
+
+            <div class="company-products-page__footer">
+              <strong class="company-products-page__price">S/ {{ product.precio | number:'1.2-2' }}</strong>
+              <button type="button" class="company-products-page__order-btn" (click)="addToCart(product)">Agregar</button>
+            </div>
+          </div>
+        </article>
+        }
+      </div>
+      } @else {
+      <div class="company-products-page__state-card">
+        <h3>No se encontraron productos</h3>
+        <p>Prueba con otro término o cambia la categoría seleccionada.</p>
+        <button type="button" class="company-products-page__clear-btn" (click)="updateSearchTerm(''); setActiveCategory('all')">Limpiar búsqueda</button>
+      </div>
+      }
+      }
+    </div>
+  </div>
+
+  @if (cartItems().length > 0 && !isCartOpen()) {
+  <button type="button" class="company-products-page__floating-cart" (click)="toggleCart()">
+    <span>🛒</span>
+    <strong>{{ cartCount() }} · S/ {{ cartTotal() | number:'1.2-2' }}</strong>
+  </button>
+  }
+
+  <div class="company-products-page__cart-layer" [class.company-products-page__cart-layer--open]="isCartOpen()">
+    <button type="button" class="company-products-page__cart-backdrop" (click)="toggleCart()" aria-label="Cerrar carrito"></button>
+
+    <aside class="company-products-page__cart-panel" [class.company-products-page__cart-panel--open]="isCartOpen()">
+      <div class="company-products-page__cart-head">
+        <div>
+          <p>Carrito</p>
+          <h3>{{ brandName() }}</h3>
+        </div>
+        <button type="button" (click)="toggleCart()">✕</button>
+      </div>
+
+      <div class="company-products-page__cart-body">
+        @if (cartItems().length === 0) {
+        <div class="company-products-page__cart-empty">Aún no agregaste productos.</div>
+        } @else {
+        @for (item of cartItems(); track item.id) {
+        <article class="company-products-page__cart-item">
+          <img [src]="item.image || fallbackProductImage()" [alt]="item.name" />
+          <div>
+            <div class="company-products-page__cart-item-top">
+              <strong>{{ item.name }}</strong>
+              <span>S/ {{ (item.price * item.quantity) | number:'1.2-2' }}</span>
+            </div>
+            <small>S/ {{ item.price | number:'1.2-2' }} c/u</small>
+            <div class="company-products-page__cart-item-actions">
+              <div class="company-products-page__cart-qty">
+                <button type="button" (click)="updateQuantity(item.id, -1)">-</button>
+                <span>{{ item.quantity }}</span>
+                <button type="button" (click)="updateQuantity(item.id, 1)">+</button>
+              </div>
+              <button type="button" class="company-products-page__cart-remove" (click)="removeFromCart(item.id)">Quitar</button>
+            </div>
+          </div>
+        </article>
+        }
+        }
+      </div>
+
+      @if (cartItems().length > 0) {
+      <div class="company-products-page__cart-foot">
+        <div class="company-products-page__cart-total">
+          <span>Total</span>
+          <strong>S/ {{ cartTotal() | number:'1.2-2' }}</strong>
+        </div>
+        <button type="button" class="company-products-page__checkout-btn" (click)="checkout()">Enviar pedido por WhatsApp</button>
+      </div>
+      }
+    </aside>
+  </div>
+</div>

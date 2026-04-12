@@ -67,7 +67,7 @@ export class Main implements OnInit {
           })));
         } else {
                this.banners.set([
-            { url: 'assets/banner.png', title: 'Bienvenido a espacio online', subtitle: 'Puedes registrar tu negocio 100% gratis' }
+            { url: 'assets/Banner1.png', title: 'Bienvenido a espacio online', subtitle: 'Puedes registrar tu negocio 100% gratis' }
           ]);
         }
       },

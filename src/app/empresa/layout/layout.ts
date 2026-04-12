@@ -1,5 +1,5 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
-import { Router, RouterModule } from '@angular/router';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../shared/services/auth.service';
 import { RegisterService } from '../../../shared/services/register.service';
 import { CommonModule } from '@angular/common';
@@ -25,8 +25,26 @@ export class Layout implements OnInit {
   menuItems = signal<any[]>([]);
   loadingItems = signal(true);
   expandedMenus = signal<Set<string>>(new Set());
+  currentUrl = signal('');
+
+  readonly isSidebarForcedCollapsed = computed(() => {
+    const url = this.currentUrl();
+    return url.startsWith('/empresa/mi-sitio') || url.startsWith('/empresa/sitio');
+  });
+
+  readonly isSidebarCompact = computed(() => this.isSidebarForcedCollapsed() || this.isSidebarCollapsed());
 
   ngOnInit() {
+    this.currentUrl.set(this.router.url);
+    this.router.events.subscribe(event => {
+      if (event instanceof NavigationEnd) {
+        this.currentUrl.set(event.urlAfterRedirects);
+        if (this.isMobileMenuOpen()) {
+          this.isMobileMenuOpen.set(false);
+        }
+      }
+    });
+
     this.loadMenus();
   }
 
@@ -97,6 +115,10 @@ export class Layout implements OnInit {
   }
 
   toggleSidebar() {
+    if (this.isSidebarForcedCollapsed()) {
+      return;
+    }
+
     this.isSidebarCollapsed.update(v => !v);
   }
 

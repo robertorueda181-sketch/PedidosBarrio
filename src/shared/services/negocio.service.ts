@@ -8,6 +8,37 @@ export interface NegocioImagen {
     descripcion: string;
 }
 
+export interface NegocioVideo {
+    url?: string;
+    urlVideo?: string;
+    titulo?: string;
+    title?: string;
+    descripcion?: string;
+    thumbnail?: string;
+}
+
+export interface NegocioSeccion {
+    id?: string | number;
+    tipo?: number | string;
+    type?: number | string;
+    titulo?: string;
+    title?: string;
+    descripcion?: string;
+    subtitle?: string;
+    urlBanner?: string;
+    imageUrl?: string;
+    urlImagen?: string;
+    imagenes?: NegocioImagen[];
+    images?: Array<{
+        url?: string;
+        imageUrl?: string;
+        alt?: string;
+        caption?: string;
+        descripcion?: string;
+    }>;
+    videos?: NegocioVideo[];
+}
+
 export interface Negocio {
     negocioID: number;
     empresaID: string;
@@ -37,6 +68,14 @@ export interface NegocioDetalle {
     twitter?: string;  
     tiktok?: string;      // Added
     whatsapp?: string;    // Added
+    tipoPlantilla?: number | string;
+    colorBanner?: string;
+    colorTexto?: string;
+    estiloLetra?: string;
+    urlImagen?: string;
+    imagenes?: NegocioImagen[];
+    videos?: NegocioVideo[];
+    secciones?: NegocioSeccion[];
     productos: any[]; // Changed to any[] temporarily or refine based on actual response if needed, kept generic for now as user just said "productos: []"
     categorias: any[]; // Changed to any[]
 }

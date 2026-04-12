@@ -1,0 +1,11 @@
+:host {
+  display: block;
+}
+
+.mi-sitio-preview-page {
+  min-height: 100vh;
+}
+
+.mi-sitio-preview-page app-company-template-three {
+  display: block;
+}

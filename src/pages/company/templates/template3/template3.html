@@ -1,0 +1,497 @@
+<div class="template-three" [class.template-three--embedded-mobile]="isEmbeddedMobile()" [style.--template3-crimson]="theme().primary"
+  [style.--template3-crimson-dark]="theme().primaryDark" [style.--template3-crimson-light]="theme().primaryLight"
+  [style.--template3-primary-rgb]="theme().primaryRgb" [style.--template3-gold]="theme().secondary"
+  [style.--template3-gold-light]="theme().secondaryLight" [style.--template3-gold-dark]="theme().secondaryDark"
+  [style.--template3-secondary-rgb]="theme().secondaryRgb" [style.--template3-cream]="theme().background"
+  [style.--template3-cream-dark]="theme().backgroundDark" [style.--template3-cream-light]="theme().backgroundLight"
+  [style.--template3-text]="theme().textColor" [style.--template3-text-muted]="theme().mutedTextColor" [style.--template3-text-light]="theme().textLight"
+  [style.--template3-heading-font]="theme().headingFontFamily" [style.font-family]="theme().fontFamily"
+  [style.font-size]="theme().baseSize">
+
+  <nav [class.template-three__nav--scrolled]="navScrolled()" [class.template-three__nav--embedded]="isEmbeddedMobile()"
+    [class.template-three__nav--menu-open]="isMobileMenuOpen()">
+    <div class="template-three__nav-inner">
+      <div class="template-three__brand-wrap">
+        <div class="template-three__brand">{{ brandName() }}</div>
+      </div>
+
+      <button type="button" class="template-three__nav-toggle"
+        [attr.aria-expanded]="isMobileMenuOpen()"
+        aria-label="Abrir menú"
+        (click)="toggleMobileMenu()">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+      <div class="template-three__nav-links" [class.template-three__nav-links--open]="isMobileMenuOpen()">
+        <div class="template-three__nav-drawer-head">
+          <button type="button" class="template-three__nav-drawer-close" aria-label="Cerrar menú"
+            (click)="closeMobileMenu()">✕</button>
+        </div>
+
+        @for (section of navigableSections(); track section.id + '-' + $index) {
+        <a [href]="sectionHref(section)"
+          (click)="navigateToSection(section, $event)"
+          [class.template-three__nav-cta]="section.type === 'reservation'">{{ sectionNavLabel(section) }}</a>
+        }
+      </div>
+
+      @if (canUseCart()) {
+      <button type="button" class="template-three__cart-trigger" (click)="onToggleCart()" aria-label="Abrir carrito">
+        <span class="template-three__cart-icon">🛒</span>
+        @if (cartCount() > 0) {
+        <span class="template-three__cart-badge">{{ cartCount() }}</span>
+        }
+      </button>
+      }
+    </div>
+  </nav>
+
+  @if (isMobileMenuOpen()) {
+  <button type="button" class="template-three__nav-backdrop" aria-label="Cerrar menú" (click)="closeMobileMenu()"></button>
+  }
+
+  @for (section of sections(); track section.id + '-' + $index) {
+  @if (asHeroSection(section); as heroSectionData) {
+  <section class="template-three__hero" [id]="sectionAnchorId(section, $index)" role="banner">
+    <div class="template-three__hero-background">
+      <img [src]="heroImageUrl()" [alt]="brandName()">
+    </div>
+
+    <div class="template-three__hero-content">
+      <div class="template-three__hero-card template-three__fade-up">
+        @if (logoImageUrl()) {
+        <img [src]="logoImageUrl()" [alt]="brandName()" class="template-three__hero-logo">
+        } @else {
+        <div class="template-three__brand template-three__brand--hero">{{ brandName() }}</div>
+        }
+      </div>
+
+      <p class="template-three__section-label template-three__section-label--hero">{{ heroSectionData.content.overline }}</p>
+      <h1 class="template-three__hero-title template-three__fade-up-2">{{ heroSectionData.content.title }}</h1>
+      <p class="template-three__hero-subtitle template-three__fade-up-3">{{ heroSectionData.content.subtitle }}</p>
+
+      <div class="template-three__hero-actions template-three__fade-up-4">
+        <a [href]="heroSectionData.content.primary_cta.link" (click)="navigateToHash(heroSectionData.content.primary_cta.link, $event)" class="template-three__btn-primary">{{ heroSectionData.content.primary_cta.text }}</a>
+        <a [href]="heroSectionData.content.secondary_cta.link" (click)="navigateToHash(heroSectionData.content.secondary_cta.link, $event)" class="template-three__btn-outline">{{ heroSectionData.content.secondary_cta.text }}</a>
+      </div>
+    </div>
+
+    <div class="template-three__stats-bar">
+      @for (stat of heroSectionData.content.stats; track stat.label + '-' + $index) {
+      <div class="template-three__stat-item">
+        <span class="template-three__stat-num">{{ stat.value }}</span>
+        <span class="template-three__stat-label">{{ stat.label }}</span>
+      </div>
+      }
+    </div>
+  </section>
+  } @else if (asAboutSection(section); as aboutSectionData) {
+  <section [id]="sectionAnchorId(section, $index)" class="template-three__section template-three__section--white">
+    <div class="template-three__container template-three__two-columns">
+      <div>
+        <p class="template-three__section-label">{{ aboutSectionData.content.overline }}</p>
+        <h2 class="template-three__section-title template-three__section-title--left">{{ aboutSectionData.content.title }}</h2>
+        <div class="template-three__divider template-three__divider--left"></div>
+        <p class="template-three__paragraph">{{ aboutSectionData.content.description }}</p>
+        <p class="template-three__paragraph">{{ aboutSectionData.content.secondary_description }}</p>
+
+        <div class="template-three__feature-grid">
+          @for (feature of aboutSectionData.content.features; track feature.label + '-' + $index) {
+          <div class="template-three__feature-item">
+            <p>{{ feature.label }}</p>
+            <span>{{ feature.detail }}</span>
+          </div>
+          }
+        </div>
+
+        <a [href]="aboutSectionData.content.cta.link" (click)="navigateToHash(aboutSectionData.content.cta.link, $event)" class="template-three__btn-crimson-outline">{{ aboutSectionData.content.cta.text }}</a>
+      </div>
+
+      <div class="template-three__about-media">
+        <img [src]="aboutSectionData.content.image_highlight.url || aboutImageUrl()" [alt]="brandName()">
+        <div class="template-three__floating-card template-three__floating-card--left">
+          <p>{{ aboutSectionData.content.image_highlight.badge_text }}</p>
+          <span>{{ experienceCardLabel() }}</span>
+        </div>
+        <div class="template-three__floating-card template-three__floating-card--right">
+          <p>★ {{ aboutSectionData.content.image_highlight.rating }}</p>
+          <span>{{ ratingCardLabel() }}</span>
+        </div>
+      </div>
+    </div>
+  </section>
+  } @else if (asMenuSection(section); as menuSectionData) {
+  <section [id]="sectionAnchorId(section, $index)" class="template-three__section template-three__section--cream">
+    <div class="template-three__container">
+      <div class="template-three__section-head">
+        <p class="template-three__section-label">{{ menuSectionData.content.overline }}</p>
+        <h2 class="template-three__section-title">{{ menuSectionData.content.title }}</h2>
+        <div class="template-three__divider"></div>
+        <p class="template-three__section-description">{{ menuSectionData.content.description }}</p>
+      </div>
+
+      <div class="template-three__filters" id="cat-tabs">
+        <button type="button" (click)="setActiveCategory('all')" class="template-three__cat-btn"
+          [class.template-three__cat-btn--active]="activeCategory() === 'all'">
+          {{ menuSectionData.content.all_categories_label }}
+        </button>
+        @for (categoria of categories(); track categoryKey(categoria)) {
+        <button type="button" (click)="setActiveCategory(categoryKey(categoria))" class="template-three__cat-btn"
+          [class.template-three__cat-btn--active]="activeCategory() === categoryKey(categoria)">
+          {{ categoria.descripcion }}
+        </button>
+        }
+      </div>
+
+      <div class="template-three__menu-grid" id="menu-grid">
+        @for (product of visibleProducts(); track productKey(product)) {
+        <article class="template-three__menu-card">
+          <div class="template-three__menu-image-wrap">
+            <img [src]="product.urlImagen || fallbackProductImage()" [alt]="product.nombre">
+            <div class="template-three__menu-tag-wrap">
+              <span class="template-three__menu-tag">{{ productCategoryLabel(product) }}</span>
+            </div>
+          </div>
+          <div class="template-three__menu-body">
+            <h3>{{ product.nombre }}</h3>
+            <p>{{ product.descripcion || menuItemFallbackDescription() }}</p>
+            <div class="template-three__menu-footer">
+              <span class="template-three__menu-price">S/ {{ product.precio | number:'1.2-2' }}</span>
+              <button type="button" (click)="onAddToCart(product)" class="template-three__menu-order-btn" [disabled]="!canUseCart()">Agregar</button>
+            </div>
+          </div>
+        </article>
+        }
+      </div>
+
+      @if (shouldShowProductsPageLink()) {
+      <div class="template-three__menu-cta">
+        <p>¿Quieres ver la carta completa en una vista dedicada?</p>
+        <a [href]="productsPageUrl()" [attr.target]="productsPageTarget()" class="template-three__btn-crimson-outline">Ver todos los productos</a>
+      </div>
+      }
+    </div>
+  </section>
+  } @else if (asGallerySection(section); as gallerySectionData) {
+  <section [id]="sectionAnchorId(section, $index)" class="template-three__section template-three__section--white">
+    <div class="template-three__container">
+      <div class="template-three__section-head">
+        <p class="template-three__section-label">{{ gallerySectionData.content.overline }}</p>
+        <h2 class="template-three__section-title">{{ gallerySectionData.content.title }}</h2>
+        <div class="template-three__divider"></div>
+        <p class="template-three__section-description">{{ gallerySectionData.content.description }}</p>
+      </div>
+
+      <div class="template-three__gallery-grid">
+        @for (image of gallerySectionData.content.items; track image.url + '-' + $index) {
+        <div class="template-three__gallery-item">
+          <img [src]="image.url" [alt]="image.alt">
+          <div class="template-three__gallery-overlay">
+            <span>{{ image.caption || image.alt }}</span>
+          </div>
+        </div>
+        }
+      </div>
+    </div>
+  </section>
+  } @else if (asVideoSection(section); as videoSectionData) {
+  <section [id]="sectionAnchorId(section, $index)" class="template-three__section template-three__section--cream">
+    <div class="template-three__container">
+      <div class="template-three__section-head">
+        <p class="template-three__section-label">{{ videoSectionData.content.overline }}</p>
+        <h2 class="template-three__section-title">{{ videoSectionData.content.title }}</h2>
+        <div class="template-three__divider"></div>
+        <p class="template-three__section-description">{{ videoSectionData.content.description }}</p>
+      </div>
+
+      <div class="template-three__video-grid">
+        @for (video of videoSectionData.content.items; track video.url + '-' + $index) {
+        <article class="template-three__video-card">
+          <div class="template-three__video-frame-wrap">
+            <iframe [src]="safeVideoUrl(video.url)" [title]="video.title" class="template-three__video-frame"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen></iframe>
+          </div>
+          <div class="template-three__video-body">
+            <h3>{{ video.title }}</h3>
+            @if (video.description) {
+            <p>{{ video.description }}</p>
+            }
+          </div>
+        </article>
+        }
+      </div>
+    </div>
+  </section>
+  } @else if (asTestimonialsSection(section); as testimonialSectionData) {
+  <section [id]="sectionAnchorId(section, $index)" class="template-three__section template-three__section--cream">
+    <div class="template-three__container template-three__container--narrow">
+      <div class="template-three__section-head">
+        <p class="template-three__section-label">{{ testimonialSectionData.content.overline }}</p>
+        <h2 class="template-three__section-title">{{ testimonialSectionData.content.title }}</h2>
+        <div class="template-three__divider"></div>
+      </div>
+
+      <div class="template-three__testimonial-grid">
+        @for (testimonial of testimonialSectionData.content.items; track testimonial.name + '-' + $index) {
+        <article class="template-three__testimonial-card">
+          <div class="template-three__stars">{{ starsFor(testimonial.rating) }}</div>
+          <p>{{ testimonial.text }}</p>
+          <div class="template-three__testimonial-author">
+            <div class="template-three__testimonial-avatar">{{ initialsFor(testimonial.name) }}</div>
+            <div>
+              <strong>{{ testimonial.name }}</strong>
+              <span>{{ testimonial.role }}</span>
+            </div>
+          </div>
+        </article>
+        }
+      </div>
+
+      <div class="template-three__rating-summary">
+        <p>{{ averageRating() }}</p>
+        <div class="template-three__stars template-three__stars--large">{{ starsFor(averageRating()) }}</div>
+        <span>{{ testimonialSectionData.content.summary_text }}</span>
+      </div>
+    </div>
+  </section>
+  } @else if (asReservationSection(section); as reservationSectionData) {
+  <section [id]="sectionAnchorId(section, $index)" class="template-three__section template-three__section--reservation">
+    <div class="template-three__container template-three__container--small">
+      <div class="template-three__section-head">
+        <p class="template-three__section-label">{{ reservationSectionData.content.overline }}</p>
+        <h2 class="template-three__section-title template-three__section-title--light">{{ reservationSectionData.content.title }}</h2>
+        <div class="template-three__divider"></div>
+        <p class="template-three__reservation-description">{{ reservationSectionData.content.description }}</p>
+      </div>
+
+      <div class="template-three__reservation-box">
+        <div class="template-three__reservation-grid">
+          <input type="text" class="template-three__form-input" [placeholder]="reservationSectionData.content.name_placeholder"
+            [value]="reservationForm().name" (input)="updateReservationField('name', $any($event.target).value)">
+          <input type="tel" class="template-three__form-input" [placeholder]="reservationSectionData.content.phone_placeholder"
+            [value]="reservationForm().phone" (input)="updateReservationField('phone', $any($event.target).value)">
+        </div>
+
+        <div class="template-three__reservation-grid">
+          <input type="date" class="template-three__form-input" [value]="reservationForm().date"
+            (input)="updateReservationField('date', $any($event.target).value)">
+          <input type="time" class="template-three__form-input" [value]="reservationForm().time"
+            (input)="updateReservationField('time', $any($event.target).value)">
+        </div>
+
+        <div class="template-three__reservation-grid">
+          <select class="template-three__form-input" [value]="reservationForm().guests"
+            (change)="updateReservationField('guests', $any($event.target).value)">
+            <option value="">{{ reservationSectionData.content.guests_placeholder }}</option>
+            @for (guestOption of reservationSectionData.content.guest_options; track guestOption) {
+            <option [value]="guestOption">{{ guestOption }}</option>
+            }
+          </select>
+          <select class="template-three__form-input" [value]="reservationForm().occasion"
+            (change)="updateReservationField('occasion', $any($event.target).value)">
+            <option value="">{{ reservationSectionData.content.occasion_placeholder }}</option>
+            @for (occasionOption of reservationSectionData.content.occasion_options; track occasionOption) {
+            <option [value]="occasionOption">{{ occasionOption }}</option>
+            }
+          </select>
+        </div>
+
+        <textarea class="template-three__form-input" rows="3" [placeholder]="reservationSectionData.content.notes_placeholder"
+          [value]="reservationForm().notes" (input)="updateReservationField('notes', $any($event.target).value)"></textarea>
+
+        <button class="template-three__reservation-button" (click)="handleReservation()" [disabled]="reservationSubmitted()">
+          {{ reservationSubmitted() ? reservationSectionData.content.success_text : reservationSectionData.content.submit_text }}
+        </button>
+
+        <p class="template-three__reservation-help">
+          {{ reservationSectionData.content.help_text }}
+          <strong>{{ business()?.whatsapp || config()?.reservationPhone || '+51 999 999 999' }}</strong>
+        </p>
+      </div>
+    </div>
+  </section>
+  } @else if (asContactSection(section); as contactSectionData) {
+  <section [id]="sectionAnchorId(section, $index)" class="template-three__section template-three__section--white">
+    <div class="template-three__container">
+      <div class="template-three__section-head">
+        <p class="template-three__section-label">{{ contactSectionData.content.overline }}</p>
+        <h2 class="template-three__section-title">{{ contactSectionData.content.title }}</h2>
+        <div class="template-three__divider"></div>
+      </div>
+
+      <div class="template-three__contact-grid">
+        <div>
+          <div class="template-three__contact-item">
+            <div class="template-three__contact-icon">📍</div>
+            <div>
+              <p>{{ contactSectionData.content.address_label }}</p>
+              <span>{{ business()?.direccion || contactSectionData.content.default_address }}</span>
+            </div>
+          </div>
+
+          <div class="template-three__contact-item">
+            <div class="template-three__contact-icon">📞</div>
+            <div>
+              <p>{{ contactSectionData.content.phone_label }}</p>
+              <span>{{ business()?.telefono || business()?.whatsapp || contactSectionData.content.default_phone }}</span>
+            </div>
+          </div>
+
+          <div class="template-three__contact-item">
+            <div class="template-three__contact-icon">✉️</div>
+            <div>
+              <p>{{ contactSectionData.content.email_label }}</p>
+              <span>{{ business()?.email || contactSectionData.content.default_email }}</span>
+            </div>
+          </div>
+
+          <div class="template-three__contact-item">
+            <div class="template-three__contact-icon">🕐</div>
+            <div>
+              <p>{{ contactSectionData.content.hours_label }}</p>
+              <span>{{ openingHoursText() }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <h3 class="template-three__social-title">{{ contactSectionData.content.social_title }}</h3>
+          <div class="template-three__social-list">
+            @for (social of socialLinks(); track social.label) {
+
+  @if (canUseCart() && cartItems().length > 0 && !isCartOpen()) {
+  <button type="button" class="template-three__floating-cart" (click)="onToggleCart()">
+    <span class="template-three__floating-cart-icon">🛒</span>
+    <span class="template-three__floating-cart-text">{{ cartCount() }} · S/ {{ cartTotal() | number:'1.2-2' }}</span>
+  </button>
+  }
+
+  @if (canUseCart()) {
+  <div class="template-three__cart-layer" [class.template-three__cart-layer--open]="isCartOpen()">
+    <button type="button" class="template-three__cart-backdrop" (click)="onToggleCart()" aria-label="Cerrar carrito"></button>
+
+    <aside class="template-three__cart-panel" [class.template-three__cart-panel--open]="isCartOpen()">
+      <div class="template-three__cart-head">
+        <div>
+          <p class="template-three__cart-kicker">Tu pedido</p>
+          <h3>Carrito</h3>
+        </div>
+        <button type="button" class="template-three__cart-close" (click)="onToggleCart()">✕</button>
+      </div>
+
+      <div class="template-three__cart-body">
+        @if (cartItems().length === 0) {
+        <div class="template-three__cart-empty">
+          <span>🛍️</span>
+          <p>Aún no agregaste productos.</p>
+        </div>
+        } @else {
+        @for (item of cartItems(); track item.id) {
+        <article class="template-three__cart-item">
+          <img [src]="item.image || fallbackProductImage()" [alt]="item.name" class="template-three__cart-item-image" />
+          <div class="template-three__cart-item-content">
+            <div class="template-three__cart-item-top">
+              <strong>{{ item.name }}</strong>
+              <span>S/ {{ (item.price * item.quantity) | number:'1.2-2' }}</span>
+            </div>
+            <small>S/ {{ item.price | number:'1.2-2' }} c/u</small>
+            <div class="template-three__cart-item-actions">
+              <div class="template-three__cart-qty">
+                <button type="button" (click)="onUpdateQuantity(item.id, -1)">-</button>
+                <span>{{ item.quantity }}</span>
+                <button type="button" (click)="onUpdateQuantity(item.id, 1)">+</button>
+              </div>
+              <button type="button" class="template-three__cart-remove" (click)="onRemoveFromCart(item.id)">Quitar</button>
+            </div>
+          </div>
+        </article>
+        }
+        }
+      </div>
+
+      @if (cartItems().length > 0) {
+      <div class="template-three__cart-foot">
+        <div class="template-three__cart-total">
+          <span>Total</span>
+          <strong>S/ {{ cartTotal() | number:'1.2-2' }}</strong>
+        </div>
+        <button type="button" class="template-three__cart-checkout" (click)="onCheckout()">Enviar pedido por WhatsApp</button>
+      </div>
+      }
+    </aside>
+  </div>
+  }
+            <a [href]="social.url" target="_blank" rel="noopener" class="template-three__social-link">
+              <span>{{ social.icon }}</span>
+              <div>
+                <p>{{ social.label }}</p>
+                <small>{{ social.meta }}</small>
+              </div>
+            </a>
+            }
+          </div>
+
+          <div class="template-three__map-box">
+            @if (mapUrl()) {
+            <iframe [src]="mapUrl()" title="Mapa del negocio" class="template-three__map-frame"></iframe>
+            } @else {
+            <div class="template-three__map-placeholder">
+              <p>🗺️</p>
+              <span>{{ contactSectionData.content.map_fallback_text }}</span>
+            </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  } @else if (asFooterSection(section); as footerSectionData) {
+  <footer [id]="sectionAnchorId(section, $index)">
+    <div class="template-three__footer-inner">
+      <div class="template-three__footer-top">
+        <div class="template-three__footer-brand">
+          <p class="template-three__brand">{{ brandName() }}</p>
+          <p>{{ footerSectionData.content.description }}</p>
+        </div>
+
+        <div>
+          <p class="template-three__footer-title">{{ footerSectionData.content.navigation_title }}</p>
+          <div class="template-three__footer-links">
+            @for (navSection of navigableSections(); track navSection.id + '-footer-' + $index) {
+            <a [href]="sectionHref(navSection)" (click)="navigateToSection(navSection, $event)">{{ sectionNavLabel(navSection) }}</a>
+            }
+          </div>
+        </div>
+
+        <div>
+          <p class="template-three__footer-title">{{ footerSectionData.content.hours_title }}</p>
+          <div class="template-three__footer-links">
+            @for (hour of openingHoursLines(); track hour) {
+            <p>{{ hour }}</p>
+            }
+          </div>
+        </div>
+
+        <div>
+          <p class="template-three__footer-title">{{ footerSectionData.content.contact_title }}</p>
+          <div class="template-three__footer-links">
+            @if (business()?.telefono) {<a [href]="'tel:' + business()?.telefono">📞 {{ business()?.telefono }}</a>}
+            @if (business()?.email) {<a [href]="'mailto:' + business()?.email">✉️ {{ business()?.email }}</a>}
+            @if (business()?.direccion) {<a [href]="sectionHrefByType('contact')" (click)="navigateToSectionByType('contact', $event)">📍 {{ business()?.direccion }}</a>}
+            <a [href]="sectionHrefByType('reservation')" (click)="navigateToSectionByType('reservation', $event)" class="template-three__footer-highlight">{{ footerSectionData.content.reservation_text }}</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="template-three__footer-bottom">
+        <p>© {{ currentYear }} {{ brandName() }}. {{ footerSectionData.content.copyright_text }}</p>
+        <p>{{ footerSectionData.content.credit_text }}</p>
+      </div>
+    </div>
+  </footer>
+  }
+  }
+</div>

@@ -1,6 +1,7 @@
 import { Component, inject, signal, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ProductoService } from '../../../shared/services/producto.service';
 import { Precio, Producto, ProductoDetalle } from '../../../shared/models/producto.model';
 import { ConfirmationService, MenuItem } from 'primeng/api';
@@ -84,6 +85,9 @@ export class ProductosComponent {
   private toastr = inject(ToastrService);
   private confirmationService = inject(ConfirmationService);
   private analyticsService = inject(AnalyticsService);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private queryActionHandled = false;
 
   @ViewChild('tabPrices') tabPrices!: TabPricesComponent;
 
@@ -212,12 +216,47 @@ export class ProductosComponent {
         }
 
         this.updateProductCounts();
+        this.handleQueryProductAction();
       },
       error: (error) => {
         console.error('Error al cargar categorías y productos:', error);
         this.toastr.error('No se pudieron cargar las categorías y productos. Usando datos de ejemplo.', 'Error');
       }
     });
+  }
+
+  private handleQueryProductAction() {
+    if (this.queryActionHandled) {
+      return;
+    }
+
+    const queryMap = this.route.snapshot.queryParamMap;
+    const openNew = queryMap.get('openNew') === 'true';
+    const editProductId = Number(queryMap.get('editProductId')) || null;
+    const categoryId = Number(queryMap.get('categoryId')) || null;
+
+    if (categoryId) {
+      this.selectedCategoryId = categoryId;
+    }
+
+    if (editProductId) {
+      const product = this.products().find(item => item.productoID === editProductId);
+      if (product) {
+        this.queryActionHandled = true;
+        this.openProductModal(product);
+      }
+    } else if (openNew) {
+      this.queryActionHandled = true;
+      this.openProductModal();
+    }
+
+    if (this.queryActionHandled) {
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: {},
+        replaceUrl: true
+      });
+    }
   }
 
   // === GESTIÓN DE CATEGORÍAS ===

@@ -5,6 +5,7 @@ import { Main } from '../shared/main/main';
 import { Layout } from '../shared/Layout/layout';
 import { InmuebleComponent } from '../pages/inmueble/inmueble';
 import { Company } from '../pages/company/company';
+import { CompanyTemplatesPage } from '../pages/company/templates/templates-page';
 import { Amanro } from '../pages/companies/amanro/amanro';
 import { Stacion64 } from '../pages/companies/stacion64/stacion64';
 import { PilarComponent } from '../pages/companies/pilar/pilar';
@@ -26,9 +27,13 @@ export const routes: Routes = [
       { path: 'servicios', loadComponent: () => import('../pages/servicios/servicios').then(m => m.ServiciosComponent) },
       { path: 'servicio/:id', loadComponent: () => import('../pages/servicio-detalle/servicio-detalle').then(m => m.ServicioDetalleComponent) },
       { path: 'buscar', loadComponent: () => import('../pages/search-results/search-results.component').then(m => m.SearchResultsComponent) },
-      { path: 'negocio/:codigoempresa', component: Company },
     ]
   },
+  { path: 'negocio/:codigoempresa', component: Company },
+  { path: 'negocio/:codigoempresa/productos', loadComponent: () => import('../pages/company/products/company-products-page').then(m => m.CompanyProductsPage) },
+  { path: 'negocio/:codigoempresa/plantillas', component: CompanyTemplatesPage },
+  { path: 'empresa/sitio/preview', loadComponent: () => import('./empresa/sitio-web/sitio-web-preview').then(m => m.SitioWebPreview) },
+  { path: 'empresa/sitio/preview/productos', loadComponent: () => import('../pages/company/products/company-products-page').then(m => m.CompanyProductsPage) },
   { path: 'business-register', component: BusinessRegisterComponent },
   {
     path: 'empresa',
@@ -43,6 +48,7 @@ export const routes: Routes = [
       { path: 'suscripcion', loadComponent: () => import('./empresa/suscripcion/suscripcion').then(m => m.Suscripcion) },
       { path: 'perfil', loadComponent: () => import('./empresa/perfil/perfil').then(m => m.Perfil) },
       { path: 'sitio', loadComponent: () => import('./empresa/sitio-web/sitio-web').then(m => m.SitioWeb) },
+      { path: 'mi-sitio', redirectTo: 'sitio', pathMatch: 'full' },
       { path: 'promociones', loadComponent: () => import('./empresa/promociones/promociones').then(m => m.Promociones) },
       { path: 'banner', loadComponent: () => import('./empresa/banner/banner').then(m => m.Banner) },
       { path: 'actividad', loadComponent: () => import('./empresa/analytics/analytics-dashboard').then(m => m.AnalyticsDashboardComponent) },
