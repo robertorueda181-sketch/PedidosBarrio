@@ -228,9 +228,9 @@ export const TEMPLATE_THREE_STATIC_CONTENT: TemplateThreePageData = {
         description: 'Nuestro objetivo es que cada visita se convierta en una experiencia memorable, tanto por el servicio como por la calidad de nuestros productos.',
         secondary_description: 'Aqui escriba una descripcion secundaria que hable un poco mas de la historia del negocio, sus valores, su propuesta unica y lo que lo hace especial. Este texto es importante para conectar con los clientes y transmitir la personalidad de la marca de manera mas profunda.',
         features: [
-          { label: 'Ingredientes frescos', detail: 'Seleccionados a diario' },
+          { label: 'Stock Siempre Listo', detail: 'Lo que buscas, cuando lo necesitas' },
           { label: 'Ambiente único', detail: 'Un espacio con carácter propio' },
-          { label: 'Cocina auténtica', detail: 'Sabores con identidad' },
+          { label: 'Envíos Veloces', detail: 'Del local a tu puerta en tiempo récord' },
           { label: 'Servicio excepcional', detail: 'Atención personalizada' }
         ],
         image_highlight: {

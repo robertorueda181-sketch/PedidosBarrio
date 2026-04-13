@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, HostListener, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { catchError, forkJoin, of } from 'rxjs';
+import { catchError, forkJoin, map, of } from 'rxjs';
 import { TemplateThreeComponent } from '../../../pages/company/templates/template3/template3';
 import {
   TEMPLATE_THREE_STATIC_CONTENT,
@@ -20,9 +20,10 @@ import {
 } from '../../../pages/company/templates/template3/template3-content';
 import { EmpresaService } from '../../../shared/services/empresa.service';
 import { NegocioDetalle } from '../../../shared/services/negocio.service';
+import { PaginasService, PaginaDto } from '../../../shared/services/paginas.service';
 import { ProductoService } from '../../../shared/services/producto.service';
 
-type EditableOptionalSection = 'menu' | 'gallery' | 'videos' | 'testimonials' | 'reservation' | 'contact';
+type EditableOptionalSection = 'about_us' | 'menu' | 'gallery' | 'videos' | 'testimonials' | 'reservation' | 'contact';
 type EditorSectionKey = 'branding' | TemplateThreeSectionData['type'];
 
 interface PreviewStyles {
@@ -83,6 +84,7 @@ export class SitioWeb {
   private readonly mobilePreviewMaxWidth = 767;
   private readonly router = inject(Router);
   private readonly empresaService = inject(EmpresaService);
+  private readonly paginasService = inject(PaginasService);
   private readonly productoService = inject(ProductoService);
   private readonly sectionOrder: TemplateThreeSectionData['type'][] = [
     'hero',
@@ -103,8 +105,11 @@ export class SitioWeb {
   private readonly initialDraft = this.loadDraft();
 
   readonly isMobilePreviewOpen = signal(false);
+  readonly isInitialLoading = signal(true);
   readonly isColorOptionsPopupOpen = signal(false);
   readonly isContactProfileEditing = signal(false);
+  readonly isPublishing = signal(false);
+  readonly publishMessage = signal<{ type: 'success' | 'error'; text: string } | null>(null);
   readonly selectedEditorSection = signal<EditorSectionKey>('branding');
   readonly pageData = signal<TemplateThreePageData>(this.initialDraft.pageData);
   readonly previewBusiness = signal<NegocioDetalle>(this.initialDraft.business);
@@ -112,6 +117,7 @@ export class SitioWeb {
   readonly viewportWidth = signal(typeof window !== 'undefined' ? window.innerWidth : this.inlinePreviewMinWidth);
 
   readonly sectionOptions: Array<{ type: EditableOptionalSection; label: string; description: string }> = [
+    { type: 'about_us', label: 'Sobre nosotros', description: 'Historia, beneficios e imagen destacada.' },
     { type: 'menu', label: 'Productos', description: 'Muestra la carta y categorías del negocio.' },
     { type: 'gallery', label: 'Galería', description: 'Agrega o quita imágenes destacadas.' },
     { type: 'videos', label: 'Videos', description: 'Inserta videos de YouTube o Vimeo.' },
@@ -123,7 +129,7 @@ export class SitioWeb {
   readonly editorSections: EditorSectionOption[] = [
     { key: 'branding', label: 'General', description: 'Marca, colores y datos principales.', toggleable: false },
     { key: 'hero', label: 'Cabecera', description: 'Primera sección, se visualiza métricas.', toggleable: false },
-    { key: 'about_us', label: 'Sobre nosotros', description: 'Historia, beneficios e imagen destacada.', toggleable: false },
+    { key: 'about_us', label: 'Sobre nosotros', description: 'Historia, beneficios e imagen destacada.', toggleable: true },
     { key: 'menu', label: 'Productos', description: 'Carta, categorías y botón de pedido.', toggleable: true },
     { key: 'gallery', label: 'Galería', description: 'Fotos destacadas del negocio.', toggleable: true },
     { key: 'videos', label: 'Videos', description: 'Clips promocionales o testimoniales.', toggleable: true },
@@ -329,6 +335,40 @@ export class SitioWeb {
     this.persistDraft();
   }
 
+  publishSite() {
+    this.isPublishing.set(true);
+    this.publishMessage.set(null);
+
+    
+
+        const paginaPayload: PaginaDto = {
+          contenido: JSON.stringify(this.pageData()),
+          descripcion: this.previewBusiness().nombre
+        };
+        console.log('Publicando sitio con payload:', paginaPayload);
+        this.paginasService.savePagina(paginaPayload).subscribe({
+          next: () => {
+            this.isPublishing.set(false);
+            this.publishMessage.set({
+              type: 'success',
+              text: '✓ Sitio publicado exitosamente'
+            });
+            this.lastSavedAt.set(new Date().toISOString());
+            setTimeout(() => this.publishMessage.set(null), 4000);
+          },
+          error: err => {
+            this.isPublishing.set(false);
+            console.error('Error al publicar:', err);
+            this.publishMessage.set({
+              type: 'error',
+              text: 'Error al publicar. Intenta de nuevo.'
+            });
+            setTimeout(() => this.publishMessage.set(null), 4000);
+          }
+        });
+     
+  }
+
   openProductsManager(mode: 'new' | 'edit' | 'list' = 'list', product?: any) {
     this.persistDraft();
 
@@ -362,7 +402,7 @@ export class SitioWeb {
   }
 
   isEditorSectionEnabled(key: EditorSectionKey): boolean {
-    if (key === 'branding' || key === 'hero' || key === 'about_us' || key === 'footer') {
+    if (key === 'branding' || key === 'hero' || key === 'footer') {
       return true;
     }
 
@@ -387,20 +427,6 @@ export class SitioWeb {
 
     localStorage.setItem(this.storageKey, JSON.stringify(payload));
     this.lastSavedAt.set(savedAt);
-  }
-
-  resetDraft() {
-    const draft = this.buildDefaultDraft();
-    this.pageData.set(draft.pageData);
-    this.previewBusiness.set(draft.business);
-    this.syncContactProfileDraft();
-    this.syncWeeklyHoursFromSection();
-    this.isContactProfileEditing.set(false);
-    this.lastSavedAt.set(null);
-
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem(this.storageKey);
-    }
   }
 
   hasSection(type: EditableOptionalSection): boolean {
@@ -1189,11 +1215,13 @@ export class SitioWeb {
   }
 
   private loadConfiguredBusinessData() {
+    this.isInitialLoading.set(true);
     this.empresaService.getSede().subscribe({
       next: profile => {
         const empresaID = profile?.empresaID || this.previewBusiness().empresaID;
 
         if (!empresaID) {
+          this.isInitialLoading.set(false);
           return;
         }
 
@@ -1204,27 +1232,48 @@ export class SitioWeb {
               return of({ categorias: [], productos: [] });
             })
           ),
-          products: this.productoService.getProductosByEmpresa(empresaID).pipe(
+          products: this.productoService.getCategoriasConProductos().pipe(
+            map(response => response?.productos || []),
             catchError(error => {
               console.error('No se pudo obtener productos por empresa para Mi Sitio:', error);
               return of([]);
             })
+          ),
+          pagina: this.paginasService.getPagina().pipe(
+            catchError(() => of(null))
           )
         }).subscribe({
-          next: ({ catalog, products }) => {
+          next: ({ catalog, products, pagina }) => {
             const resolvedProducts = products?.length ? products : (catalog?.productos || []);
             const configuredBusiness = this.mapConfiguredBusiness(profile, catalog, resolvedProducts);
             const merged = this.mergeDraftWithConfiguredBusiness(this.previewBusiness(), configuredBusiness);
             this.previewBusiness.set(merged);
-            this.persistDraft();
+           console.log('5',pagina)
+             console.log('5',pagina?.contenido)
+            if (pagina?.contenido) {
+              try {
+                console.log('Contenido de página guardada encontrado, intentando cargarlo en el editor.',pagina.contenido);
+                const savedPageData = JSON.parse(pagina.contenido) as TemplateThreePageData;
+                this.pageData.set(savedPageData);
+                console.log(savedPageData);
+                this.syncContactProfileDraft();
+                this.syncWeeklyHoursFromSection();
+              } catch {
+                console.error('No se pudo parsear el contenido de la página guardada.');
+              }
+            }
+
+            this.isInitialLoading.set(false);
           },
           error: error => {
             console.error('No se pudo sincronizar productos de Mi Sitio:', error);
+            this.isInitialLoading.set(false);
           }
         });
       },
       error: error => {
         console.error('No se pudo sincronizar Mi Sitio con la configuración del negocio:', error);
+        this.isInitialLoading.set(false);
       }
     });
   }

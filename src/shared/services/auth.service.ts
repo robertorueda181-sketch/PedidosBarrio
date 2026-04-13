@@ -14,17 +14,15 @@ export class AuthService {
     private socialAuthService = inject(SocialAuthService);
     private router = inject(Router);
     private registerService = inject(RegisterService);
-    private toastr = inject(ToastrService);
 
     private readonly TOKEN_KEY = 'auth_token';
     private readonly USER_KEY = 'user_data';
 
     user = signal<SocialUser | null>(null);
     loggedIn = signal<boolean>(false);
-    autoRegisterSocial = true; // Control if we register immediately or wait for more data
+    autoRegisterSocial = true; 
 
     constructor() {
-        // Check for existing session on app start
         this.checkExistingSession();
 
         this.socialAuthService.authState.subscribe((user) => {
@@ -36,7 +34,6 @@ export class AuthService {
                     this.registerSocialUser(user);
                 }
             } else {
-                // User logged out
                 this.clearSession();
             }
         });
@@ -77,10 +74,9 @@ export class AuthService {
         const token = this.getToken();
         if (!token) return false;
 
-        // Check if token is expired (basic check)
         try {
             const payload = JSON.parse(atob(token.split('.')[1]));
-            const expiry = payload.exp * 1000; // Convert to milliseconds
+            const expiry = payload.exp * 1000;
             return Date.now() < expiry;
         } catch {
             return false;
@@ -117,8 +113,6 @@ export class AuthService {
     private clearSession() {
         localStorage.removeItem(this.TOKEN_KEY);
         localStorage.removeItem(this.USER_KEY);
-        // Do NOT nullify 'user' immediately upon logout if it causes re-triggering of effects unwantedly? 
-        // Actually, clearing it is correct.
         this.user.set(null);
         this.loggedIn.set(false);
     }
@@ -148,26 +142,5 @@ export class AuthService {
             idToken: user.idToken || ''
         };
 
-    //     this.registerService.registerSocialUser(userData).subscribe({
-    //         next: (response: any) => {
-    //             console.log('User registered/authenticated successfully:', response);
-
-    //             // Assuming the backend returns { token: string, user: object }
-    //             if (response.token) {
-    //                 this.saveSession(response.token, user);
-    //                 console.log('Session saved successfully');
-    //             } else {
-    //                 console.warn('No token received from backend');
-    //             }
-    //         },
-    //         error: (error: any) => {
-    //             console.error('Error registering/authenticating user:', error);
-    //             const errorMessage = error.error?.message || error.error || 'Error local al autenticar con Google';
-    //             this.toastr.error(
-    //                 typeof errorMessage === 'string' ? errorMessage : 'Error en la respuesta del servidor (400)',
-    //                 'Error de Autenticación'
-    //             );
-    //         }
-    //     });
      }
 }
