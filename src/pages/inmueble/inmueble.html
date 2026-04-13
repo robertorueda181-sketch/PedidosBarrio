@@ -53,7 +53,7 @@
       <!-- Imagen -->
       <div class="relative h-48 bg-gray-200">
         <img [src]="inmueble.urlImagen" [alt]="inmueble.titulo" class="w-full h-full object-cover"
-          onerror="this.src='https://images.unsplash.com/photo-1560448072-283bd0dfaa55?auto=format&fit=crop&w=800&q=60'" />
+          onerror="this.src='/assets/image-default.webp'" />
         <div class="absolute top-3 right-3">
           <span [class]="inmueble.operacion === 'Venta' ? 'bg-green-500' : 'bg-[#1A365D]'"
             class="text-white px-3 py-1 rounded-full text-sm font-semibold shadow-sm">

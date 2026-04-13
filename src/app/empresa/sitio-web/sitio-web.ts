@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, HostListener, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { forkJoin } from 'rxjs';
+import { catchError, forkJoin, of } from 'rxjs';
 import { TemplateThreeComponent } from '../../../pages/company/templates/template3/template3';
 import {
   TEMPLATE_THREE_STATIC_CONTENT,
@@ -32,6 +32,18 @@ interface PreviewStyles {
   mutedTextColor?: string;
 }
 
+interface ColorPreset {
+  name: string;
+  colors: {
+    primary: string;
+    secondary: string;
+    background: string;
+    text_main: string;
+  };
+}
+
+type ThemeEditableColorKey = 'primary' | 'secondary' | 'background' | 'text_main';
+
 interface SiteBuilderDraft {
   pageData: TemplateThreePageData;
   business: NegocioDetalle;
@@ -43,6 +55,20 @@ interface EditorSectionOption {
   label: string;
   description: string;
   toggleable: boolean;
+}
+
+interface ContactProfileDraft {
+  direccion: string;
+  telefono: string;
+  email: string;
+}
+
+interface WeeklyHourConfig {
+  dayKey: 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday';
+  dayLabel: string;
+  isOpen: boolean;
+  from: string;
+  to: string;
 }
 
 @Component({
@@ -69,10 +95,16 @@ export class SitioWeb {
     'contact',
     'footer'
   ];
+  private readonly heroCtaDefaults = {
+    primary: { text: 'Reservar', link: '#reservas' },
+    secondary: { text: 'Ver nuestros productos', link: '#menu' }
+  };
 
   private readonly initialDraft = this.loadDraft();
 
   readonly isMobilePreviewOpen = signal(false);
+  readonly isColorOptionsPopupOpen = signal(false);
+  readonly isContactProfileEditing = signal(false);
   readonly selectedEditorSection = signal<EditorSectionKey>('branding');
   readonly pageData = signal<TemplateThreePageData>(this.initialDraft.pageData);
   readonly previewBusiness = signal<NegocioDetalle>(this.initialDraft.business);
@@ -90,7 +122,7 @@ export class SitioWeb {
 
   readonly editorSections: EditorSectionOption[] = [
     { key: 'branding', label: 'General', description: 'Marca, colores y datos principales.', toggleable: false },
-    { key: 'hero', label: 'Hero', description: 'Primera sección, CTAs y métricas.', toggleable: false },
+    { key: 'hero', label: 'Cabecera', description: 'Primera sección, se visualiza métricas.', toggleable: false },
     { key: 'about_us', label: 'Sobre nosotros', description: 'Historia, beneficios e imagen destacada.', toggleable: false },
     { key: 'menu', label: 'Productos', description: 'Carta, categorías y botón de pedido.', toggleable: true },
     { key: 'gallery', label: 'Galería', description: 'Fotos destacadas del negocio.', toggleable: true },
@@ -101,7 +133,74 @@ export class SitioWeb {
     { key: 'footer', label: 'Footer', description: 'Cierre del sitio y textos finales.', toggleable: false }
   ];
 
+  readonly colorPresets: ColorPreset[] = [
+    {
+      name: 'Cafetería clásica',
+      colors: {
+        primary: '#4A2F27',
+        secondary: '#C2A06B',
+        background: '#F6F0E6',
+        text_main: '#2B211D'
+      }
+    },
+    {
+      name: 'Océano fresco',
+      colors: {
+        primary: '#0D3B66',
+        secondary: '#2EC4B6',
+        background: '#F4F9FF',
+        text_main: '#102A43'
+      }
+    },
+    {
+      name: 'Atardecer cálido',
+      colors: {
+        primary: '#B23A48',
+        secondary: '#F4A259',
+        background: '#FFF4E8',
+        text_main: '#3B1F2B'
+      }
+    },
+    {
+      name: 'Bosque natural',
+      colors: {
+        primary: '#2D6A4F',
+        secondary: '#95D5B2',
+        background: '#F1F8F5',
+        text_main: '#1B4332'
+      }
+    },
+    {
+      name: 'Nocturno moderno',
+      colors: {
+        primary: '#111827',
+        secondary: '#38BDF8',
+        background: '#E2E8F0',
+        text_main: '#111827'
+      }
+    }
+  ];
+  readonly basicColors: string[] = ['#000000', '#FFFFFF', '#EF4444', '#F97316', '#FACC15', '#22C55E', '#14B8A6', '#3B82F6', '#6366F1', '#8B5CF6', '#EC4899', '#64748B'];
+  readonly colorBase = signal<Record<ThemeEditableColorKey, string>>({
+    primary: this.normalizeHexColor(this.initialDraft.pageData.theme.colors.primary, '#4A2F27'),
+    secondary: this.normalizeHexColor(this.initialDraft.pageData.theme.colors.secondary, '#C2A06B'),
+    background: this.normalizeHexColor(this.initialDraft.pageData.theme.colors.background, '#F6F0E6'),
+    text_main: this.normalizeHexColor(this.initialDraft.pageData.theme.colors.text_main, '#2B211D')
+  });
+  readonly colorOpacity = signal<Record<ThemeEditableColorKey, number>>({
+    primary: 100,
+    secondary: 100,
+    background: 100,
+    text_main: 100
+  });
+  readonly contactProfileDraft = signal<ContactProfileDraft>({ direccion: '', telefono: '', email: '' });
+  readonly weeklyHoursConfig = signal<WeeklyHourConfig[]>(this.createDefaultWeeklyHoursConfig());
+
   readonly selectedEditorMeta = computed(() => this.editorSections.find(section => section.key === this.selectedEditorSection()) || this.editorSections[0]);
+  readonly previewFocusSection = computed<TemplateThreeSectionData['type']>(() => {
+    const selected = this.selectedEditorSection();
+    return selected === 'branding' ? 'hero' : selected;
+  });
   readonly isInlinePreviewVisible = computed(() => this.viewportWidth() >= this.inlinePreviewMinWidth);
   readonly shouldOpenPreviewInNewTab = computed(() => this.viewportWidth() <= this.mobilePreviewMaxWidth);
   readonly shouldUsePreviewPopup = computed(() => !this.isInlinePreviewVisible() && !this.shouldOpenPreviewInNewTab());
@@ -142,6 +241,9 @@ export class SitioWeb {
   readonly previewWebUrl = computed(() => this.buildHashUrl('/empresa/sitio/preview'));
 
   ngOnInit() {
+    this.enforceHeroCtaDefaults();
+    this.syncContactProfileDraft();
+    this.syncWeeklyHoursFromSection();
     this.loadConfiguredBusinessData();
   }
 
@@ -155,6 +257,13 @@ export class SitioWeb {
 
     if ((this.isInlinePreviewVisible() || this.shouldOpenPreviewInNewTab()) && this.isMobilePreviewOpen()) {
       this.closeMobilePreview();
+    }
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscapeKey() {
+    if (this.isColorOptionsPopupOpen()) {
+      this.closeColorOptionsPopup();
     }
   }
 
@@ -176,6 +285,15 @@ export class SitioWeb {
 
   closeMobilePreview() {
     this.isMobilePreviewOpen.set(false);
+  }
+
+  openColorOptionsPopup() {
+    this.syncColorControlsFromTheme();
+    this.isColorOptionsPopupOpen.set(true);
+  }
+
+  closeColorOptionsPopup() {
+    this.isColorOptionsPopupOpen.set(false);
   }
 
   scrollToInlinePreview() {
@@ -275,6 +393,9 @@ export class SitioWeb {
     const draft = this.buildDefaultDraft();
     this.pageData.set(draft.pageData);
     this.previewBusiness.set(draft.business);
+    this.syncContactProfileDraft();
+    this.syncWeeklyHoursFromSection();
+    this.isContactProfileEditing.set(false);
     this.lastSavedAt.set(null);
 
     if (typeof window !== 'undefined') {
@@ -309,7 +430,12 @@ export class SitioWeb {
       draft.sections = draft.sections.filter(section => section.type !== type);
     });
 
+    this.enforceHeroCtaDefaults();
+
     if (enabled) {
+      if (type === 'contact') {
+        this.syncWeeklyHoursFromSection();
+      }
       this.selectedEditorSection.set(type);
       return;
     }
@@ -325,10 +451,209 @@ export class SitioWeb {
     });
   }
 
+  setThemeBaseColor(colorKey: ThemeEditableColorKey, value: string) {
+    const normalizedBase = this.normalizeHexColor(value, this.colorBase()[colorKey]);
+    this.colorBase.update(current => ({
+      ...current,
+      [colorKey]: normalizedBase
+    }));
+
+    const opacity = this.colorOpacity()[colorKey];
+    const colorWithOpacity = this.applyOpacityToHex(normalizedBase, opacity);
+    this.updateThemeColor(colorKey, colorWithOpacity);
+  }
+
+  setThemeOpacity(colorKey: ThemeEditableColorKey, value: number | string) {
+    const parsed = typeof value === 'number' ? value : Number(value);
+    const opacity = Number.isFinite(parsed) ? Math.max(0, Math.min(100, parsed)) : 100;
+
+    this.colorOpacity.update(current => ({
+      ...current,
+      [colorKey]: opacity
+    }));
+
+    const baseColor = this.colorBase()[colorKey];
+    const colorWithOpacity = this.applyOpacityToHex(baseColor, opacity);
+    this.updateThemeColor(colorKey, colorWithOpacity);
+  }
+
+  applyBasicColor(colorKey: ThemeEditableColorKey, color: string) {
+    this.setThemeBaseColor(colorKey, color);
+  }
+
+  isBasicColorActive(colorKey: ThemeEditableColorKey, color: string): boolean {
+    return this.normalizeHexColor(this.colorBase()[colorKey], this.colorBase()[colorKey])
+      === this.normalizeHexColor(color, color);
+  }
+
+  applyColorPreset(preset: ColorPreset) {
+    this.patchPageData(draft => {
+      draft.theme.colors.primary = preset.colors.primary;
+      draft.theme.colors.secondary = preset.colors.secondary;
+      draft.theme.colors.background = preset.colors.background;
+      draft.theme.colors.text_main = preset.colors.text_main;
+    });
+
+    this.colorBase.set({
+      primary: this.normalizeHexColor(preset.colors.primary, '#4A2F27'),
+      secondary: this.normalizeHexColor(preset.colors.secondary, '#C2A06B'),
+      background: this.normalizeHexColor(preset.colors.background, '#F6F0E6'),
+      text_main: this.normalizeHexColor(preset.colors.text_main, '#2B211D')
+    });
+
+    this.colorOpacity.set({
+      primary: 100,
+      secondary: 100,
+      background: 100,
+      text_main: 100
+    });
+  }
+
+  isColorPresetActive(preset: ColorPreset): boolean {
+    const colors = this.pageData().theme.colors;
+    return colors.primary === preset.colors.primary
+      && colors.secondary === preset.colors.secondary
+      && colors.background === preset.colors.background
+      && colors.text_main === preset.colors.text_main;
+  }
+
+  private syncColorControlsFromTheme() {
+    const colors = this.pageData().theme.colors;
+
+    this.colorBase.set({
+      primary: this.normalizeHexColor(colors.primary, this.colorBase().primary),
+      secondary: this.normalizeHexColor(colors.secondary, this.colorBase().secondary),
+      background: this.normalizeHexColor(colors.background, this.colorBase().background),
+      text_main: this.normalizeHexColor(colors.text_main, this.colorBase().text_main)
+    });
+
+    this.colorOpacity.set({
+      primary: 100,
+      secondary: 100,
+      background: 100,
+      text_main: 100
+    });
+  }
+
+  private normalizeHexColor(value: string | null | undefined, fallback: string): string {
+    const raw = (value || '').trim();
+
+    if (/^#[0-9a-fA-F]{6}$/.test(raw)) {
+      return raw.toUpperCase();
+    }
+
+    if (/^#[0-9a-fA-F]{3}$/.test(raw)) {
+      const short = raw.slice(1);
+      return `#${short[0]}${short[0]}${short[1]}${short[1]}${short[2]}${short[2]}`.toUpperCase();
+    }
+
+    return fallback.toUpperCase();
+  }
+
+  private applyOpacityToHex(hexColor: string, opacityPercent: number): string {
+    const color = this.normalizeHexColor(hexColor, '#000000');
+    const alpha = Math.max(0, Math.min(100, opacityPercent)) / 100;
+    const hex = color.slice(1);
+
+    const r = Number.parseInt(hex.slice(0, 2), 16);
+    const g = Number.parseInt(hex.slice(2, 4), 16);
+    const b = Number.parseInt(hex.slice(4, 6), 16);
+
+    const mixedR = Math.round(255 * (1 - alpha) + r * alpha);
+    const mixedG = Math.round(255 * (1 - alpha) + g * alpha);
+    const mixedB = Math.round(255 * (1 - alpha) + b * alpha);
+
+    return `#${[mixedR, mixedG, mixedB].map(channel => channel.toString(16).padStart(2, '0')).join('')}`.toUpperCase();
+  }
+
   updateBusinessField(field: keyof NegocioDetalle, value: string) {
     this.patchBusiness(draft => {
       (draft[field] as any) = value;
     });
+
+    if (field === 'direccion' || field === 'telefono' || field === 'email') {
+      this.syncContactProfileDraft();
+    }
+  }
+
+  startContactProfileEdit() {
+    this.syncContactProfileDraft();
+    this.isContactProfileEditing.set(true);
+  }
+
+  cancelContactProfileEdit() {
+    this.syncContactProfileDraft();
+    this.isContactProfileEditing.set(false);
+  }
+
+  saveContactProfileEdit() {
+    const draft = this.contactProfileDraft();
+    this.updateBusinessField('direccion', draft.direccion.trim());
+    this.updateBusinessField('telefono', draft.telefono.trim());
+    this.updateBusinessField('email', draft.email.trim());
+    this.isContactProfileEditing.set(false);
+  }
+
+  updateContactProfileDraft(field: keyof ContactProfileDraft, value: string) {
+    this.contactProfileDraft.update(current => ({
+      ...current,
+      [field]: value
+    }));
+  }
+
+  setDayOpen(dayKey: WeeklyHourConfig['dayKey'], isOpen: boolean) {
+    this.weeklyHoursConfig.update(current => {
+      const updated = current.map(day => day.dayKey === dayKey ? { ...day, isOpen } : day);
+      this.persistWeeklyHoursConfig(updated);
+      return updated;
+    });
+  }
+
+  setDayFromTime(dayKey: WeeklyHourConfig['dayKey'], from: string) {
+    this.weeklyHoursConfig.update(current => {
+      const updated = current.map(day => {
+        if (day.dayKey !== dayKey) {
+          return day;
+        }
+
+        const endOptions = this.getEndTimeOptions(from);
+        const nextTo = endOptions.some(option => option.value === day.to)
+          ? day.to
+          : (endOptions[0]?.value || from);
+
+        return {
+          ...day,
+          from,
+          to: nextTo
+        };
+      });
+
+      this.persistWeeklyHoursConfig(updated);
+      return updated;
+    });
+  }
+
+  setDayToTime(dayKey: WeeklyHourConfig['dayKey'], to: string) {
+    this.weeklyHoursConfig.update(current => {
+      const updated = current.map(day => day.dayKey === dayKey ? { ...day, to } : day);
+      this.persistWeeklyHoursConfig(updated);
+      return updated;
+    });
+  }
+
+  getTimeSlotOptions(): Array<{ value: string; label: string }> {
+    return this.buildHalfHourOptions();
+  }
+
+  getEndTimeOptions(from: string): Array<{ value: string; label: string }> {
+    const options = this.buildHalfHourOptions();
+    const fromIndex = options.findIndex(option => option.value === from);
+
+    if (fromIndex < 0 || fromIndex === options.length - 1) {
+      return options.slice(-1);
+    }
+
+    return options.slice(fromIndex + 1);
   }
 
   async uploadBusinessImage(event: Event, field: 'urlBanner' | 'logoUrl') {
@@ -396,6 +721,15 @@ export class SitioWeb {
   updateHeroCta(cta: 'primary_cta' | 'secondary_cta', field: 'text' | 'link', value: string) {
     this.patchSection('hero', section => {
       section.content[cta][field] = value;
+    });
+  }
+
+  private enforceHeroCtaDefaults() {
+    this.patchSection('hero', section => {
+      section.content.primary_cta.text = this.heroCtaDefaults.primary.text;
+      section.content.primary_cta.link = this.heroCtaDefaults.primary.link;
+      section.content.secondary_cta.text = this.heroCtaDefaults.secondary.text;
+      section.content.secondary_cta.link = this.heroCtaDefaults.secondary.link;
     });
   }
 
@@ -481,7 +815,7 @@ export class SitioWeb {
     this.patchSection('gallery', section => {
       section.content.items.push({
         type: 'image',
-        url: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1200&q=80',
+        url: '/assets/image-default.webp',
         alt: 'Nueva imagen',
         caption: 'Agrega una descripción atractiva'
       });
@@ -492,6 +826,27 @@ export class SitioWeb {
     this.patchSection('gallery', section => {
       (section.content.items[index][field] as any) = value;
     });
+  }
+
+  async uploadGalleryImage(event: Event, index: number) {
+    const input = event.target as HTMLInputElement | null;
+    const file = input?.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    if (!file.type.startsWith('image/')) {
+      input.value = '';
+      return;
+    }
+
+    const dataUrl = await this.optimizeImageFile(file, 'aboutImage');
+    this.updateGalleryItem(index, 'url', dataUrl);
+
+    if (input) {
+      input.value = '';
+    }
   }
 
   updateGalleryField(field: 'title' | 'description' | 'overline', value: string) {
@@ -632,10 +987,7 @@ export class SitioWeb {
       | 'navigation_title'
       | 'hours_title'
       | 'contact_title'
-      | 'description'
-      | 'reservation_text'
-      | 'copyright_text'
-      | 'credit_text',
+      | 'description',
     value: string
   ) {
     this.patchSection('footer', section => {
@@ -653,7 +1005,7 @@ export class SitioWeb {
         descripcion: 'Describe aquí tu producto estrella.',
         precio: 25,
         stock: 20,
-        urlImagen: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&q=80',
+        urlImagen: '/assets/image-default.webp',
         categoria: {
           categoriaID: 1,
           descripcion: 'Especialidades',
@@ -707,9 +1059,10 @@ export class SitioWeb {
 
     try {
       const draft = JSON.parse(raw) as SiteBuilderDraft;
+      const draftBusiness = this.normalizeBusiness(draft.business || this.buildDefaultBusiness());
       return {
         pageData: draft.pageData || this.deepClone(TEMPLATE_THREE_STATIC_CONTENT),
-        business: this.normalizeBusiness(draft.business || this.buildDefaultBusiness()),
+        business: this.sanitizeDemoDraftBusiness(draftBusiness),
         savedAt: draft.savedAt || null
       };
     } catch {
@@ -734,47 +1087,30 @@ export class SitioWeb {
       telefono: '987654321',
       direccion: 'Av. Principal 456, Lima',
       referencia: 'Frente al parque central',
-      urlBanner: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1400&q=80',
-      logoUrl: 'https://dummyimage.com/240x240/111827/ffffff&text=LOGO',
+      urlBanner: '/assets/image-default.webp',
+      logoUrl: '/assets/image-default.webp',
       facebook: 'https://facebook.com/misitio.demo',
       instagram: 'https://instagram.com/misitio.demo',
       twitter: 'https://x.com/misitio_demo',
       tiktok: 'https://tiktok.com/@misitio.demo',
       whatsapp: '51987654321',
-      productos: [
-        {
-          productoID: 1,
-          categoriaID: 1,
-          nombre: 'Lomo saltado de la casa',
-          descripcion: 'Corte jugoso salteado al wok con papas crocantes.',
-          precio: 36,
-          stock: 20,
-          urlImagen: 'https://images.unsplash.com/photo-1544025162-d76694265947?w=800&q=80',
-          categoria: { categoriaID: 1, descripcion: 'Fondos', codigo: 'fondos' }
-        },
-        {
-          productoID: 2,
-          categoriaID: 2,
-          nombre: 'Ceviche clásico',
-          descripcion: 'Pescado fresco, leche de tigre y cancha crocante.',
-          precio: 34,
-          stock: 20,
-          urlImagen: 'https://images.unsplash.com/photo-1604908554007-93bb2d8d0c1f?w=800&q=80',
-          categoria: { categoriaID: 2, descripcion: 'Entradas', codigo: 'entradas' }
-        },
-        {
-          productoID: 3,
-          categoriaID: 3,
-          nombre: 'Cheesecake de frutos rojos',
-          descripcion: 'Postre cremoso con base crocante y topping natural.',
-          precio: 19,
-          stock: 20,
-          urlImagen: 'https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=800&q=80',
-          categoria: { categoriaID: 3, descripcion: 'Postres', codigo: 'postres' }
-        }
-      ],
+      productos: [],
       categorias: []
     });
+  }
+
+  private sanitizeDemoDraftBusiness(business: NegocioDetalle): NegocioDetalle {
+    const isDemoBusiness = business.empresaID === 'preview-demo';
+
+    if (!isDemoBusiness) {
+      return business;
+    }
+
+    return {
+      ...business,
+      productos: [],
+      categorias: []
+    };
   }
 
   private patchPageData(mutator: (draft: TemplateThreePageData) => void) {
@@ -862,11 +1198,22 @@ export class SitioWeb {
         }
 
         forkJoin({
-          catalog: this.productoService.getCategoriasConProductos(),
-          products: this.productoService.getProductosByEmpresa(empresaID)
+          catalog: this.productoService.getCategoriasConProductos().pipe(
+            catchError(error => {
+              console.error('No se pudo obtener categorías con productos para Mi Sitio:', error);
+              return of({ categorias: [], productos: [] });
+            })
+          ),
+          products: this.productoService.getProductosByEmpresa(empresaID).pipe(
+            catchError(error => {
+              console.error('No se pudo obtener productos por empresa para Mi Sitio:', error);
+              return of([]);
+            })
+          )
         }).subscribe({
           next: ({ catalog, products }) => {
-            const configuredBusiness = this.mapConfiguredBusiness(profile, catalog, products);
+            const resolvedProducts = products?.length ? products : (catalog?.productos || []);
+            const configuredBusiness = this.mapConfiguredBusiness(profile, catalog, resolvedProducts);
             const merged = this.mergeDraftWithConfiguredBusiness(this.previewBusiness(), configuredBusiness);
             this.previewBusiness.set(merged);
             this.persistDraft();
@@ -950,7 +1297,133 @@ export class SitioWeb {
   }
 
   private fallbackProductImage(): string {
-    return 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&q=80';
+    return '/assets/image-default.webp';
+  }
+
+  private syncContactProfileDraft() {
+    this.contactProfileDraft.set({
+      direccion: this.previewBusiness().direccion || '',
+      telefono: this.previewBusiness().telefono || '',
+      email: this.previewBusiness().email || ''
+    });
+  }
+
+  private createDefaultWeeklyHoursConfig(): WeeklyHourConfig[] {
+    return [
+      { dayKey: 'monday', dayLabel: 'Lunes', isOpen: true, from: '09:00', to: '18:00' },
+      { dayKey: 'tuesday', dayLabel: 'Martes', isOpen: true, from: '09:00', to: '18:00' },
+      { dayKey: 'wednesday', dayLabel: 'Miércoles', isOpen: true, from: '09:00', to: '18:00' },
+      { dayKey: 'thursday', dayLabel: 'Jueves', isOpen: true, from: '09:00', to: '18:00' },
+      { dayKey: 'friday', dayLabel: 'Viernes', isOpen: true, from: '09:00', to: '18:00' },
+      { dayKey: 'saturday', dayLabel: 'Sábado', isOpen: true, from: '09:00', to: '18:00' },
+      { dayKey: 'sunday', dayLabel: 'Domingo', isOpen: true, from: '09:00', to: '18:00' }
+    ];
+  }
+
+  private syncWeeklyHoursFromSection() {
+    const section = this.contactSection();
+    const hours = section?.content.hours || [];
+
+    const defaultConfig = this.createDefaultWeeklyHoursConfig();
+    const mapped = defaultConfig.map(day => {
+      const matched = hours.find(line => line.toLowerCase().startsWith(day.dayLabel.toLowerCase()));
+      if (!matched) {
+        return day;
+      }
+
+      const normalized = matched.normalize('NFD').replace(/[ -]/g, '').replace(/\s+/g, ' ').trim().toLowerCase();
+
+      if (normalized.includes('cerrado') || normalized.includes('no abre')) {
+        return { ...day, isOpen: false };
+      }
+
+      const timeMatch = matched.match(/(\d{1,2}):(\d{2}).*?(\d{1,2}):(\d{2})/);
+      if (!timeMatch) {
+        return day;
+      }
+
+      const from = `${timeMatch[1].padStart(2, '0')}:${timeMatch[2]}`;
+      const to = `${timeMatch[3].padStart(2, '0')}:${timeMatch[4]}`;
+      return {
+        ...day,
+        isOpen: true,
+        from,
+        to
+      };
+    });
+
+    this.weeklyHoursConfig.set(mapped);
+    this.persistWeeklyHoursConfig(mapped);
+  }
+
+  private persistWeeklyHoursConfig(config: WeeklyHourConfig[]) {
+    const labels = this.buildWeeklyHoursLabels(config);
+    this.patchSection('contact', section => {
+      section.content.hours = labels;
+    });
+  }
+
+  private buildWeeklyHoursLabels(config: WeeklyHourConfig[]): string[] {
+    const labels: string[] = [];
+    let index = 0;
+
+    while (index < config.length) {
+      const current = config[index];
+
+      if (!current.isOpen) {
+        index += 1;
+        continue;
+      }
+
+      let end = index;
+
+      while (end + 1 < config.length && this.hasSameSchedule(current, config[end + 1])) {
+        end += 1;
+      }
+
+      const dayLabel = end > index
+        ? `${current.dayLabel} a ${config[end].dayLabel}`
+        : current.dayLabel;
+
+      const scheduleText = `${this.formatTimeLabel(current.from)} - ${this.formatTimeLabel(current.to)}`;
+
+      labels.push(`${dayLabel}: ${scheduleText}`);
+      index = end + 1;
+    }
+
+    return labels;
+  }
+
+  private hasSameSchedule(a: WeeklyHourConfig, b: WeeklyHourConfig): boolean {
+    if (!a.isOpen || !b.isOpen) {
+      return false;
+    }
+
+    return a.from === b.from && a.to === b.to;
+  }
+
+  private buildHalfHourOptions(): Array<{ value: string; label: string }> {
+    const options: Array<{ value: string; label: string }> = [];
+
+    for (let hour = 0; hour < 24; hour += 1) {
+      for (const minute of [0, 30]) {
+        const value = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+        options.push({ value, label: this.formatTimeLabel(value) });
+      }
+    }
+
+    return options;
+  }
+
+  private formatTimeLabel(value: string): string {
+    const [hourRaw, minuteRaw] = value.split(':');
+    const hour = Number(hourRaw);
+    const minute = Number(minuteRaw);
+    const suffix = hour < 12 ? 'a. m.' : 'p. m.';
+    const normalizedHour = hour % 12 === 0 ? 12 : hour % 12;
+    const minuteText = minute.toString().padStart(2, '0');
+
+    return `${normalizedHour}:${minuteText} ${suffix}`;
   }
 
   private buildHashUrl(route: string): string {

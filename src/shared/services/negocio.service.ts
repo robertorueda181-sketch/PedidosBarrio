@@ -128,7 +128,7 @@ export class NegocioService {
                 ...detalle,
                 productos: detalle.productos.map(p => ({
                     ...p,
-                    urlImagen: p.urlImagen ? p.urlImagen : 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80'
+                    urlImagen: p.urlImagen ? p.urlImagen : '/assets/image-default.webp'
                 }))
             }))
         );
@@ -152,7 +152,7 @@ export class NegocioService {
         const urlImagen = transformedImages.length > 0
             ? transformedImages[0].urlImagen
             : (item.urlImagen ? item.urlImagen :
-                'https://images.unsplash.com/photo-1560448072-283bd0dfaa55?auto=format&fit=crop&w=800&q=60');
+                '/assets/image-default.webp');
 
         return {
             ...item,

@@ -64,7 +64,7 @@ export class ServicioService {
         const urlImagen = transformedImages.length > 0
             ? transformedImages[0].urlImagen
             : (item.urlImagen ? `${this.config.baseUrl}/images/${item.urlImagen.split(/[/\\]/).pop()}` :
-                'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&q=80&w=800');
+                '/assets/image-default.webp');
 
         return {
             ...item,

@@ -67,7 +67,7 @@ export class InmuebleService {
         const urlImagen = transformedImages.length > 0
             ? transformedImages[0].urlImagen
             : (item.urlImagen ? `${this.config.baseUrl}/images/${item.urlImagen.split(/[/\\]/).pop()}` :
-                'https://images.unsplash.com/photo-1560448072-283bd0dfaa55?auto=format&fit=crop&w=800&q=60');
+                '/assets/image-default.webp');
 
         // Set tipo from tipoInmueble if available, otherwise keep existing
         const tipo = item.tipoInmueble || item.tipo || 'Inmueble';

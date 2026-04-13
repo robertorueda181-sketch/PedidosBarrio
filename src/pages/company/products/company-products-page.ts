@@ -12,6 +12,17 @@ interface SiteBuilderDraft {
   savedAt: string | null;
 }
 
+interface CompanyProductsTheme {
+  primary: string;
+  secondary: string;
+  background: string;
+  text: string;
+  textLight: string;
+  surface: string;
+  surfaceBorder: string;
+  mutedText: string;
+}
+
 @Component({
   selector: 'app-company-products-page',
   standalone: true,
@@ -32,10 +43,12 @@ export class CompanyProductsPage {
   readonly selectedCategory = signal('all');
   readonly cartItems = signal<CompanyCartItem[]>([]);
   readonly isCartOpen = signal(false);
+  readonly theme = signal<CompanyProductsTheme>(this.buildTheme());
 
   readonly isPreview = computed(() => this.router.url.includes('/preview'));
   readonly businessSlug = computed(() => this.route.snapshot.paramMap.get('codigoempresa') || '');
   readonly brandName = computed(() => this.business()?.nombre || 'Mi catálogo');
+  readonly logoUrl = computed(() => this.business()?.logoUrl || (this.business() as any)?.urlLogo || '');
   readonly pageTitle = computed(() => `Productos de ${this.brandName()}`);
   readonly pageDescription = computed(() => this.business()?.descripcion || 'Explora todos los productos disponibles y encuentra lo que buscas rápidamente.');
 
@@ -73,16 +86,10 @@ export class CompanyProductsPage {
   });
 
   readonly backUrl = computed(() => this.isPreview()
-    ? '/empresa/mi-sitio/preview'
+    ? '/empresa/sitio/preview'
     : `/negocio/${this.businessSlug()}`);
 
-  readonly menuSectionLabels = computed(() => {
-    const menuSection = TEMPLATE_THREE_STATIC_CONTENT.sections.find(section => section.type === 'menu');
-    return {
-      allCategoriesLabel: menuSection?.content.all_categories_label || 'Todas',
-      orderButtonText: menuSection?.content.order_button_text || 'Pedir'
-    };
-  });
+  
   readonly cartTotal = computed(() => this.cartItems().reduce((acc, item) => acc + item.price * item.quantity, 0));
   readonly cartCount = computed(() => this.cartItems().reduce((acc, item) => acc + item.quantity, 0));
 
@@ -201,7 +208,7 @@ export class CompanyProductsPage {
   }
 
   fallbackProductImage(): string {
-    return 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&q=80';
+    return '/assets/image-default.webp';
   }
 
   private loadBusiness() {
@@ -245,8 +252,39 @@ export class CompanyProductsPage {
     try {
       const draft = JSON.parse(raw) as SiteBuilderDraft;
       this.business.set(draft.business || null);
+      this.theme.set(this.buildTheme(draft.pageData?.theme?.colors));
     } catch {
       this.error.set('No se pudo leer el borrador de la vista previa.');
     }
+  }
+
+  private buildTheme(colors?: typeof TEMPLATE_THREE_STATIC_CONTENT.theme.colors): CompanyProductsTheme {
+    const palette = colors || TEMPLATE_THREE_STATIC_CONTENT.theme.colors;
+    const text = palette.text_main || '#2b211d';
+    const background = palette.background || '#f6f0e6';
+
+    return {
+      primary: palette.primary || '#4a2f27',
+      secondary: palette.secondary || '#c2a06b',
+      background,
+      text,
+      textLight: palette.text_light || '#ffffff',
+      surface: '#ffffff',
+      surfaceBorder: this.hexToRgba(text, 0.08),
+      mutedText: this.hexToRgba(text, 0.72)
+    };
+  }
+
+  private hexToRgba(hex: string, alpha: number): string {
+    const normalized = hex.startsWith('#') ? hex.slice(1) : hex;
+    if (!/^[0-9a-fA-F]{6}$/.test(normalized)) {
+      return `rgba(43, 33, 29, ${alpha})`;
+    }
+
+    const value = parseInt(normalized, 16);
+    const r = value >> 16;
+    const g = (value >> 8) & 0x00ff;
+    const b = value & 0x0000ff;
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
   }
 }

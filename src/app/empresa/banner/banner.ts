@@ -68,7 +68,7 @@ export class Banner implements OnInit {
           id: b.bannerID, 
           title: b.titulo,
           subtitle: b.descripcion,
-          urlImagen: b.urlImagen || 'https://images.unsplash.com/photo-1517433367423-c7e5b0f35086?w=1600', // URL imagen
+          urlImagen: b.urlImagen || '/assets/image-default.webp', // URL imagen
           ctaText: b.textoBoton,
           ctaAction: b.redireccion,
           startDate: b.fechaInicio ? new Date(b.fechaInicio) : undefined,
@@ -107,7 +107,7 @@ export class Banner implements OnInit {
       id: '',
       title: '',
       subtitle: '',
-      urlImagen: 'https://images.unsplash.com/photo-1517433367423-c7e5b0f35086?w=1600',
+      urlImagen: '/assets/image-default.webp',
       ctaText: 'Ver Más',
       ctaAction: 'productos',
       startDate: now,

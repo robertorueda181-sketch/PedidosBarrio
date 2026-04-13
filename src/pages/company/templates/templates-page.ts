@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { NegocioDetalle, NegocioService } from '../../../shared/services/negocio.service';
+import { LoaderComponent } from '../../../shared/components/loader/loader';
 
 interface PublicTemplateCard {
   id: 1 | 2 | 3;
@@ -15,7 +16,7 @@ interface PublicTemplateCard {
 @Component({
   selector: 'app-company-templates-page',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, LoaderComponent],
   templateUrl: './templates-page.html',
   styleUrl: './templates-page.css'
 })

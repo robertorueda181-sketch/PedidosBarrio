@@ -190,7 +190,7 @@ export class SitioWebPreview {
         descripcion: producto.descripcion,
         precio: producto.precioActual || producto.precio || 0,
         stock: producto.stock || 0,
-        urlImagen: producto.imagenPrincipal || producto.urlImagen || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&q=80',
+        urlImagen: producto.imagenPrincipal || producto.urlImagen || '/assets/image-default.webp',
         categoria
       };
     });

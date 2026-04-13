@@ -112,7 +112,7 @@ export class Promociones implements OnInit {
             title: 'NUEVA PROMO',
             subtitle: 'Descripción breve de la oferta',
             showSubtitle: true,
-            imageUrl: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800',
+            imageUrl: '/assets/image-default.webp',
             mainContent: '<p>Explica aquí los detalles de tu promoción...</p>',
             showMainContent: true,
             showWhatsAppBadge: true,
@@ -167,8 +167,8 @@ export class Promociones implements OnInit {
             id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
             type: type,
             content: type !== 'image' ? '<p>Contenido de la sección...</p>' : '',
-            imageUrl: type === 'mixed' ? 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400' : '',
-            imageUrls: type === 'image' ? ['https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400'] : [],
+            imageUrl: type === 'mixed' ? '/assets/image-default.webp' : '',
+            imageUrls: type === 'image' ? ['/assets/image-default.webp'] : [],
             layout: 'text-left',
             size: sizeOverride || 'lg'
         };
@@ -178,7 +178,7 @@ export class Promociones implements OnInit {
     addImageToSection(sectionId: string) {
         const section = this.adConfig.moduleSections.find(s => s.id === sectionId);
         if (section && section.imageUrls) {
-            section.imageUrls.push('https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400');
+            section.imageUrls.push('/assets/image-default.webp');
         }
     }
 

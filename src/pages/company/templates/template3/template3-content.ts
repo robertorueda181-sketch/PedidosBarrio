@@ -51,13 +51,8 @@ export interface TemplateThreeAboutSection {
     description: string;
     secondary_description: string;
     features: TemplateThreeAboutFeature[];
-    cta: {
-      text: string;
-      link: string;
-    };
     image_highlight: {
       url: string;
-      badge_text: string;
       rating: number;
     };
   };
@@ -71,7 +66,6 @@ export interface TemplateThreeMenuSection {
     title: string;
     description: string;
     all_categories_label: string;
-    order_button_text: string;
   };
 }
 
@@ -85,7 +79,6 @@ export interface TemplateThreeGallerySection {
     items: Array<{
       type: 'image';
       url: string;
-      alt: string;
       caption?: string;
     }>;
   };
@@ -151,8 +144,6 @@ export interface TemplateThreeContactSection {
   type: 'contact';
   id: string;
   content: {
-    overline: string;
-    title: string;
     social_title: string;
     address_label: string;
     phone_label: string;
@@ -170,13 +161,7 @@ export interface TemplateThreeFooterSection {
   type: 'footer';
   id: string;
   content: {
-    navigation_title: string;
-    hours_title: string;
-    contact_title: string;
     description: string;
-    reservation_text: string;
-    copyright_text: string;
-    credit_text: string;
   };
 }
 
@@ -220,7 +205,7 @@ export const TEMPLATE_THREE_STATIC_CONTENT: TemplateThreePageData = {
         title: 'Sabores que convierten una salida en un recuerdo',
         subtitle: 'Cocina con personalidad, ambiente cálido y una propuesta pensada para compartir grandes momentos.',
         primary_cta: {
-          text: 'Reservar una mesa',
+          text: 'Reservar',
           link: '#reservas'
         },
         secondary_cta: {
@@ -241,20 +226,15 @@ export const TEMPLATE_THREE_STATIC_CONTENT: TemplateThreePageData = {
         overline: 'NUESTRA HISTORIA',
         title: 'Sobre Nosotros',
         description: 'Nuestro objetivo es que cada visita se convierta en una experiencia memorable, tanto por el servicio como por la calidad de nuestros productos.',
-        secondary_description: 'Trabajamos con ingredientes frescos y una atención cercana para que cada detalle sume a la experiencia.',
+        secondary_description: 'Aqui escriba una descripcion secundaria que hable un poco mas de la historia del negocio, sus valores, su propuesta unica y lo que lo hace especial. Este texto es importante para conectar con los clientes y transmitir la personalidad de la marca de manera mas profunda.',
         features: [
           { label: 'Ingredientes frescos', detail: 'Seleccionados a diario' },
           { label: 'Ambiente único', detail: 'Un espacio con carácter propio' },
           { label: 'Cocina auténtica', detail: 'Sabores con identidad' },
           { label: 'Servicio excepcional', detail: 'Atención personalizada' }
         ],
-        cta: {
-          text: 'Reserva tu experiencia',
-          link: '#reservas'
-        },
         image_highlight: {
-          url: 'url_imagen_grand_opening.jpg',
-          badge_text: '50%',
+          url: '/assets/image-default.webp',
           rating: 4.8
         }
       }
@@ -266,8 +246,7 @@ export const TEMPLATE_THREE_STATIC_CONTENT: TemplateThreePageData = {
         overline: 'LO QUE OFRECEMOS',
         title: 'Nuestro Menú',
         description: 'Explora una selección de productos y categorías que representan lo mejor de nuestra propuesta.',
-        all_categories_label: 'Todas',
-        order_button_text: 'Pedir'
+        all_categories_label: 'Todas'
       }
     },
     {
@@ -278,10 +257,10 @@ export const TEMPLATE_THREE_STATIC_CONTENT: TemplateThreePageData = {
         title: 'Galería',
         description: 'Una selección visual de los platos, espacios y momentos que hacen única tu marca.',
         items: [
-          { type: 'image', url: 'modelo_bikini.jpg', alt: 'Lifestyle', caption: 'Momentos con estilo' },
-          { type: 'image', url: 'aji_de_gallina_1.jpg', alt: 'Plato típico', caption: 'Sabores peruanos' },
-          { type: 'image', url: 'aji_de_gallina_2.jpg', alt: 'Plato típico detalle', caption: 'Detalles que enamoran' },
-          { type: 'image', url: 'aji_de_gallina_3.jpg', alt: 'Plato típico presentación', caption: 'Presentación impecable' }
+          { type: 'image', url: '/assets/image-default.webp', caption: 'Momentos con estilo' },
+          { type: 'image', url: '/assets/image-default.webp',caption: 'Sabores peruanos' },
+          { type: 'image', url: '/assets/image-default.webp', caption: 'Detalles que enamoran' },
+          { type: 'image', url: '/assets/image-default.webp', caption: 'Presentación impecable' }
         ]
       }
     },
@@ -372,8 +351,6 @@ export const TEMPLATE_THREE_STATIC_CONTENT: TemplateThreePageData = {
       type: 'contact',
       id: 'contacto',
       content: {
-        overline: 'ENCUÉNTRANOS',
-        title: 'Contacto',
         social_title: 'Síguenos en redes sociales',
         address_label: 'Dirección',
         phone_label: 'Teléfono / WhatsApp',
@@ -394,13 +371,7 @@ export const TEMPLATE_THREE_STATIC_CONTENT: TemplateThreePageData = {
       type: 'footer',
       id: 'footer',
       content: {
-        navigation_title: 'Navegación',
-        hours_title: 'Horarios',
-        contact_title: 'Contáctanos',
         description: 'Una experiencia gastronómica pensada para disfrutarse con todos los sentidos.',
-        reservation_text: '→ Reservar una mesa',
-        copyright_text: 'Todos los derechos reservados.',
-        credit_text: 'Diseñado con pasión en Lima, Perú 🇵🇪'
       }
     }
   ]

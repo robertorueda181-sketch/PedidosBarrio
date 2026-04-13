@@ -327,6 +327,36 @@
   margin-top: 0.5rem;
 }
 
+.mi-sitio-color-popup-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 95;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(15, 23, 42, 0.72);
+  backdrop-filter: blur(6px);
+}
+
+.mi-sitio-color-popup-modal {
+  width: min(1100px, 100%);
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
+  border-radius: 1.5rem;
+  border: 1px solid #dbeafe;
+  background: #f8fafc;
+  box-shadow: 0 28px 70px rgba(2, 6, 23, 0.35);
+  padding: 1.25rem;
+}
+
+.mi-sitio-color-popup-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
 @media (max-width: 960px) {
   .mi-sitio-builder__layout {
     gap: 1rem;
@@ -342,6 +372,10 @@
 
   .mi-sitio-preview-meta {
     gap: 0.85rem;
+  }
+
+  .mi-sitio-color-popup-modal {
+    padding: 1rem;
   }
 }
 
@@ -466,6 +500,21 @@
   .mi-sitio-preview-meta p,
   .mi-sitio-preview-meta ul {
     font-size: 0.9rem;
+  }
+
+  .mi-sitio-color-popup-backdrop {
+    padding: 0.65rem;
+  }
+
+  .mi-sitio-color-popup-modal {
+    max-height: calc(100vh - 1.3rem);
+    border-radius: 1.15rem;
+    padding: 0.8rem;
+  }
+
+  .mi-sitio-color-popup-head {
+    flex-direction: column;
+    align-items: stretch;
   }
 }
 

@@ -149,7 +149,7 @@ export class Amanro implements OnInit {
       if (config.moduleSections) {
         config.moduleSections = config.moduleSections.map((sec: any) => {
           if (sec.type === 'image' && !sec.imageUrls) {
-            sec.imageUrls = [sec.imageUrl || 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400'];
+            sec.imageUrls = [sec.imageUrl || '/assets/image-default.webp'];
           }
           return sec;
         });

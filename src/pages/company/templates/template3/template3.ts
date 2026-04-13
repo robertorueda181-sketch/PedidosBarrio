@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, HostListener, computed, inject, input, signal } from '@angular/core';
+import { Component, ElementRef, HostListener, computed, effect, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { NegocioDetalle } from '../../../../shared/services/negocio.service';
@@ -48,7 +48,6 @@ interface TemplateThreeTestimonial {
 
 interface TemplateThreeGalleryItem {
   url: string;
-  alt: string;
   caption?: string;
 }
 
@@ -108,6 +107,7 @@ export class TemplateThreeComponent {
   mapUrl = input<SafeResourceUrl | null>(null);
   whatsappUrl = input<string | null>(null);
   previewMode = input<'default' | 'embedded-mobile'>('default');
+  editorFocusSection = input<TemplateThreeSectionData['type'] | null>(null);
   cartItems = input<CompanyCartItem[]>([]);
   isCartOpen = input(false);
   cartCount = input(0);
@@ -122,6 +122,7 @@ export class TemplateThreeComponent {
   isMobileMenuOpen = signal(false);
   reservationSubmitted = signal(false);
   navScrolled = signal(false);
+  lightboxItem = signal<{ url: string; caption?: string } | null>(null);
   reservationForm = signal<ReservationFormState>({
     name: '',
     phone: '',
@@ -144,6 +145,8 @@ export class TemplateThreeComponent {
   reservationSection = computed(() => this.sections().find(section => section.type === 'reservation') as TemplateThreeReservationSection | undefined);
   contactSection = computed(() => this.sections().find(section => section.type === 'contact') as TemplateThreeContactSection | undefined);
   footerSection = computed(() => this.sections().find(section => section.type === 'footer') as TemplateThreeFooterSection | undefined);
+  hasMenuSection = computed(() => !!this.menuSection());
+  hasReservationSection = computed(() => !!this.reservationSection());
   navigableSections = computed(() => this.sections().filter(section => section.type !== 'footer'));
   isEmbeddedMobile = computed(() => this.previewMode() === 'embedded-mobile');
 
@@ -191,7 +194,9 @@ export class TemplateThreeComponent {
     || this.business()?.urlBanner
     || this.business()?.urlImagen
     || this.business()?.imagenes?.[0]?.urlImagen
-    || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1600&q=85');
+    || '/assets/image-default.webp');
+  readonly heroPrimaryCtaText = 'Reservar';
+  readonly heroSecondaryCtaText = 'Ver nuestros productos';
 
   aboutOverline = computed(() => this.aboutSection()?.content.overline || 'Nuestra historia');
   aboutTitle = computed(() => this.config()?.aboutTitle || this.aboutSection()?.content.title || 'Sobre Nosotros');
@@ -212,8 +217,6 @@ export class TemplateThreeComponent {
     || this.aboutSection()?.content.image_highlight.url
     || this.business()?.imagenes?.[1]?.urlImagen
     || this.heroImageUrl());
-  aboutCtaText = computed(() => this.aboutSection()?.content.cta.text || 'Reserva tu experiencia');
-  aboutCtaLink = computed(() => this.aboutSection()?.content.cta.link || '#reservas');
   galleryOverline = computed(() => this.gallerySection()?.content.overline || 'Momentos y sabores');
   galleryTitle = computed(() => this.gallerySection()?.content.title || 'Galería');
 
@@ -232,7 +235,7 @@ export class TemplateThreeComponent {
 
     return products.filter(product => this.productCategoryKey(product) === active);
   });
-  productsPageUrl = computed(() => this.config()?.productsPageUrl || '');
+  productsPageUrl = computed(() => this.normalizeProductsPageUrl(this.config()?.productsPageUrl || ''));
   shouldShowProductsPageLink = computed(() => !!this.productsPageUrl());
 
   heroStats = computed<TemplateThreeStat[]>(() => {
@@ -320,8 +323,7 @@ export class TemplateThreeComponent {
     if (sectionGallery?.length) {
       return sectionGallery.map(image => ({
         url: image.url,
-        alt: image.alt,
-        caption: image.caption || image.alt
+        caption: image.caption
       }));
     }
 
@@ -366,6 +368,21 @@ export class TemplateThreeComponent {
     if (window.innerWidth > 768 && this.isMobileMenuOpen()) {
       this.isMobileMenuOpen.set(false);
     }
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscapeKey() {
+    if (this.lightboxItem()) {
+      this.lightboxItem.set(null);
+    }
+  }
+
+  openLightbox(item: { url: string; caption?: string }): void {
+    this.lightboxItem.set(item);
+  }
+
+  closeLightbox(): void {
+    this.lightboxItem.set(null);
   }
 
   toggleMobileMenu() {
@@ -513,7 +530,7 @@ export class TemplateThreeComponent {
       case 'reservation':
         return section.content.title;
       case 'contact':
-        return section.content.title;
+        return 'Contacto';
       case 'footer':
         return 'Footer';
     }
@@ -540,21 +557,12 @@ export class TemplateThreeComponent {
   }
 
   fallbackProductImage(): string {
-    return 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&q=80';
+    return '/assets/image-default.webp';
   }
 
   menuItemFallbackDescription(): string {
     return 'Preparado con los mejores ingredientes de la casa.';
   }
-
-  experienceCardValue(): string {
-    return this.aboutSection()?.content.image_highlight.badge_text || this.heroStats()[0]?.value || '5+';
-  }
-
-  experienceCardLabel(): string {
-    return this.heroStats()[0]?.label || 'Años de experiencia';
-  }
-
   ratingCardValue(): string {
     return `★ ${this.aboutSection()?.content.image_highlight.rating?.toFixed(1) || this.averageRating()}`;
   }
@@ -597,6 +605,20 @@ export class TemplateThreeComponent {
 
   openingHoursText(): string {
     return this.openingHoursLines().join(' · ');
+  }
+
+  constructor() {
+    effect(() => {
+      const sectionType = this.editorFocusSection();
+
+      if (!sectionType || !this.isEmbeddedMobile()) {
+        return;
+      }
+
+      requestAnimationFrame(() => {
+        this.navigateToSectionByType(sectionType);
+      });
+    });
   }
 
   whatsappProductLink(product: any): string {
@@ -669,6 +691,29 @@ export class TemplateThreeComponent {
 
   private slugify(value: string): string {
     return value.toLowerCase().replace(/[^a-z0-9]+/g, '').trim() || 'negocio';
+  }
+
+  private normalizeProductsPageUrl(url: string): string {
+    const raw = (url || '').trim();
+    if (!raw) {
+      return '';
+    }
+
+    if (/^(https?:|mailto:|tel:|\/\/)/i.test(raw)) {
+      return raw;
+    }
+
+    if (raw.startsWith('#')) {
+      return raw;
+    }
+
+    const routePath = raw.startsWith('/') ? raw : `/${raw.replace(/^\.\//, '')}`;
+
+    if (typeof window === 'undefined') {
+      return `#${routePath}`;
+    }
+
+    return `${window.location.origin}${window.location.pathname}#${routePath}`;
   }
 
   private toVideoEmbedUrl(url: string): string {

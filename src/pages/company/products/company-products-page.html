@@ -1,10 +1,23 @@
-<div class="company-products-page min-h-screen bg-slate-950 text-white">
+<div class="company-products-page min-h-screen"
+  [style.--products-primary]="theme().primary"
+  [style.--products-secondary]="theme().secondary"
+  [style.--products-background]="theme().background"
+  [style.--products-text]="theme().text"
+  [style.--products-text-light]="theme().textLight"
+  [style.--products-surface]="theme().surface"
+  [style.--products-surface-border]="theme().surfaceBorder"
+  [style.--products-muted-text]="theme().mutedText">
   <div class="company-products-page__hero">
     <div class="company-products-page__container">
       <a [routerLink]="backUrl()" class="company-products-page__back-link">← Volver al sitio</a>
 
       <div class="company-products-page__hero-grid">
         <div>
+          @if (logoUrl()) {
+          <div class="company-products-page__brand-logo-wrap">
+            <img [src]="logoUrl()" [alt]="'Logo de ' + brandName()" class="company-products-page__brand-logo" />
+          </div>
+          }
           <p class="company-products-page__eyebrow">Catálogo</p>
           <h1 class="company-products-page__title">{{ pageTitle() }}</h1>
           <p class="company-products-page__description">{{ pageDescription() }}</p>
@@ -36,13 +49,7 @@
       <div class="company-products-page__state-card company-products-page__state-card--error">{{ error() }}</div>
       } @else {
       <div class="company-products-page__filters">
-        <button
-          type="button"
-          class="company-products-page__filter-btn"
-          [class.company-products-page__filter-btn--active]="selectedCategory() === 'all'"
-          (click)="setActiveCategory('all')">
-          {{ menuSectionLabels().allCategoriesLabel }}
-        </button>
+        
 
         @for (category of categories(); track categoryKey(category)) {
         <button

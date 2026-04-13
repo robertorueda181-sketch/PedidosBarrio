@@ -73,8 +73,12 @@
       <p class="template-three__hero-subtitle template-three__fade-up-3">{{ heroSectionData.content.subtitle }}</p>
 
       <div class="template-three__hero-actions template-three__fade-up-4">
-        <a [href]="heroSectionData.content.primary_cta.link" (click)="navigateToHash(heroSectionData.content.primary_cta.link, $event)" class="template-three__btn-primary">{{ heroSectionData.content.primary_cta.text }}</a>
-        <a [href]="heroSectionData.content.secondary_cta.link" (click)="navigateToHash(heroSectionData.content.secondary_cta.link, $event)" class="template-three__btn-outline">{{ heroSectionData.content.secondary_cta.text }}</a>
+        @if (hasReservationSection()) {
+        <a [href]="sectionHrefByType('reservation')" (click)="navigateToSectionByType('reservation', $event)" class="template-three__btn-primary">{{ heroPrimaryCtaText }}</a>
+        }
+        @if (hasMenuSection()) {
+        <a [href]="sectionHrefByType('menu')" (click)="navigateToSectionByType('menu', $event)" class="template-three__btn-outline">{{ heroSecondaryCtaText }}</a>
+        }
       </div>
     </div>
 
@@ -105,16 +109,10 @@
           </div>
           }
         </div>
-
-        <a [href]="aboutSectionData.content.cta.link" (click)="navigateToHash(aboutSectionData.content.cta.link, $event)" class="template-three__btn-crimson-outline">{{ aboutSectionData.content.cta.text }}</a>
       </div>
 
       <div class="template-three__about-media">
         <img [src]="aboutSectionData.content.image_highlight.url || aboutImageUrl()" [alt]="brandName()">
-        <div class="template-three__floating-card template-three__floating-card--left">
-          <p>{{ aboutSectionData.content.image_highlight.badge_text }}</p>
-          <span>{{ experienceCardLabel() }}</span>
-        </div>
         <div class="template-three__floating-card template-three__floating-card--right">
           <p>★ {{ aboutSectionData.content.image_highlight.rating }}</p>
           <span>{{ ratingCardLabel() }}</span>
@@ -186,10 +184,11 @@
 
       <div class="template-three__gallery-grid">
         @for (image of gallerySectionData.content.items; track image.url + '-' + $index) {
-        <div class="template-three__gallery-item">
-          <img [src]="image.url" [alt]="image.alt">
+        <div class="template-three__gallery-item template-three__gallery-item--clickable" (click)="openLightbox(image)">
+          <img [src]="image.url" [alt]="image.caption || 'Imagen de galería'">
           <div class="template-three__gallery-overlay">
-            <span>{{ image.caption || image.alt }}</span>
+            <span>{{ image.caption }}</span>
+            <span class="template-three__gallery-zoom-icon">&#x1F50D;</span>
           </div>
         </div>
         }
@@ -317,8 +316,8 @@
   <section [id]="sectionAnchorId(section, $index)" class="template-three__section template-three__section--white">
     <div class="template-three__container">
       <div class="template-three__section-head">
-        <p class="template-three__section-label">{{ contactSectionData.content.overline }}</p>
-        <h2 class="template-three__section-title">{{ contactSectionData.content.title }}</h2>
+        <p class="template-three__section-label">ENCUÉNTRANOS</p>
+        <h2 class="template-three__section-title">Contacto</h2>
         <div class="template-three__divider"></div>
       </div>
 
@@ -458,7 +457,7 @@
         </div>
 
         <div>
-          <p class="template-three__footer-title">{{ footerSectionData.content.navigation_title }}</p>
+          <p class="template-three__footer-title">Navegación</p>
           <div class="template-three__footer-links">
             @for (navSection of navigableSections(); track navSection.id + '-footer-' + $index) {
             <a [href]="sectionHref(navSection)" (click)="navigateToSection(navSection, $event)">{{ sectionNavLabel(navSection) }}</a>
@@ -467,7 +466,7 @@
         </div>
 
         <div>
-          <p class="template-three__footer-title">{{ footerSectionData.content.hours_title }}</p>
+          <p class="template-three__footer-title">Horarios</p>
           <div class="template-three__footer-links">
             @for (hour of openingHoursLines(); track hour) {
             <p>{{ hour }}</p>
@@ -476,22 +475,33 @@
         </div>
 
         <div>
-          <p class="template-three__footer-title">{{ footerSectionData.content.contact_title }}</p>
+          <p class="template-three__footer-title">Contáctanos</p>
           <div class="template-three__footer-links">
             @if (business()?.telefono) {<a [href]="'tel:' + business()?.telefono">📞 {{ business()?.telefono }}</a>}
             @if (business()?.email) {<a [href]="'mailto:' + business()?.email">✉️ {{ business()?.email }}</a>}
             @if (business()?.direccion) {<a [href]="sectionHrefByType('contact')" (click)="navigateToSectionByType('contact', $event)">📍 {{ business()?.direccion }}</a>}
-            <a [href]="sectionHrefByType('reservation')" (click)="navigateToSectionByType('reservation', $event)" class="template-three__footer-highlight">{{ footerSectionData.content.reservation_text }}</a>
+            <a [href]="sectionHrefByType('reservation')" (click)="navigateToSectionByType('reservation', $event)" class="template-three__footer-highlight">Reservar</a>
           </div>
         </div>
       </div>
 
       <div class="template-three__footer-bottom">
-        <p>© {{ currentYear }} {{ brandName() }}. {{ footerSectionData.content.copyright_text }}</p>
-        <p>{{ footerSectionData.content.credit_text }}</p>
+        <p>© {{ currentYear }} {{ brandName() }}. Todos los derechos reservados.</p>
       </div>
     </div>
   </footer>
   }
   }
+
+@if (lightboxItem()) {
+<div class="template-three__lightbox-backdrop" (click)="closeLightbox()" role="dialog" aria-modal="true">
+  <button type="button" class="template-three__lightbox-close" (click)="closeLightbox()" aria-label="Cerrar">✕</button>
+  <div class="template-three__lightbox-box" (click)="$event.stopPropagation()">
+    <img [src]="lightboxItem()!.url" [alt]="lightboxItem()!.caption || 'Imagen de galería'" class="template-three__lightbox-img">
+    @if (lightboxItem()!.caption) {
+    <p class="template-three__lightbox-caption">{{ lightboxItem()!.caption }}</p>
+    }
+  </div>
+</div>
+}
 </div>

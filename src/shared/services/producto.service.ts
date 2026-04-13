@@ -101,7 +101,7 @@ export class ProductoService {
     private transformProducto(producto: Producto): Producto {
         const urlImagen = producto.imagenPrincipal != '' ?
           producto.imagenPrincipal :
-         'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80';
+         '/assets/image-default.webp';
 
         return {
             ...producto,
