@@ -29,10 +29,12 @@ jobs:
       - name: Desplegar en el servidor VPS via SCP
         uses: appleboy/scp-action@v0.1.7
         with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USERNAME }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          port: ${{ secrets.VPS_PORT || 22 }}
-          source: "dist/PedidosBarrio/browser/*"
-          target: "/var/www/html/EspacioOnline" # Ruta de destino en tu servidor VPS
-          strip_components: 3 # Esto elimina la estructura de carpetas inicial "dist/PedidosBarrio/browser" al copiar
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          # Ajustamos la ruta de origen para que coincida con la subcarpeta
+          source: "PedidosBarrio/dist/pedidos-barrio/browser/*"
+          target: "/var/www/EspacioOnline"
+          # Subimos a 4 porque ahora hay una carpeta más: PedidosBarrio/dist/pedidos-barrio/browser
+          strip_components: 4
+          rm: true
