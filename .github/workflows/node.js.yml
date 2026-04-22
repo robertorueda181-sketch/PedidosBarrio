@@ -22,6 +22,7 @@ jobs:
           # Asegúrate de haberlo subido al repo.
           # Esta línea le dice a GitHub exactamente dónde buscar el archivo
           #cache-dependency-path: './package-lock.json'
+          cache-dependency-path: 'PedidosBarrio/package-lock.json'
 
       - name: Instalar dependencias
         run: npm install
