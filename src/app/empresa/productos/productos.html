@@ -150,52 +150,7 @@
   </div>
 </div>
 
-<!-- Modal Categoría -->
-@if (showCategoryModal) {
-<div class="modal-overlay" (click)="closeCategoryModal()">
-  <div class="modal" (click)="$event.stopPropagation()">
-    <div class="modal-header">
-      <h3>{{ categoryForm.id ? 'Editar Categoría' : 'Nueva Categoría' }}</h3>
-      <button class="btn-close" (click)="closeCategoryModal()">×</button>
-    </div>
-    <div class="modal-body">
-      <div class="form-group">
-        <label>Nombre de la categoría</label>
-        <input type="text" [(ngModel)]="categoryForm.name" placeholder="Ej: Platos, Bebidas, Postres"
-          class="form-control">
-      </div>
-      <div class="form-group">
-        <label>Color de la categoría</label>
-        <div class="color-picker-group">
-          <input type="color" [(ngModel)]="categoryForm.color" class="color-picker">
-          <input type="text" [(ngModel)]="categoryForm.color" placeholder="#3b82f6" class="form-control color-input">
-          <!-- <div class="color-preview" [style.background-color]="categoryForm.color"></div> -->
-        </div>
-        <div class="color-presets">
-          @for (color of ['#ef4444', '#f59e0b', '#fbbf24', '#10b981', '#06b6d4', '#3b82f6', '#8b5cf6', '#ec4899']; track
-          color) {
-          <button type="button" class="color-preset" [style.background-color]="color"
-            (click)="categoryForm.color = color" [class.active]="categoryForm.color === color">
-          </button>
-          }
-        </div>
-      </div>
-      <!-- <div class="form-group">
-          <label class="checkbox-label">
-            <input 
-              type="checkbox" 
-              [(ngModel)]="categoryForm.isFavorite">
-            <span>Marcar como categoría favorita</span>
-          </label>
-        </div> -->
-    </div>
-    <div class="modal-footer">
-      <button class="btn-secondary" (click)="closeCategoryModal()">Cancelar</button>
-      <button class="btn-primary" (click)="saveCategoryForm()">{{ categoryForm.id ? 'Guardar' : 'Crear' }}</button>
-    </div>
-  </div>
-</div>
-}
+
 
 <!-- Modal Producto con PrimeNG -->
 <p-dialog [(visible)]="showProductModal" [header]="productForm.id ? 'Editar Producto' : 'Nuevo Producto'" [modal]="true"

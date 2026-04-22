@@ -104,8 +104,8 @@ export class ProductosComponent {
 
   // Categoría seleccionada
   searchTerm: string = '';
-
-  // Datos de formularios
+  selectedCategoryId: number | null = null;
+  categories = signal<any[]>([]);
   productForm = {
     id: null as number | null,
     name: '',
@@ -175,6 +175,7 @@ export class ProductosComponent {
         this.products.set(response.productos.map(prod => ({
           ...prod
         })));
+        this.categories.set(response.categorias || []);
 
         this.handleQueryProductAction();
       },
@@ -516,7 +517,7 @@ export class ProductosComponent {
         this.productoService.eliminarProducto(productId).subscribe({
           next: () => {
             this.products.update(prods => prods.filter(p => p.productoID !== productId));
-            this.updateProductCounts();
+            // this.updateProductCounts();
             this.toastr.success('El producto se ha eliminado correctamente', 'Producto eliminado');
           },
           error: (error) => {

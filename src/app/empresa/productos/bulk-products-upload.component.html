@@ -15,7 +15,7 @@
 </div>
 
 <!-- Diálogo de carga de Excel -->
-<p-dialog [(visible)]="showExcelDialog()" header="Cargar Productos desde Excel" [modal]="true"
+<p-dialog [visible]="showExcelDialog()" (visibleChange)="showExcelDialog.set($event)" header="Cargar Productos desde Excel" [modal]="true"
   [style]="{ width: isMobile() ? '95vw' : '90vw', maxWidth: '800px' }" [draggable]="false">
 
   <div class="dialog-content">
@@ -64,49 +64,49 @@
       <div class="mapping-grid">
         <div class="mapping-item">
           <label>Nombre del Producto</label>
-          <input type="text" [(ngModel)]="columnMapping" (ngModelChange)="columnMapping.set({ ...columnMapping(), nombre: $event })"
+          <input type="text" [ngModel]="columnMapping().nombre" (ngModelChange)="updateColumnMapping('nombre', $event)"
             placeholder="ej. Nombre" />
         </div>
 
         <div class="mapping-item">
           <label>Descripción</label>
-          <input type="text" [(ngModel)]="columnMapping" (ngModelChange)="columnMapping.set({ ...columnMapping(), descripcion: $event })"
+          <input type="text" [ngModel]="columnMapping().descripcion" (ngModelChange)="updateColumnMapping('descripcion', $event)"
             placeholder="ej. Descripción" />
         </div>
 
         <div class="mapping-item">
           <label>Precio *</label>
-          <input type="text" [(ngModel)]="columnMapping" (ngModelChange)="columnMapping.set({ ...columnMapping(), precio: $event })"
+          <input type="text" [ngModel]="columnMapping().precio" (ngModelChange)="updateColumnMapping('precio', $event)"
             placeholder="ej. Precio" />
         </div>
 
         <div class="mapping-item">
           <label>Categoría ID *</label>
-          <input type="text" [(ngModel)]="columnMapping" (ngModelChange)="columnMapping.set({ ...columnMapping(), categoriaID: $event })"
+          <input type="text" [ngModel]="columnMapping().categoriaID" (ngModelChange)="updateColumnMapping('categoriaID', $event)"
             placeholder="ej. Categoría ID" />
         </div>
 
         <div class="mapping-item">
           <label>Código del Producto</label>
-          <input type="text" [(ngModel)]="columnMapping" (ngModelChange)="columnMapping.set({ ...columnMapping(), codigo: $event })"
+          <input type="text" [ngModel]="columnMapping().codigo" (ngModelChange)="updateColumnMapping('codigo', $event)"
             placeholder="ej. Código" />
         </div>
 
         <div class="mapping-item">
           <label>Stock</label>
-          <input type="text" [(ngModel)]="columnMapping" (ngModelChange)="columnMapping.set({ ...columnMapping(), stock: $event })"
+          <input type="text" [ngModel]="columnMapping().stock" (ngModelChange)="updateColumnMapping('stock', $event)"
             placeholder="ej. Stock" />
         </div>
 
         <div class="mapping-item">
           <label>Stock Mínimo</label>
-          <input type="text" [(ngModel)]="columnMapping" (ngModelChange)="columnMapping.set({ ...columnMapping(), stockMinimo: $event })"
+          <input type="text" [ngModel]="columnMapping().stockMinimo" (ngModelChange)="updateColumnMapping('stockMinimo', $event)"
             placeholder="ej. Stock Mínimo" />
         </div>
 
         <div class="mapping-item">
           <label>Inventario</label>
-          <input type="text" [(ngModel)]="columnMapping" (ngModelChange)="columnMapping.set({ ...columnMapping(), inventario: $event })"
+          <input type="text" [ngModel]="columnMapping().inventario" (ngModelChange)="updateColumnMapping('inventario', $event)"
             placeholder="ej. Inventario" />
         </div>
       </div>
@@ -173,7 +173,7 @@
 </p-dialog>
 
 <!-- Diálogo de carga de imágenes -->
-<p-dialog [(visible)]="showImagesDialog()" header="Cargar Imágenes Masivamente" [modal]="true"
+<p-dialog [visible]="showImagesDialog()" (visibleChange)="showImagesDialog.set($event)" header="Cargar Imágenes Masivamente" [modal]="true"
   [style]="{ width: isMobile() ? '95vw' : '90vw', maxWidth: '800px' }" [draggable]="false">
 
   <div class="dialog-content">
@@ -242,7 +242,7 @@
 </p-dialog>
 
 <!-- Diálogo de vista previa completa -->
-<p-dialog [(visible)]="showPreviewDialog()" header="Vista Previa de Datos" [modal]="true"
+<p-dialog [visible]="showPreviewDialog()" (visibleChange)="showPreviewDialog.set($event)" header="Vista Previa de Datos" [modal]="true"
   [style]="{ width: isMobile() ? '95vw' : '90vw', maxWidth: '1000px' }" [draggable]="false"
   [maximizable]="true">
 

@@ -71,6 +71,13 @@ export class BulkProductsUploadComponent {
   readonly imageFiles = signal<File[]>([]);
   readonly uploadResults = signal<BulkUploadResult | null>(null);
 
+  updateColumnMapping(field: keyof ColumnMapConfig, value: string): void {
+    this.columnMapping.set({
+      ...this.columnMapping(),
+      [field]: value
+    });
+  }
+
   // Estados del formulario
   readonly selectedCategory = signal<number | null>(null);
 

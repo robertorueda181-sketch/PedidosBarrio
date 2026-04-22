@@ -60,6 +60,13 @@ export class CategoriasComponent {
     typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches
   );
 
+  updateCategoryForm(field: keyof CategoryFormData, value: any): void {
+    this.categoryForm.set({
+      ...this.categoryForm(),
+      [field]: value
+    });
+  }
+
   // Computed
   readonly filteredCategories = computed(() => {
     const term = this.searchTerm().toLowerCase();

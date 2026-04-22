@@ -137,7 +137,7 @@
 
 <!-- Modal para crear/editar categoría -->
 <p-dialog
-  [(visible)]="showModal()"
+  [visible]="showModal()" (visibleChange)="showModal.set($event)"
   [header]="categoryForm().id ? 'Editar Categoría' : 'Nueva Categoría'"
   [modal]="true"
   [style]="{ width: '90vw', maxWidth: '500px' }"
@@ -148,8 +148,8 @@
       <input
         type="text"
         pInputText
-        [(ngModel)]="categoryForm"
-        (ngModelChange)="categoryForm.set({ ...categoryForm(), descripcion: $event })"
+        [ngModel]="categoryForm().descripcion"
+        (ngModelChange)="updateCategoryForm('descripcion', $event)"
         placeholder="Ej. Platos principales"
         class="w-full" />
     </div>
@@ -157,10 +157,9 @@
     <div class="form-group">
       <label>Color</label>
       <p-colorPicker
-        [(ngModel)]="categoryForm"
-        (ngModelChange)="categoryForm.set({ ...categoryForm(), color: $event })"
-        [inline]="true"
-        [append]="true"></p-colorPicker>
+        [ngModel]="categoryForm().color"
+        (ngModelChange)="updateCategoryForm('color', $event)"
+        [inline]="true"></p-colorPicker>
     </div>
   </div>
 

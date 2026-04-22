@@ -77,10 +77,10 @@ export class BulkUploadService {
             descripcion: row[columnMapping.descripcion]?.toString().trim(),
             precio: parseFloat(row[columnMapping.precio]) || 0,
             categoriaID: parseInt(row[columnMapping.categoriaID]) || 1,
-            codigo: row[columnMapping.codigo]?.toString().trim(),
-            stock: parseInt(row[columnMapping.stock]) || 0,
-            stockMinimo: parseInt(row[columnMapping.stockMinimo]) || 0,
-            inventario: row[columnMapping.inventario]?.toString().toLowerCase() === 'si' || false
+            codigo: columnMapping.codigo ? row[columnMapping.codigo]?.toString().trim() : undefined,
+            stock: columnMapping.stock ? parseInt(row[columnMapping.stock]) || 0 : 0,
+            stockMinimo: columnMapping.stockMinimo ? parseInt(row[columnMapping.stockMinimo]) || 0 : 0,
+            inventario: columnMapping.inventario ? row[columnMapping.inventario]?.toString().toLowerCase() === 'si' : false
           }));
 
           resolve(productsData);
