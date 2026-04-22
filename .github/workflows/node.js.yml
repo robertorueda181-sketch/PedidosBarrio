@@ -1,8 +1,9 @@
-name: Deploy Angular App (Manual)
+name: Deploy Angular App (Espacio Online)
 
 on:
   push:
     branches: [ main ]
+  workflow_dispatch: # Permite ejecutarlo manualmente desde la pestaña Actions
 
 jobs:
   build-and-deploy:
@@ -12,25 +13,33 @@ jobs:
       - name: Checkout código
         uses: actions/checkout@v4
 
-      - name: Configurar Node.js
+      - name: Configurar Node.js (Versión 20 para Angular 20)
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
           cache: 'npm'
+          # Esto fallará si package-lock.json sigue en gitignore. 
+          # Asegúrate de haberlo subido al repo.
+          cache-dependency-path: './package-lock.json'
 
       - name: Instalar dependencias
         run: npm ci
 
       - name: Construir proyecto (Producción)
+        # Angular 20 genera por defecto la carpeta dist/proyecto/browser
         run: npm run build --configuration=production
 
-      - name: Desplegar archivos al servidor
+      - name: Desplegar archivos al servidor vía SCP
         uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          # Cambia "dist/tu-proyecto" por el nombre real que genera Angular
-          source: "dist/PedidosBarrio/*"
+          # IMPORTANTE: Verifica si tu carpeta en dist es 'pedidos-barrio' o 'espacio-online'
+          # Para Angular 17+ siempre añade /browser/ al final
+          source: "dist/pedidos-barrio/browser/*"
           target: "/var/www/EspacioOnline"
-          strip_components: 2 # Esto evita que se cree la carpeta 'dist/proyecto' en el servidor
+          # strip_components: 3 elimina 'dist', 'pedidos-barrio' y 'browser' 
+          # para que los archivos queden directo en /var/www/EspacioOnline
+          strip_components: 3
+          rm: true # Esto limpia la carpeta destino antes de copiar los archivos nuevos
