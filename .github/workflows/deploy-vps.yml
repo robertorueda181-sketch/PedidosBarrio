@@ -19,7 +19,7 @@ jobs:
           node-version: '24' # Usando la misma versión que tienes localmente (v24.x)
 
       - name: Instalar dependencias
-        run: npm install --legacy-peer-deps
+        run: npm ci --legacy-peer-deps
 
       - name: Construir la aplicación (Build)
         run: npm run build
