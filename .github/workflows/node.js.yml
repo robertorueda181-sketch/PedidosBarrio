@@ -20,6 +20,7 @@ jobs:
           cache: 'npm'
           # Esto fallará si package-lock.json sigue en gitignore. 
           # Asegúrate de haberlo subido al repo.
+          # Esta línea le dice a GitHub exactamente dónde buscar el archivo
           cache-dependency-path: './package-lock.json'
 
       - name: Instalar dependencias
