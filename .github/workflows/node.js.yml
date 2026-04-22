@@ -1,47 +1,39 @@
-name: Deploy Angular App (Espacio Online)
+name: Deploy to VPS
 
 on:
   push:
-    branches: [ main ]
-  workflow_dispatch: # Permite ejecutarlo manualmente desde la pestaña Actions
+    branches:
+      - main # Cambia esto si tu rama principal se llama de otra forma, por ejemplo 'master'
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout código
+      - name: Checkout del código
         uses: actions/checkout@v4
 
-      - name: Configurar Node.js (Versión 20 para Angular 20)
+      - name: Configurar Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: '20' # Puedes cambiar a la versión de Node.js que utilices
           cache: 'npm'
-          # Esto fallará si package-lock.json sigue en gitignore. 
-          # Asegúrate de haberlo subido al repo.
-          # Esta línea le dice a GitHub exactamente dónde buscar el archivo
-          #cache-dependency-path: './package-lock.json'
-          cache-dependency-path: 'PedidosBarrio/package-lock.json'
 
       - name: Instalar dependencias
-        run: npm install
+        run: npm ci || npm install
 
-      - name: Construir proyecto (Producción)
-        # Angular 20 genera por defecto la carpeta dist/proyecto/browser
-        run: npm run build --configuration=production
+      - name: Construir la aplicación (Build)
+        run: npm run build
+        # Por defecto, Angular 17+ genera los archivos en 'dist/PedidosBarrio/browser'
+        # Si usas una versión anterior puede ser solo 'dist/PedidosBarrio'
 
-      - name: Desplegar archivos al servidor vía SCP
-        uses: appleboy/scp-action@master
+      - name: Desplegar en el servidor VPS via SCP
+        uses: appleboy/scp-action@v0.1.7
         with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          # IMPORTANTE: Verifica si tu carpeta en dist es 'pedidos-barrio' o 'espacio-online'
-          # Para Angular 17+ siempre añade /browser/ al final
-          source: "dist/pedidos-barrio/browser/*"
-          target: "/var/www/EspacioOnline"
-          # strip_components: 3 elimina 'dist', 'pedidos-barrio' y 'browser' 
-          # para que los archivos queden directo en /var/www/EspacioOnline
-          strip_components: 3
-          rm: true # Esto limpia la carpeta destino antes de copiar los archivos nuevos
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          source: "dist/PedidosBarrio/browser/*"
+          target: "/var/www/html/tu-app" # Ruta de destino en tu servidor VPS
+          strip_components: 3 # Esto elimina la estructura de carpetas inicial "dist/PedidosBarrio/browser" al copiar
