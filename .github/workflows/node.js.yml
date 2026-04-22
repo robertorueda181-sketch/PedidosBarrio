@@ -19,7 +19,7 @@ jobs:
           node-version: '24' # Usando la misma versión que tienes localmente (v24.x)
 
       - name: Instalar dependencias
-        run: npm ci || npm install
+        run: npm install --legacy-peer-deps
 
       - name: Construir la aplicación (Build)
         run: npm run build
@@ -34,5 +34,5 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT || 22 }}
           source: "dist/PedidosBarrio/browser/*"
-          target: "/var/www/html/tu-app" # Ruta de destino en tu servidor VPS
+          target: "/var/www/html/EspacioOnline" # Ruta de destino en tu servidor VPS
           strip_components: 3 # Esto elimina la estructura de carpetas inicial "dist/PedidosBarrio/browser" al copiar
