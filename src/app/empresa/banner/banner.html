@@ -1,0 +1,248 @@
+<div class="space-y-8 animate-fade-in pb-20">
+    <!-- Header -->
+    <div class="max-w-6xl mx-auto">
+        <!-- LIST VIEW -->
+        @if (viewMode() === 'list') {
+        <div class="space-y-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h1 class="text-3xl font-black text-gray-900 tracking-tight">Mis Banners</h1>
+                    <p class="text-gray-500 font-medium">Gestiona los banners que aparecen en tu portada</p>
+                </div>
+                <button (click)="createBanner()"
+                    class="px-6 py-3 bg-cyan-600 hover:bg-cyan-700 text-white font-bold rounded-xl shadow-lg shadow-cyan-600/20 transition-all flex items-center gap-2">
+                    <i class="pi pi-plus"></i> Nuevo Banner
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                @for (item of banners(); track item.id) {
+                <div
+                    class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden group hover:shadow-md transition-all">
+                    <!-- Image -->
+                    <div class="h-40 overflow-hidden relative">
+                        <img [src]="item.urlImagen || 'assets/default-banner.webp'" alt="Banner Image"
+                            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+                        <div class="absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest backdrop-blur-md shadow-sm"
+                            [ngClass]="isActive(item) ? 'bg-green-100/90 text-green-700' : 'bg-gray-100/90 text-gray-500'">
+                            {{ isActive(item) ? 'Activo' : 'Inactivo' }}
+                        </div>
+                    </div>
+
+                    <!-- Content -->
+                    <div class="p-5 space-y-4">
+                        <div>
+                            <h3 class="font-bold text-gray-900 line-clamp-1" [title]="item.title">{{ item.title || 'Sin
+                                Título' }}</h3>
+                            <p class="text-sm text-gray-500 line-clamp-1">{{ item.subtitle || 'Sin subtítulo' }}</p>
+                        </div>
+
+                        <div class="space-y-1 text-xs text-gray-400 font-medium">
+                            <div class="flex items-center gap-2">
+                                <i class="pi pi-calendar-plus text-cyan-600"></i>
+                                <span>Desde: {{ item.startDate | date:'dd/MM/yyyy' }}</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <i class="pi pi-calendar-minus text-red-400"></i>
+                                <span>Hasta: {{ item.endDate | date:'dd/MM/yyyy' }}</span>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-2 pt-2 border-t border-gray-50">
+                            <button (click)="editBanner(item)"
+                                class="flex-1 py-2 text-sm font-bold text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">
+                                Editar
+                            </button>
+                            <button (click)="deleteBanner(item.id!)"
+                                class="px-3 py-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+                                <i class="pi pi-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                }
+                @empty {
+                <div class="col-span-full py-12 flex flex-col items-center justify-center text-center text-gray-400">
+                    <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                        <i class="pi pi-images text-3xl"></i>
+                    </div>
+                    <p class="font-medium">No tienes banners creados aún.</p>
+                    <button (click)="createBanner()" class="mt-4 text-cyan-600 font-bold hover:underline">Crear el
+                        primero</button>
+                </div>
+                }
+            </div>
+        </div>
+        }
+
+        <!-- EDIT MODE -->
+        @else {
+        <div class="space-y-8 animate-fade-in">
+            <!-- Header Edit -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <button (click)="cancelEdit()"
+                        class="text-gray-400 hover:text-gray-600 font-bold text-sm mb-1 flex items-center gap-1">
+                        <i class="pi pi-arrow-left"></i> Volver a la lista
+                    </button>
+                    <h1 class="text-3xl font-black text-gray-900 tracking-tight">
+                        {{ banner.id ? 'Editar Banner' : 'Nuevo Banner' }}
+                    </h1>
+                </div>
+                <div class="flex gap-3">
+                    <button (click)="showFullPreview = true"
+                        class="px-5 py-3 bg-white border border-gray-200 hover:bg-gray-50 text-gray-800 font-bold rounded-xl transition-all flex items-center gap-2">
+                        <i class="pi pi-eye"></i>
+                        <span class="hidden md:inline">Previsualizar</span>
+                    </button>
+                    <button (click)="saveBanner()" [disabled]="isLoading()"
+                        class="px-8 py-3 bg-cyan-600 hover:bg-cyan-700 text-white font-bold rounded-xl shadow-lg shadow-cyan-600/20 transition-all flex items-center gap-2">
+                        <i class="pi" [ngClass]="isLoading() ? 'pi-spin pi-spinner' : 'pi-save'"></i>
+                        Guardar
+                    </button>
+                </div>
+            </div>
+
+            <!-- Form Container -->
+            <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 space-y-6">
+                <h2 class="text-lg font-black text-gray-800 flex items-center gap-2 border-b pb-4">
+                    <i class="pi pi-pencil text-cyan-600"></i> Configuración
+                </h2>
+
+                <div class="space-y-2">
+                    <label class="text-xs font-black text-gray-400 uppercase tracking-widest">Título Principal</label>
+                    <input type="text" [(ngModel)]="banner.title"
+                        class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-4 focus:ring-2 focus:ring-cyan-500 outline-none font-bold text-lg" />
+                </div>
+
+                <div class="space-y-2">
+                    <label class="text-xs font-black text-gray-400 uppercase tracking-widest">Eslogan /
+                        Subtítulo</label>
+                    <textarea [(ngModel)]="banner.subtitle" rows="3"
+                        class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-4 focus:ring-2 focus:ring-cyan-500 outline-none text-gray-600"></textarea>
+                </div>
+
+                <!-- Date Range with Time -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="space-y-2">
+                        <label class="text-xs font-black text-gray-400 uppercase tracking-widest">Fecha Inicio</label>
+                        <div class="flex-auto">
+                            <p-datepicker [(ngModel)]="banner.startDate" [iconDisplay]="'input'" [showIcon]="true" inputId="templatedisplay" dateFormat="dd/mm/yy">
+                                <ng-template #inputicon let-clickCallBack="clickCallBack">
+                                    <i class="pi pi-calendar" (click)="clickCallBack($event)"></i>
+                                </ng-template>
+                            </p-datepicker>
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-xs font-black text-gray-400 uppercase tracking-widest">Fecha Fin</label>
+                        <div class="flex-auto">
+                            <p-datepicker [(ngModel)]="banner.endDate" [iconDisplay]="'input'" [showIcon]="true" inputId="templatedisplay" dateFormat="dd/mm/yy">
+                                <ng-template #inputicon let-clickCallBack="clickCallBack">
+                                    <i class="pi pi-calendar" (click)="clickCallBack($event)"></i>
+                                </ng-template>
+                            </p-datepicker>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Image Picker -->
+                <div class="space-y-2">
+                    <label class="text-xs font-black text-gray-400 uppercase tracking-widest">Imagen de Fondo</label>
+                    <button (click)="showImageModal.set(true)"
+                        class="w-full flex items-center justify-between p-4 bg-gray-50 border border-gray-100 rounded-xl hover:bg-gray-100 transition-all group">
+                        <div class="flex items-center gap-4">
+                            <img [src]="banner.urlImagen" class="w-16 h-10 rounded bg-white shadow-sm object-cover">
+                            <span class="text-sm font-bold text-gray-700">Cambiar Imagen de Portada</span>
+                        </div>
+                        <i class="pi pi-images text-cyan-600 group-hover:scale-110 transition-transform text-xl"></i>
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="space-y-2">
+                        <label class="text-xs font-black text-gray-400 uppercase tracking-widest">Texto del
+                            Botón</label>
+                        <input type="text" [(ngModel)]="banner.ctaText"
+                            class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 focus:ring-2 focus:ring-cyan-500 outline-none font-black" />
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-xs font-black text-gray-400 uppercase tracking-widest">Acción al Clic</label>
+                        <p-select [options]="sections" [(ngModel)]="banner.ctaAction" styleClass="w-full bg-gray-50"
+                            [editable]="true" placeholder="Elegir..."></p-select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        }
+    </div>
+</div>
+
+<!-- IMAGE PICKER MODAL -->
+<p-dialog [visible]="showImageModal()" [modal]="true" header="Seleccionar Imagen de Portada"
+    [style]="{width: '90vw', maxWidth: '600px'}" [dismissableMask]="true" (onHide)="showImageModal.set(false)">
+    <div class="space-y-6">
+        <div class="flex border-b">
+            <button (click)="activeTab = 'upload'"
+                class="flex-1 py-3 font-black uppercase tracking-widest text-xs transition-all border-b-2"
+                [ngClass]="activeTab === 'upload' ? 'border-cyan-600 text-cyan-600 bg-cyan-50' : 'border-transparent text-gray-400'">
+                <i class="pi pi-upload mr-2"></i> Subir Archivo
+            </button>
+            <button (click)="activeTab = 'stock'"
+                class="flex-1 py-3 font-black uppercase tracking-widest text-xs transition-all border-b-2"
+                [ngClass]="activeTab === 'stock' ? 'border-cyan-600 text-cyan-600 bg-cyan-50' : 'border-transparent text-gray-400'">
+                <i class="pi pi-images mr-2"></i> Librería Repositorio
+            </button>
+        </div>
+
+        <div class="min-h-[300px]">
+            @if(activeTab === 'upload') {
+            <div
+                class="h-full flex flex-col items-center justify-center p-12 border-2 border-dashed border-gray-200 rounded-3xl bg-gray-50 group hover:border-cyan-400 transition-all cursor-pointer relative">
+                <input type="file" (change)="onFileSelected($event)" class="absolute inset-0 opacity-0 cursor-pointer"
+                    accept="image/*">
+                <i
+                    class="pi pi-cloud-upload text-5xl text-cyan-600 mb-4 group-hover:scale-110 transition-transform"></i>
+                <p class="font-bold text-gray-700">Haz clic para buscar en tu equipo</p>
+            </div>
+            } @else {
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                @for(img of stockImages; track img) {
+                <div (click)="selectStockImage(img)"
+                    class="aspect-video rounded-xl overflow-hidden cursor-pointer hover:ring-4 ring-cyan-500 transition-all">
+                    <img [src]="img" class="w-full h-full object-cover">
+                </div>
+                }
+            </div>
+            }
+        </div>
+    </div>
+</p-dialog>
+
+<!-- FULL PREVIEW MODAL -->
+<p-dialog [(visible)]="showFullPreview" [modal]="true" [showHeader]="false" [dismissableMask]="true"
+    [style]="{width: '100vw', height: '100vh', margin: '0', padding: '0'}">
+    <div class="relative w-full h-full bg-white flex flex-col pt-16">
+        <button (click)="showFullPreview = false"
+            class="fixed top-8 right-8 z-[100] bg-black text-white px-6 py-2 rounded-full font-black uppercase tracking-widest flex items-center gap-2 hover:bg-gray-800 transition-all shadow-2xl">
+            <i class="pi pi-times"></i> Salir de Vista Previa
+        </button>
+        <div class="relative w-full flex-1 overflow-hidden">
+            <img [src]="banner.urlImagen" class="w-full h-full object-cover" />
+            <div class="absolute inset-0 bg-black/40 flex flex-col items-center justify-center text-center p-20">
+                <span class="text-cyan-300 uppercase tracking-[0.5em] font-light mb-6 text-2xl">{{ banner.subtitle
+                    }}</span>
+                <h2 class="text-7xl font-black text-white leading-tight mb-12 max-w-4xl drop-shadow-2xl">{{ banner.title
+                    }}</h2>
+                @if(banner.startDate && banner.endDate) {
+                <p class="text-white text-lg mb-4">Disponible del {{ banner.startDate | date:'dd/MM/yyyy' }} al {{
+                    banner.endDate | date:'dd/MM/yyyy' }}</p>
+                }
+                <button
+                    class="bg-cyan-500 hover:bg-cyan-600 text-white px-12 py-5 font-black uppercase tracking-[0.2em] rounded-2xl shadow-xl transition-all">
+                    {{ banner.ctaText }}
+                </button>
+            </div>
+        </div>
+    </div>
+</p-dialog>

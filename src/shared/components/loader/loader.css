@@ -1,0 +1,191 @@
+.loader-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(to bottom, #000814 0%, #001d3d 50%, #000814 100%);
+  z-index: 10000;
+  overflow: hidden;
+}
+
+.space-background {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.star {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: white;
+  border-radius: 50%;
+  animation: twinkle 2s ease-in-out infinite;
+}
+
+.star-1 {
+  top: 20%;
+  left: 15%;
+  animation-delay: 0s;
+}
+
+.star-2 {
+  top: 40%;
+  right: 25%;
+  animation-delay: 0.5s;
+}
+
+.star-3 {
+  top: 60%;
+  left: 30%;
+  animation-delay: 1s;
+}
+
+.star-4 {
+  top: 80%;
+  right: 20%;
+  animation-delay: 1.5s;
+}
+
+.star-5 {
+  top: 30%;
+  left: 70%;
+  width: 3px;
+  height: 3px;
+  animation-delay: 0.8s;
+}
+
+.star-6 {
+  top: 70%;
+  right: 60%;
+  animation-delay: 1.2s;
+}
+
+.rocket-container {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: float 3s ease-in-out infinite;
+}
+
+.rocket {
+  width: 120px;
+  height: 120px;
+  transform: rotate(-45deg);
+  filter: drop-shadow(0 0 20px rgba(34, 211, 238, 0.6));
+}
+
+.rocket-body {
+  animation: shake 0.5s ease-in-out infinite;
+  transform-origin: center;
+}
+
+.flame {
+  animation: flicker 0.3s ease-in-out infinite;
+  transform-origin: 12px 20px;
+}
+
+.loading-text {
+  margin-top: 2rem;
+  font-size: 2rem;
+  font-weight: bold;
+  color: #22D3EE;
+  letter-spacing: 0.5rem;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.dot {
+  animation: bounce 1.5s ease-in-out infinite;
+}
+
+.dot:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.dot:nth-child(2) {
+  animation-delay: 0.3s;
+}
+
+.dot:nth-child(3) {
+  animation-delay: 0.6s;
+}
+
+.loading-message {
+  margin-top: 1rem;
+  font-size: 1.2rem;
+  color: #94a3b8;
+  letter-spacing: 0.2rem;
+  text-transform: uppercase;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* Animaciones */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-1px);
+  }
+  75% {
+    transform: translateX(1px);
+  }
+}
+
+@keyframes flicker {
+  0%, 100% {
+    opacity: 0.8;
+    transform: scaleY(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scaleY(0.8);
+  }
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(-10px);
+    opacity: 0.5;
+  }
+}
+
+@keyframes twinkle {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}

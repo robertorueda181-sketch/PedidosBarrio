@@ -1,0 +1,36 @@
+/* Inmuebles Component Styles */
+.property-card {
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.property-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.property-image {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.status-badge {
+  transition: all 0.2s ease-in-out;
+}
+
+.btn-edit {
+  transition: color 0.2s ease-in-out;
+}
+
+.btn-delete {
+  transition: color 0.2s ease-in-out;
+}
+
+.btn-delete:hover {
+  color: #dc2626;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .property-card {
+    margin-bottom: 1rem;
+  }
+}

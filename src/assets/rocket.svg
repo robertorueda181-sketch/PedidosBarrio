@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <g>
+    <!-- Cuerpo principal -->
+    <ellipse cx="16" cy="16" rx="6" ry="13" fill="#22D3EE"/>
+    <!-- Punta -->
+    <ellipse cx="16" cy="6" rx="4" ry="6" fill="#06B6D4"/>
+    <!-- Ventana -->
+    <circle cx="16" cy="14" r="2.5" fill="#fff" opacity="0.7"/>
+    <!-- Aleta izquierda -->
+    <path d="M12 22 L6 28 L13 25 Z" fill="#2563EB"/>
+    <!-- Aleta derecha -->
+    <path d="M20 22 L26 28 L19 25 Z" fill="#2563EB"/>
+    <!-- Llama -->
+    <ellipse cx="16" cy="29" rx="3" ry="4" fill="#F59E0B" opacity="0.8"/>
+    <ellipse cx="16" cy="31" rx="2" ry="2.5" fill="#EF4444" opacity="0.6"/>
+  </g>
+</svg>

@@ -1,0 +1,181 @@
+<div class="min-h-screen bg-gray-50 pt-20 lg:pt-24 pb-12">
+    <div class="max-w-7xl mx-auto px-4 lg:px-6">
+
+        <!-- Search Header -->
+        <div class="mb-8 lg:mb-12">
+            <div class="max-w-3xl mx-auto">
+                <form (submit)="onSearch()" class="relative group">
+                    <div class="relative flex items-center">
+                        <div class="absolute left-4 lg:left-6 text-gray-400 group-focus-within:text-[#1A365D] transition-colors">
+                            <svg class="w-5 h-5 lg:w-6 lg:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                        </div>
+                        <input type="search" [(ngModel)]="searchQuery" name="search"
+                            placeholder="Buscar..."
+                            class="w-full bg-white rounded-2xl pl-12 lg:pl-16 pr-28 lg:pr-36 py-3 lg:py-5 text-base lg:text-lg shadow-xl focus:outline-none focus:ring-4 focus:ring-[#1A365D]/10 transition-all border-none" />
+                        <button type="submit"
+                            class="absolute right-2 lg:right-3 bg-[#1A365D] hover:bg-[#2C5282] text-white px-5 lg:px-8 py-2 lg:py-3 rounded-xl font-bold transition-all shadow-lg text-sm lg:text-base">
+                            Buscar
+                        </button>
+                    </div>
+                </form>
+                <p class="mt-4 text-gray-500 text-center text-sm lg:text-base">
+                    Mostrando resultados para: <span class="font-bold text-[#1A365D]">"{{ searchQuery() }}"</span>
+                </p>
+            </div>
+        </div>
+
+        <div class="flex flex-col lg:flex-row gap-6 lg:gap-8 relative">
+            
+            <!-- Mobile Filter Toggle Button -->
+            <div class="lg:hidden mb-2">
+                <button (click)="toggleMobileFilters()" 
+                    class="w-full flex items-center justify-center gap-2 bg-white border border-gray-200 text-gray-700 py-2.5 rounded-xl font-bold shadow-sm hover:bg-gray-50 transition-all text-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+                    </svg>
+                    Filtrar Resultados
+                </button>
+            </div>
+
+            <!-- Sidebar Filters -->
+            <aside [class.hidden]="!showMobileFilters()" 
+                   class="lg:block fixed inset-0 z-[2000] lg:z-auto bg-white lg:bg-transparent lg:static w-full lg:w-64 space-y-8 p-6 lg:p-0 overflow-y-auto lg:overflow-visible transition-all duration-300">
+                
+                <!-- Mobile Header for Filters -->
+                <div class="lg:hidden flex justify-between items-center mb-6">
+                    <h3 class="font-black text-xl text-gray-900">Filtros</h3>
+                    <button (click)="toggleMobileFilters()" class="p-2 bg-gray-100 rounded-full hover:bg-gray-200">
+                        <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="bg-white lg:p-6 lg:rounded-3xl lg:shadow-sm lg:border lg:border-gray-100">
+                    <h3 class="hidden lg:block font-black text-lg mb-6 text-gray-900">Filtros</h3>
+
+                    <!-- Categories -->
+                    <div class="space-y-4">
+                        <h4 class="font-bold text-sm text-gray-400 uppercase tracking-wider">Categorías</h4>
+                        <div class="space-y-2">
+                            @for (cat of categories; track cat) {
+                            <label class="flex items-center space-x-3 cursor-pointer group">
+                                <input type="checkbox"
+                                    class="w-5 h-5 rounded border-gray-300 text-[#1A365D] focus:ring-[#1A365D]">
+                                <span class="text-gray-600 group-hover:text-[#1A365D] transition-colors">{{ cat
+                                    }}</span>
+                            </label>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="mt-8 pt-8 border-t border-gray-50">
+                        <h4 class="font-bold text-sm text-gray-400 uppercase tracking-wider mb-4">Rango de Precio</h4>
+                        <div class="space-y-4">
+                            <input type="range" class="w-full accent-[#1A365D]">
+                            <div class="flex justify-between text-sm font-bold text-gray-600">
+                                <span>S/. 0</span>
+                                <span>S/. 10,000+</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Mobile Apply Button -->
+                    <div class="lg:hidden mt-8 pt-6 border-t border-gray-100">
+                         <button (click)="toggleMobileFilters()" 
+                            class="w-full bg-[#1A365D] text-white py-4 rounded-xl font-bold text-lg shadow-lg active:scale-95 transition-transform">
+                            Ver Resultados
+                        </button>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Results Area -->
+            <main class="flex-grow min-w-0">
+                <!-- Tabs -->
+                <div class="flex overflow-x-auto gap-2 mb-6 md:mb-8 bg-gray-100 p-1.5 rounded-2xl w-full md:w-fit no-scrollbar">
+                    @for (tab of ['TODOS', 'NEGOCIO', 'SERVICIO', 'INMUEBLE']; track tab) {
+                    <button (click)="setTab(tab)"
+                        [class]="activeTab() === tab ? 'bg-white text-[#1A365D] shadow-sm' : 'text-gray-500 hover:text-gray-700'"
+                        class="flex-shrink-0 px-4 md:px-6 py-2 md:py-2.5 rounded-xl font-bold text-xs md:text-sm transition-all capitalize whitespace-nowrap">
+                        {{ tab === 'TODOS' ? 'Todos' : tab.toLowerCase() + 's' }}
+                    </button>
+                    }
+                </div>
+
+                @if (isLoading()) {
+                <div class="flex flex-col items-center justify-center py-20">
+                    <div class="animate-spin rounded-full h-12 w-12 border-4 border-[#1A365D] border-t-transparent">
+                    </div>
+                    <p class="mt-4 text-gray-500 font-bold">Buscando las mejores coincidencias...</p>
+                </div>
+                } @else if (filteredResults.length > 0) {
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    @for (item of filteredResults; track item.id + item.type) {
+                    <div (click)="goToDetail(item)"
+                        class="group bg-white rounded-3xl shadow-sm hover:shadow-xl transition-all duration-500 cursor-pointer overflow-hidden border border-gray-100 flex flex-col">
+
+                        <div class="relative h-48 overflow-hidden">
+                            <img [src]="item.imageUrl || 'assets/banner1.png'" [alt]="item.title"
+                                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                            <div class="absolute top-4 left-4">
+                                <span [class]="{
+                    'bg-blue-500': item.type === 'NEGOCIO',
+                    'bg-purple-500': item.type === 'SERVICIO',
+                    'bg-green-500': item.type === 'INMUEBLE'
+                  }" class="text-white px-3 py-1 rounded-lg text-xs font-black uppercase shadow-lg">
+                                    {{ item.type }}
+                                </span>
+                            </div>
+                            @if (item.price) {
+                            <div
+                                class="absolute bottom-4 right-4 bg-white/90 backdrop-blur-md px-4 py-1.5 rounded-xl shadow-lg">
+                                <span class="text-[#1A365D] font-black">S/. {{ item.price | number }}</span>
+                            </div>
+                            }
+                        </div>
+
+                        <div class="p-6 flex-grow flex flex-col">
+                            <h3
+                                class="font-black text-xl text-gray-900 mb-2 group-hover:text-[#1A365D] transition-colors">
+                                {{ item.title }}
+                            </h3>
+                            <p class="text-gray-500 text-sm mb-4 line-clamp-2">
+                                {{ item.description }}
+                            </p>
+
+                            <div class="mt-auto pt-4 border-t border-gray-50 flex items-center justify-between">
+                                <div class="flex items-center text-gray-400 text-xs font-bold">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z">
+                                        </path>
+                                    </svg>
+                                    {{ item.location || 'Varias ubicaciones' }}
+                                </div>
+                                <div
+                                    class="w-8 h-8 bg-gray-50 rounded-full flex items-center justify-center text-[#1A365D] group-hover:bg-[#1A365D] group-hover:text-white transition-colors">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M9 5l7 7-7 7"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    }
+                </div>
+                } @else {
+                <div class="text-center py-20 bg-white rounded-3xl border-2 border-dashed border-gray-200">
+                    <div class="text-6xl mb-4">🔍</div>
+                    <h3 class="text-xl font-black text-gray-900 mb-2">No encontramos coincidencias</h3>
+                    <p class="text-gray-500">Intenta con otros términos o ajusta los filtros.</p>
+                </div>
+                }
+            </main>
+        </div>
+    </div>
+</div>

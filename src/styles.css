@@ -1,0 +1,114 @@
+/* You can add global styles to this file, and also import other style files */
+@import "primeicons/primeicons.css";
+@import "leaflet/dist/leaflet.css";
+@import "quill/dist/quill.core.css";
+@import "quill/dist/quill.snow.css";
+@import "ngx-toastr/toastr";
+@import "tailwindcss";
+
+@theme {
+    --color-space-primary: #0F172A;
+    --color-space-secondary-from: #06B6D4;
+    --color-space-secondary-to: #2563EB;
+}
+
+:root {
+    --primary-color: #96C2DB;
+    --secondary-color: #E5EDF1;
+    --dark-blue-color: #1A365D;
+    --white-color: #FFFFFF;
+}
+
+body {
+    background-color: var(--secondary-color);
+    color: #333;
+    font-family: 'Inter', sans-serif;
+}
+
+/* Add asterisk to label if the input/select/textarea in the same container is required */
+div:has(input:required)>label::after,
+div:has(select:required)>label::after,
+div:has(textarea:required)>label::after {
+    content: " *";
+    color: red;
+}
+
+button {
+    cursor: pointer;
+}
+
+/* Custom classes for the new palette */
+.bg-primary {
+    background-color: var(--primary-color);
+}
+
+.text-primary {
+    color: var(--primary-color);
+}
+
+.bg-secondary {
+    background-color: var(--secondary-color);
+}
+
+.text-secondary {
+    color: var(--secondary-color);
+}
+
+.bg-dark-blue {
+    background-color: var(--dark-blue-color);
+}
+
+.text-dark-blue {
+    color: var(--dark-blue-color);
+}
+
+.bg-white-custom {
+    background-color: var(--white-color);
+}
+
+/* NGX-Toastr custom styles for better mobile support */
+#toast-container > div {
+    opacity: 1;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+#toast-container.toast-top-right {
+    top: 1rem;
+    right: 1rem;
+}
+
+/* Mobile responsive toasts */
+@media (max-width: 767px) {
+    #toast-container > div {
+        width: calc(100vw - 2rem);
+        max-width: calc(100vw - 2rem);
+        margin: 0 0 0.5rem 0;
+    }
+    
+    #toast-container.toast-top-right {
+        right: 1rem;
+        left: 1rem;
+        width: auto;
+    }
+}
+
+@media (min-width: 768px) {
+    #toast-container > div {
+        width: 300px;
+    }
+}
+
+/* Tailwind custom theme colors for Espacio Online */
+@layer utilities {
+  .bg-space-primary {
+    background-color: #0F172A !important;
+  }
+  .from-space-secondary-from {
+    --tw-gradient-from: #06B6D4 var(--tw-gradient-from-position);
+    --tw-gradient-to: rgb(6 182 212 / 0) var(--tw-gradient-to-position);
+    --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+  }
+  .to-space-secondary-to {
+    --tw-gradient-to: #2563EB var(--tw-gradient-to-position);
+  }
+}

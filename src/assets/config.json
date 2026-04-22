@@ -1,0 +1,11 @@
+{
+    "apiUrl": "https://localhost:7045/api",
+    "baseUrl": "https://localhost:7045",
+    "phoneNumber": "51954121196",
+    "phoneNumberDisplay": "+51 954 121 196",
+    "registroTipos": {
+        "negocio": true,
+        "servicio": true,
+        "inmueble": true
+    }
+}

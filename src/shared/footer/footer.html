@@ -1,0 +1,117 @@
+<!-- Footer -->
+<footer class="bg-space-primary text-gray-300 py-12 mt-16">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+
+      <!-- Logo & Description -->
+      <div class="space-y-6">
+        <div class="flex items-center gap-3">
+          <svg class="h-8 w-8" viewBox="0 0 24 24" style="transform: rotate(-45deg);">
+            <g fill="#22D3EE">
+              <!-- Cuerpo del cohete -->
+              <ellipse cx="12" cy="12" rx="3" ry="7"/>
+              <!-- Punta -->
+              <ellipse cx="12" cy="5" rx="2" ry="3"/>
+              <!-- Ventana -->
+              <circle cx="12" cy="11" r="1.5" opacity="0.4"/>
+              <!-- Aleta izquierda -->
+              <path d="M9 15 L6 19 L9 18 Z"/>
+              <!-- Aleta derecha -->
+              <path d="M15 15 L18 19 L15 18 Z"/>
+              <!-- Llama -->
+              <ellipse cx="12" cy="20" rx="2" ry="2.5" opacity="0.6"/>
+            </g>
+          </svg>
+          
+          <span class="text-3xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">Espacio Online.net</span>
+        </div>
+        <p class="text-sm leading-relaxed">
+          Conectando negocios locales con la comunidad. Descubre los mejores servicios, productos e inmuebles
+          disponibles en tu espacio digital.
+        </p>
+        <a [href]="whatsappLink" target="_blank"
+          class="bg-[#10B981] hover:bg-[#059669] text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2 transition w-full justify-center shadow-lg">
+          <i class="pi pi-whatsapp"></i>
+          Contáctanos por WhatsApp
+        </a>
+      </div>
+
+      <!-- Enlaces Rápidos -->
+      <div>
+        <h3 class="text-white font-bold text-lg mb-6 relative">
+          Enlaces Rápidos
+          <span class="absolute -bottom-2 left-0 w-12 h-1 bg-gradient-to-r from-cyan-400 to-blue-400"></span>
+        </h3>
+        <ul class="space-y-4 text-sm">
+          <li><a routerLink="/" class="hover:text-cyan-400 transition">Inicio</a></li>
+          <li><a routerLink="#" class="hover:text-cyan-400 transition">Blog</a></li>
+          <li><a routerLink="/negocios" class="hover:text-cyan-400 transition">Negocios</a></li>
+          <li><a routerLink="/inmueble" class="hover:text-cyan-400 transition">Inmuebles</a></li>
+          <li><a routerLink="/business-register" class="hover:text-cyan-400 transition">Registrarse como empresa</a></li>
+          <li><a routerLink="/registro-negocio" class="hover:text-cyan-400 transition">Registrarse como cliente</a></li>
+        </ul>
+      </div>
+
+      <!-- Contáctanos -->
+      <div>
+        <h3 class="text-white font-bold text-lg mb-6 relative">
+          Contáctanos
+          <span class="absolute -bottom-2 left-0 w-12 h-1 bg-gradient-to-r from-cyan-400 to-blue-400"></span>
+        </h3>
+        <ul class="space-y-4 text-sm">
+          <li class="flex items-center gap-3">
+            <i class="pi pi-envelope text-cyan-400"></i>
+            <a href="mailto:info@espacioonline.com" class="hover:text-cyan-400 transition">info@espacioonline.com</a>
+          </li>
+          <li class="flex items-center gap-3">
+            <i class="pi pi-phone text-cyan-400"></i>
+            <a [href]="whatsappLink"
+              target="_blank" class="hover:text-cyan-400 transition">{{ phoneNumberDisplay }}</a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Síguenos & Newsletter -->
+      <div>
+        <h3 class="text-white font-bold text-lg mb-6 relative">
+          Síguenos
+          <span class="absolute -bottom-2 left-0 w-12 h-1 bg-gradient-to-r from-cyan-400 to-blue-400"></span>
+        </h3>
+        <div class="flex gap-4 mb-8">
+          <a href="#" class="bg-gray-800 p-3 rounded-lg hover:bg-gradient-to-r hover:from-cyan-500 hover:to-blue-600 transition">
+            <i class="pi pi-facebook"></i>
+          </a>
+          <a href="#" class="bg-gray-800 p-3 rounded-lg hover:bg-gradient-to-r hover:from-cyan-500 hover:to-blue-600 transition">
+            <i class="pi pi-instagram"></i>
+          </a>
+          <a [href]="whatsappLink" target="_blank" class="bg-gray-800 p-3 rounded-lg hover:bg-gradient-to-r hover:from-cyan-500 hover:to-blue-600 transition">
+            <i class="pi pi-whatsapp"></i>
+          </a>
+        </div>
+        <!-- <p class="text-sm mb-4">Suscríbete a nuestro boletín</p>
+        <div class="flex">
+          <input type="email" placeholder="Tu correo electrónico"
+            class="bg-gray-800 border-none rounded-l-lg px-4 py-2 text-sm w-full focus:ring-1 focus:ring-cyan-400 outline-none" />
+          <button
+            class="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white px-4 py-2 rounded-r-lg font-semibold text-sm transition">
+            Enviar
+          </button>
+        </div> -->
+      </div>
+
+    </div>
+
+    <!-- Bottom Bar -->
+    <div class="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs">
+      <div class="flex items-center gap-2">
+        <span class="text-cyan-400">©</span>
+        <p>{{ currentYear }} espacioonline.net - Todos los derechos reservados</p>
+      </div>
+      <div class="flex gap-6">
+        <a href="#" class="hover:text-white transition">Términos y Condiciones</a>
+        <a href="#" class="hover:text-white transition">Política de Privacidad</a>
+        <a href="#" class="hover:text-white transition">Cookies</a>
+      </div>
+    </div>
+  </div>
+</footer>

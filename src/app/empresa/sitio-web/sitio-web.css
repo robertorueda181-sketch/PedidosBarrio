@@ -1,0 +1,549 @@
+:host {
+  display: block;
+}
+
+.mi-sitio-builder {
+  color: #0f172a;
+  width: 100%;
+}
+
+.mi-sitio-builder__header {
+  padding: clamp(1.25rem, 2vw, 1.75rem);
+}
+
+.mi-sitio-builder__header-inner {
+  gap: clamp(1rem, 2vw, 1.5rem);
+}
+
+.mi-sitio-builder__actions {
+  justify-content: flex-start;
+}
+
+.mi-sitio-builder__layout {
+  display: grid;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.mi-sitio-builder__sidebar {
+  min-width: 0;
+}
+
+.mi-sitio-builder__card {
+  padding: clamp(1rem, 2vw, 1.5rem);
+}
+
+.mi-sitio-builder__preview-column {
+  min-width: 0;
+  position: sticky;
+  top: 1rem;
+  align-self: start;
+}
+
+.mi-sitio-builder__preview-card {
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
+}
+
+.mi-sitio-builder__preview-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.mi-sitio-builder__inline-preview-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.mi-sitio-builder__preview-notes ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mi-sitio-builder__section-item {
+  border-color: #e2e8f0;
+  background: #fff;
+}
+
+.mi-sitio-builder__section-item:hover {
+  border-color: rgba(34, 211, 238, 0.65);
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
+}
+
+.mi-sitio-builder__section-item--active {
+  border-color: rgba(34, 211, 238, 0.7);
+  background: linear-gradient(135deg, rgba(236, 254, 255, 0.95), rgba(248, 250, 252, 1));
+  box-shadow: 0 16px 36px rgba(8, 145, 178, 0.12);
+}
+
+.mi-sitio-builder__media-card {
+  background: linear-gradient(180deg, #fff 0%, #f8fafc 100%);
+}
+
+.mi-sitio-builder__media-preview {
+  overflow: hidden;
+  min-height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed rgba(148, 163, 184, 0.5);
+}
+
+.mi-sitio-builder__media-preview--logo {
+  min-height: 150px;
+  padding: 1rem;
+}
+
+.mi-sitio-builder__media-image {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  display: block;
+}
+
+.mi-sitio-builder__media-image--logo {
+  width: auto;
+  max-width: 100%;
+  height: 110px;
+  object-fit: contain;
+}
+
+.mi-sitio-builder__media-empty {
+  padding: 1.25rem;
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #64748b;
+}
+
+
+.mi-sitio-builder ::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.mi-sitio-builder ::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.55);
+  border-radius: 999px;
+}
+
+.mi-sitio-builder ::-webkit-scrollbar-track {
+  background: rgba(226, 232, 240, 0.55);
+  border-radius: 999px;
+}
+
+/* Sidebar Scrollbar */
+.overflow-y-auto::-webkit-scrollbar {
+  width: 6px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb {
+  background: #e2e8f0;
+  border-radius: 3px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background: #cbd5e1;
+}
+
+.mi-sitio-preview-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: rgba(15, 23, 42, 0.72);
+  backdrop-filter: blur(8px);
+}
+
+.mi-sitio-preview-modal {
+  width: min(100%, 1200px);
+  max-height: calc(100vh - 3rem);
+  overflow: hidden;
+  border-radius: 2rem;
+  background: linear-gradient(135deg, #0f172a 0%, #111827 45%, #1e293b 100%);
+  box-shadow: 0 32px 80px rgba(15, 23, 42, 0.38);
+}
+
+.mi-sitio-preview-shell {
+  display: grid;
+  grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
+  gap: 1.5rem;
+  padding: clamp(1rem, 2vw, 1.5rem);
+}
+
+.mi-sitio-preview-phone-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mi-sitio-preview-phone {
+  position: relative;
+  width: min(100%, 320px);
+  height: min(76vh, 680px);
+  padding: 14px;
+  border-radius: 2.75rem;
+  background: linear-gradient(180deg, #020617 0%, #0f172a 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 24px 60px rgba(2, 6, 23, 0.45);
+}
+
+.mi-sitio-preview-phone::before {
+  content: '';
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  width: 34%;
+  height: 22px;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.92);
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.08);
+  z-index: 2;
+}
+
+.mi-sitio-preview-phone::after {
+  content: '';
+  position: absolute;
+  top: 20px;
+  right: 34px;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(59, 130, 246, 0.85);
+  box-shadow: 0 0 0 4px rgba(15, 23, 42, 0.55);
+  z-index: 2;
+}
+
+.mi-sitio-preview-phone-screen {
+  position: relative;
+  height: 100%;
+  overflow: auto;
+  overflow-x: hidden;
+  border-radius: 2.15rem;
+  background: #ffffff;
+  box-shadow: inset 0 0 0 1px rgba(226, 232, 240, 0.9);
+  isolation: isolate;
+}
+
+.mi-sitio-preview-statusbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-height: 30px;
+  padding: 0.6rem 1rem 0.35rem;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.92) 100%);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.9);
+}
+
+.mi-sitio-preview-statusbar__time {
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #0f172a;
+}
+
+.mi-sitio-preview-statusbar__icons {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.38rem;
+  font-size: 0.72rem;
+  color: #334155;
+}
+
+.mi-sitio-preview-phone-screen app-company-template-three {
+  display: block;
+  min-height: 100%;
+  margin-top: 0.2rem;
+}
+
+.mi-sitio-preview-meta {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1rem;
+  color: #e2e8f0;
+  min-width: 0;
+}
+
+.mi-sitio-preview-meta-badge {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 999px;
+  border: 1px solid rgba(103, 232, 249, 0.28);
+  background: rgba(8, 145, 178, 0.18);
+  padding: 0.45rem 0.9rem;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #a5f3fc;
+}
+
+.mi-sitio-preview-meta h3 {
+  margin: 0;
+  font-size: clamp(1.75rem, 3vw, 2.6rem);
+  font-weight: 900;
+  line-height: 1.05;
+  color: #f8fafc;
+}
+
+.mi-sitio-preview-meta p {
+  margin: 0;
+  max-width: 42rem;
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: rgba(226, 232, 240, 0.82);
+}
+
+.mi-sitio-preview-meta ul {
+  margin: 0;
+  padding-left: 1.1rem;
+  color: rgba(226, 232, 240, 0.88);
+  line-height: 1.6;
+}
+
+.mi-sitio-preview-meta li + li {
+  margin-top: 0.5rem;
+}
+
+.mi-sitio-color-popup-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 95;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(15, 23, 42, 0.72);
+  backdrop-filter: blur(6px);
+}
+
+.mi-sitio-color-popup-modal {
+  width: min(1100px, 100%);
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
+  border-radius: 1.5rem;
+  border: 1px solid #dbeafe;
+  background: #f8fafc;
+  box-shadow: 0 28px 70px rgba(2, 6, 23, 0.35);
+  padding: 1.25rem;
+}
+
+.mi-sitio-color-popup-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+@media (max-width: 960px) {
+  .mi-sitio-builder__layout {
+    gap: 1rem;
+  }
+
+  .mi-sitio-preview-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .mi-sitio-preview-phone {
+    width: min(100%, 360px);
+  }
+
+  .mi-sitio-preview-meta {
+    gap: 0.85rem;
+  }
+
+  .mi-sitio-color-popup-modal {
+    padding: 1rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .mi-sitio-builder__layout {
+    grid-template-columns: 340px minmax(0, 1fr);
+  }
+}
+
+@media (min-width: 1600px) {
+  .mi-sitio-builder__layout--with-preview {
+    grid-template-columns: 340px minmax(0, 1fr) 380px;
+  }
+
+  .mi-sitio-builder__workspace {
+    min-width: 0;
+  }
+
+  .mi-sitio-builder__preview-card .mi-sitio-preview-phone {
+    width: min(100%, 310px);
+    height: min(72vh, 690px);
+  }
+}
+
+@media (max-width: 1599px) {
+  .mi-sitio-builder__preview-column {
+    position: static;
+    top: auto;
+  }
+
+  .mi-sitio-builder__preview-card {
+    max-height: none;
+    overflow-y: visible;
+  }
+}
+
+@media (max-width: 640px) {
+  .mi-sitio-builder {
+    gap: 1rem;
+  }
+
+  .mi-sitio-builder__header {
+    border-radius: 1.5rem;
+    padding: 1rem;
+  }
+
+  .mi-sitio-builder__actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    width: 100%;
+  }
+
+  .mi-sitio-builder__actions button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .mi-sitio-builder__preview-head {
+    flex-direction: column;
+  }
+
+  .mi-sitio-builder__card {
+    border-radius: 1.25rem;
+    padding: 1rem;
+  }
+
+  .mi-sitio-builder__media-preview {
+    min-height: 150px;
+  }
+
+  .mi-sitio-builder__media-image {
+    height: 150px;
+  }
+
+  .mi-sitio-preview-backdrop {
+    padding: 0.75rem;
+  }
+
+  .mi-sitio-preview-modal {
+    max-height: calc(100vh - 1.5rem);
+    border-radius: 1.5rem;
+  }
+
+  .mi-sitio-preview-shell {
+    gap: 0.85rem;
+    padding: 0.85rem;
+  }
+
+  .mi-sitio-preview-phone {
+    width: min(100%, 290px);
+    height: min(64vh, 560px);
+    padding: 12px;
+    border-radius: 2.1rem;
+  }
+
+  .mi-sitio-preview-phone::before {
+    top: 9px;
+    height: 18px;
+  }
+
+  .mi-sitio-preview-phone::after {
+    top: 17px;
+    right: 28px;
+    width: 8px;
+    height: 8px;
+  }
+
+  .mi-sitio-preview-phone-screen {
+    border-radius: 1.7rem;
+  }
+
+  .mi-sitio-preview-statusbar {
+    min-height: 28px;
+    padding: 0.55rem 0.85rem 0.3rem;
+  }
+
+  .mi-sitio-preview-meta h3 {
+    font-size: 1.5rem;
+  }
+
+  .mi-sitio-preview-meta p,
+  .mi-sitio-preview-meta ul {
+    font-size: 0.9rem;
+  }
+
+  .mi-sitio-color-popup-backdrop {
+    padding: 0.65rem;
+  }
+
+  .mi-sitio-color-popup-modal {
+    max-height: calc(100vh - 1.3rem);
+    border-radius: 1.15rem;
+    padding: 0.8rem;
+  }
+
+  .mi-sitio-color-popup-head {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+@media (max-width: 480px) {
+  .mi-sitio-builder__actions {
+    grid-template-columns: 1fr;
+  }
+
+  .mi-sitio-builder__header h1 {
+    font-size: 1.6rem;
+    line-height: 1.15;
+  }
+
+  .mi-sitio-preview-shell {
+    padding: 0.75rem;
+  }
+
+  .mi-sitio-preview-phone {
+    width: min(100%, 260px);
+    height: min(58vh, 500px);
+    border-radius: 1.9rem;
+  }
+
+  .mi-sitio-preview-meta-badge {
+    font-size: 0.68rem;
+    letter-spacing: 0.16em;
+  }
+
+  .mi-sitio-preview-meta h3 {
+    font-size: 1.3rem;
+  }
+}

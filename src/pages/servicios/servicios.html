@@ -1,0 +1,79 @@
+<div class="bg-[#E5EDF1] min-h-screen py-12">
+    <div class="max-w-7xl mx-auto px-6">
+        <!-- Header -->
+        <div class="mb-12">
+            <h1 class="text-4xl font-extrabold text-[#1A365D] mb-4">Todos los Servicios</h1>
+            <p class="text-gray-700 text-lg">Encuentra los mejores profesionales para tu hogar o negocio.</p>
+        </div>
+
+        <!-- Grid de Servicios -->
+        @if (loading()) {
+        <div class="flex justify-center items-center h-64">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1A365D]"></div>
+        </div>
+        } @else {
+        @if (servicios().length > 0) {
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            @for (servicio of servicios(); track servicio.servicioID) {
+            <div (click)="navigateToDetail(servicio.servicioID)"
+                class="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 cursor-pointer border border-transparent hover:border-[#96C2DB] group">
+                <!-- Imagen -->
+                <div class="relative h-56 bg-gray-200 overflow-hidden">
+                    <img [src]="servicio.urlImagen" [alt]="servicio.nombre"
+                        class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        onerror="this.src='/assets/image-default.webp'" />
+                    <div class="absolute top-4 right-4">
+                        <span
+                            class="bg-white/90 backdrop-blur text-[#1A365D] text-xs font-bold px-3 py-1 rounded-full shadow-sm">
+                            {{ servicio.atencion }}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Contenido -->
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="bg-blue-100 text-blue-600 text-[10px] font-bold px-2 py-0.5 rounded uppercase">
+                            Verificado
+                        </span>
+                        <div class="flex text-yellow-400 text-xs">
+                            <i class="pi pi-star-fill"></i>
+                            <i class="pi pi-star-fill"></i>
+                            <i class="pi pi-star-fill"></i>
+                            <i class="pi pi-star-fill"></i>
+                            <i class="pi pi-star-fill"></i>
+                        </div>
+                    </div>
+
+                    <h3 class="font-bold text-xl text-gray-900 mb-2 capitalize line-clamp-1">
+                        {{ servicio.nombre || servicio.descripcion }}
+                    </h3>
+
+                    <p class="text-gray-600 text-sm mb-4 line-clamp-2">
+                        {{ servicio.descripcion }}
+                    </p>
+
+                    <div class="flex items-center justify-between mb-6">
+                        <span class="text-gray-400 text-xs">Desde</span>
+                        <span class="text-[#1A365D] font-bold text-lg">S/. {{ servicio.precio | number:'1.2-2' }}</span>
+                    </div>
+
+                    <button
+                        class="w-full bg-[#1A365D] hover:bg-[#2C5282] text-white py-3 rounded-xl font-bold transition-colors flex items-center justify-center gap-2 shadow-md">
+                        Ver Detalles
+                        <i class="pi pi-arrow-right text-sm"></i>
+                    </button>
+                </div>
+            </div>
+            }
+        </div>
+        } @else {
+        <div class="bg-white rounded-2xl p-12 text-center shadow-md">
+            <div class="text-6xl mb-4">🛠️</div>
+            <h3 class="text-2xl font-bold text-gray-900 mb-2">No se encontraron servicios</h3>
+            <p class="text-gray-600">Vuelve más tarde para descubrir nuevos profesionales en tu zona.</p>
+        </div>
+        }
+        }
+    </div>
+</div>

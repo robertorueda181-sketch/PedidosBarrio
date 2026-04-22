@@ -1,0 +1,141 @@
+<div class="flex h-screen bg-gray-100 overflow-hidden font-sans">
+  <!-- Mobile Sidebar Overlay -->
+  @if (isMobileMenuOpen()) {
+  <div class="fixed inset-0 z-40 md:hidden bg-gray-900/60 backdrop-blur-sm transition-opacity"
+    (click)="toggleMobileMenu()"></div>
+  }
+
+  <!-- Sidebar (Desktop & Mobile) -->
+  <aside [ngClass]="{
+      'translate-x-0': isMobileMenuOpen(),
+      '-translate-x-full': !isMobileMenuOpen(),
+      'md:translate-x-0': true,
+      'w-64': !isSidebarCompact(),
+      'w-20': isSidebarCompact()
+    }"
+    class="fixed inset-y-0 left-0 z-50 flex flex-col bg-gray-900 text-white transition-all duration-300 ease-in-out md:relative shadow-2xl">
+
+    <!-- Sidebar Header -->
+    <div class="flex items-center h-16 px-4 bg-gray-900 border-b border-gray-800"
+      [ngClass]="isSidebarCompact() ? 'justify-center' : 'justify-between'">
+      <h1 class="text-xl font-black tracking-tight truncate transition-all duration-300"
+        [ngClass]="isSidebarCompact() ? 'opacity-0 w-0' : 'opacity-100'">
+        Panel Empresa
+      </h1>
+      @if (!isSidebarForcedCollapsed()) {
+      <button (click)="toggleSidebar()"
+        class="hidden md:flex p-2 rounded-lg hover:bg-gray-800 text-gray-400 hover:text-white transition-colors">
+        <i class="pi" [ngClass]="isSidebarCompact() ? 'pi-list' : 'pi-align-left'" style="font-size: 1.25rem"></i>
+      </button>
+      }
+      <!-- Mobile Close Button -->
+      <button (click)="toggleMobileMenu()" class="md:hidden p-2 rounded-lg hover:bg-gray-800 text-gray-400">
+        <i class="pi pi-times" style="font-size: 1.25rem"></i>
+      </button>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto custom-scrollbar">
+      @if (loadingItems()) {
+      <div class="space-y-3 px-2">
+        <div class="h-10 bg-gray-800/50 rounded-xl animate-pulse"></div>
+        <div class="h-10 bg-gray-800/50 rounded-xl animate-pulse"></div>
+        <div class="h-10 bg-gray-800/50 rounded-xl animate-pulse"></div>
+      </div>
+      } @else {
+      @for (item of getRootMenus(); track item.id) {
+      @if (getMenuChildren(item.id).length > 0) {
+      <!-- Parent with Submenu -->
+      <div class="space-y-1">
+        <button (click)="toggleSubmenu(item.id, $event)"
+          class="w-full group flex items-center justify-between px-3 py-3 text-sm font-semibold rounded-xl transition-all duration-200 hover:bg-gray-800 text-gray-400 hover:text-white"
+          [ngClass]="{'text-white bg-gray-800/50': isExpanded(item.id)}">
+          <div class="flex items-center">
+            <i [class]="item.icono || 'pi pi-chevron-right'"
+              class="text-xl transition-transform duration-200 group-hover:scale-110 mr-3"
+              [ngClass]="isSidebarCompact() ? 'mx-auto mr-0' : 'mr-3'"></i>
+            <span class="truncate transition-all duration-300"
+              [ngClass]="isSidebarCompact() ? 'opacity-0 scale-95 w-0 invisible' : 'opacity-100 scale-100 visible'">
+              {{ item.nombre }}
+            </span>
+          </div>
+          @if (!isSidebarCompact()) {
+          <i class="pi transition-transform duration-200 text-[10px]"
+            [ngClass]="isExpanded(item.id) ? 'pi-chevron-down rotate-180' : 'pi-chevron-right'"></i>
+          }
+        </button>
+
+        <!-- Children List -->
+        @if (isExpanded(item.id) && !isSidebarCompact()) {
+        <div class="pl-4 space-y-1 mt-1 animate-fade-in">
+          @for (child of getMenuChildren(item.id); track child.id) {
+          <a [routerLink]="child.url" routerLinkActive="bg-[#06b6d4] text-white shadow-lg shadow-cyan-900/20"
+            (click)="isMobileMenuOpen() ? toggleMobileMenu() : null"
+            class="group flex items-center px-4 py-2 text-xs font-bold rounded-lg transition-all duration-200 hover:bg-gray-800 text-gray-500 hover:text-white">
+            <i [class]="child.icono || 'pi pi-circle-fill'" class="text-[8px] mr-3"></i>
+            <span>{{ child.nombre }}</span>
+          </a>
+          }
+        </div>
+        }
+      </div>
+      } @else {
+      <!-- Single Link -->
+      <a [routerLink]="item.url" routerLinkActive="bg-[#06b6d4] text-white shadow-lg shadow-cyan-900/20"
+        (click)="isMobileMenuOpen() ? toggleMobileMenu() : null"
+        class="group flex items-center px-3 py-3 text-sm font-semibold rounded-xl transition-all duration-200 hover:bg-gray-800 text-gray-400 hover:text-white"
+        [title]="isSidebarCompact() ? item.nombre : ''">
+        <i [class]="item.icono || 'pi pi-chevron-right'"
+          class="text-xl transition-transform duration-200 group-hover:scale-110"
+          [ngClass]="isSidebarCompact() ? 'mx-auto' : 'mr-3'"></i>
+        <span class="truncate transition-all duration-300"
+          [ngClass]="isSidebarCompact() ? 'opacity-0 scale-95 w-0 invisible' : 'opacity-100 scale-100 visible'">
+          {{ item.nombre }}
+        </span>
+      </a>
+      }
+      } @empty {
+      <div class="text-center py-10" *ngIf="!isSidebarCompact()">
+        <i class="pi pi-inbox text-3xl text-gray-700 mb-2"></i>
+        <p class="text-gray-600 text-xs font-bold uppercase tracking-widest">Sin menús</p>
+      </div>
+      }
+      }
+    </nav>
+
+    <!-- Logout Section -->
+    <div class="p-4 bg-gray-900 border-t border-gray-800">
+      <button (click)="logout()"
+        class="w-full flex items-center p-3 rounded-xl text-gray-400 hover:text-white hover:bg-red-500/10 hover:text-red-400 transition-all duration-200 group"
+        [ngClass]="isSidebarCompact() ? 'justify-center' : 'justify-start'">
+        <i class="pi pi-power-off text-xl transition-transform group-hover:rotate-12"></i>
+        <span class="ml-3 font-bold text-sm tracking-wide transition-all duration-300"
+          [ngClass]="isSidebarCompact() ? 'hidden' : 'block'">
+          Cerrar Sesión
+        </span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <div class="flex-1 flex flex-col h-full overflow-hidden">
+    <!-- Mobile Header (Visible only on mobile) -->
+    <header
+      class="md:hidden h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 shrink-0 z-30 shadow-sm">
+      <h2 class="text-lg font-black text-gray-900 tracking-tight">Panel Empresa</h2>
+      <button (click)="toggleMobileMenu()" class="p-2 -mr-2 text-gray-500 hover:text-gray-900 transition-colors">
+        <i class="pi pi-bars" style="font-size: 1.5rem"></i>
+      </button>
+    </header>
+
+    <!-- Dynamic Content -->
+    <main class="flex-1 overflow-y-auto bg-gray-50/50 relative">
+      <div class="p-4 md:p-8 max-w-7xl mx-auto min-h-full">
+        <router-outlet></router-outlet>
+      </div>
+      
+      <!-- Botón flotante de progreso global -->
+      <app-progress-button></app-progress-button>
+    </main>
+  </div>
+</div>

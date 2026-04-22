@@ -1,0 +1,41 @@
+@if (company(); as negocio) {
+
+@if (templateType() === 1) {
+<app-company-template-one [business]="negocio" [mapUrl]="mapUrl()" [cartItems]="cartItems()" [isCartOpen]="isCartOpen()"
+  [cartCount]="cartCount()" [cartTotal]="cartTotal()" [addToCart]="addToCart.bind(this)"
+  [removeFromCart]="removeFromCart.bind(this)" [updateQuantity]="updateQuantity.bind(this)"
+  [toggleCart]="toggleCart.bind(this)" [checkout]="checkout.bind(this)"></app-company-template-one>
+} @else if (templateType() === 2) {
+<app-company-template-two [business]="negocio" [styles]="templateStyles()" [filteredCategories]="filteredCategories()"
+  [whatsappUrl]="whatsappUrl()" [bannerSection]="bannerSection()" [heroTitle]="heroTitle()"
+  [heroSubtitle]="heroSubtitle()" [searchTerm]="searchTerm()" [hasFilteredProducts]="hasFilteredProducts()"
+  [imageSections]="imageSections()" [videoSections]="videoSections()" [cartItems]="cartItems()"
+  [isCartOpen]="isCartOpen()" [cartCount]="cartCount()" [cartTotal]="cartTotal()" [currentYear]="currentYear"
+  [getProductsByCategory]="getProductsByCategory.bind(this)" [updateSearchTerm]="updateSearchTerm.bind(this)"
+  [scrollToSection]="scrollToSection.bind(this)" [addToCart]="addToCart.bind(this)"
+  [toggleCart]="toggleCart.bind(this)" [updateQuantity]="updateQuantity.bind(this)"
+  [checkout]="checkout.bind(this)"></app-company-template-two>
+} @else if (templateType() === 3) {
+<app-company-template-three [business]="company()" [styles]="templateStyles()" [config]="templateThreeConfig()"
+  [mapUrl]="mapUrl()" [whatsappUrl]="whatsappUrl()" [cartItems]="cartItems()" [isCartOpen]="isCartOpen()"
+  [cartCount]="cartCount()" [cartTotal]="cartTotal()" [addToCart]="addToCart.bind(this)"
+  [removeFromCart]="removeFromCart.bind(this)" [updateQuantity]="updateQuantity.bind(this)"
+  [toggleCart]="toggleCart.bind(this)" [checkout]="checkout.bind(this)"></app-company-template-three>
+}
+}
+
+@if (loading()) {
+<div class="min-h-screen flex items-center justify-center bg-white">
+  <div class="animate-pulse flex flex-col items-center">
+    <div class="h-12 w-12 bg-gray-200 rounded-full mb-4"></div>
+    <div class="h-4 w-48 bg-gray-200 rounded"></div>
+  </div>
+</div>
+}
+
+
+@if(error()) {
+<div class="container mx-auto p-10 text-center text-red-500">
+  <p>{{ error() }}</p>
+</div>
+}

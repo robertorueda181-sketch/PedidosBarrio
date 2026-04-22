@@ -1,0 +1,372 @@
+<div class="sans-font min-h-screen bg-white">
+
+  <!-- Header -->
+  <header
+    class="fixed top-0 left-0 w-full z-50 transition-all duration-300 bg-[#3E1F0A]/90 backdrop-blur-md border-b border-[#fedeb8]/10">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+      <div class="flex items-center">
+        <img src="assets/logoamanro.png" alt="Amanro Logo" class="h-10 md:h-12 w-auto invert" />
+      </div>
+
+      <nav class="hidden md:flex items-center space-x-8 text-xs font-bold tracking-widest uppercase">
+        <a href="/amanro" class="text-white hover:text-[#fedeb8] transition-colors">Inicio</a>
+        @for(categoria of negocio()?.categorias; track categoria.categoriaID) {
+        @if(categoria.mostrar && hasProductsInCategory(categoria.categoriaID)) {
+        <a (click)="scrollToSection('cat-' + categoria.categoriaID)"
+          class="text-white/80 hover:text-[#fedeb8] transition-colors cursor-pointer">{{ categoria.descripcion }}</a>
+        }
+        }
+      </nav>
+
+      <div class="flex items-center space-x-4">
+        <button (click)="toggleCart()" class="relative text-white hover:text-[#fedeb8] transition-colors">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+          </svg>
+          @if(cartCount() > 0) {
+          <span
+            class="absolute -top-2 -right-2 bg-[#fedeb8] text-[#3E1F0A] text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-[#3E1F0A]">
+            {{ cartCount() }}
+          </span>
+          }
+        </button>
+        <button (click)="sendWhatsAppOrder()"
+          class="hidden md:block bg-[#fedeb8] text-[#3E1F0A] py-2 px-6 text-xs font-bold uppercase tracking-wider rounded-sm hover:bg-white transition-all">Pedir
+          Ahora</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="relative h-[60vh] flex items-center overflow-hidden">
+    <div class="absolute inset-0 z-0">
+      <img src="assets/restaurante.jpg" alt="Amanro Experience" class="w-full h-full object-cover brightness-[0.4]">
+      <div class="absolute inset-0 hero-gradient-overlay"></div>
+    </div>
+
+    <div class="relative z-10 max-w-7xl mx-auto px-6 w-full">
+      <div class="max-w-2xl">
+        <span class="text-[#fedeb8] block text-xl md:text-2xl uppercase tracking-[0.3em] mb-4 font-light">Bienvenidos
+          a</span>
+        <h1 class="serif-font text-5xl md:text-6xl text-white leading-tight mb-6">
+          Amanro: Sabor <br> & Tradición
+        </h1>
+        <div class="flex flex-wrap gap-4">
+          <button (click)="scrollToSection('productos')"
+            class="bg-[#fedeb8] text-black px-8 py-4 font-bold uppercase tracking-widest hover:bg-[#a38763] transition-all">Explorar
+            Menú</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content with Sidebar -->
+  <div id="productos" class="max-w-7xl mx-auto px-4 py-12 flex flex-col md:flex-row gap-8">
+
+    <!-- Sidebar Navigation -->
+    <aside class="hidden md:block w-64 sticky top-24 h-fit">
+      <div class="bg-gray-50 rounded-xl p-6 border border-gray-100">
+        <h3 class="text-[#3E1F0A] font-bold uppercase tracking-widest text-sm mb-6 border-b border-[#fedeb8] pb-2">
+          Categorías</h3>
+        <ul class="space-y-4">
+          @for(categoria of negocio()?.categorias; track categoria.categoriaID) {
+          @if(categoria.mostrar && hasProductsInCategory(categoria.categoriaID)) {
+          <li>
+            <button (click)="scrollToSection('cat-' + categoria.categoriaID)"
+              class="text-gray-600 hover:text-[#8B4513] font-medium transition-colors flex items-center justify-between w-full group">
+              {{ categoria.descripcion }}
+              <svg class="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" fill="none"
+                stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+              </svg>
+            </button>
+          </li>
+          }
+          }
+        </ul>
+      </div>
+    </aside>
+
+    <!-- Products List -->
+    <main class="flex-1">
+
+      <!-- Search Bar -->
+      <div class="mb-10 p-6 bg-gray-50/50 rounded-2xl border border-gray-100 shadow-sm">
+        <div class="relative w-full">
+          <input type="text" [ngModel]="searchTerm()" (ngModelChange)="searchTerm.set($event)"
+            placeholder="¿Qué estás buscando? (Ej: Pizza, Hamburguesa, Postre...)"
+            class="w-full pl-14 pr-6 py-5 bg-white border-2 border-gray-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-[#fedeb8]/30 focus:border-[#8B4513] transition-all text-lg shadow-inner shadow-gray-50">
+          <div class="absolute left-5 top-1/2 -translate-y-1/2 text-[#8B4513]">
+            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Grouped Products -->
+      @if(!hasAnyProduct()) {
+      <div class="text-center py-20 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400">
+          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+        </div>
+        <h3 class="text-[#3E1F0A] font-bold text-lg mb-2">No se encontraron productos</h3>
+        <p class="text-gray-500">Prueba con otros términos de búsqueda.</p>
+        <button (click)="searchTerm.set('')" class="mt-4 text-[#8B4513] font-bold hover:underline">Limpiar
+          búsqueda</button>
+      </div>
+      }
+
+      @for(categoria of negocio()?.categorias; track categoria.categoriaID) {
+      @if(categoria.mostrar && hasProductsInCategory(categoria.categoriaID)) {
+      <div [id]="'cat-' + categoria.categoriaID" class="mb-12 scroll-mt-28">
+        <h2 class="serif-font text-3xl text-[#3E1F0A] mb-8 border-l-4 border-[#8B4513] pl-4">{{ categoria.descripcion }}
+        </h2>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          @for(producto of getProductosByCategory(categoria.categoriaID); track producto.productoID) {
+          <div (click)="openProducto(producto)"
+            class="bg-white border border-gray-100 rounded-2xl p-4 flex gap-4 hover:shadow-lg transition-all cursor-pointer group">
+            <div class="flex-1 flex flex-col justify-between">
+              <div>
+                <h3 class="font-bold text-[#3E1F0A] text-lg mb-1 group-hover:text-[#8B4513] transition-colors">{{
+                  producto.nombre }}</h3>
+                <p class="text-gray-500 text-sm line-clamp-2 mb-2">{{ producto.descripcion || 'Preparado con los mejores
+                  ingredientes de la casa.' }}</p>
+              </div>
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <span class="text-[#8B4513] font-bold">S/ {{ producto.precio | number:'1.2-2' }}</span>
+                </div>
+                <button (click)="$event.stopPropagation(); addToCart(producto)"
+                  class="bg-[#fedeb8] text-[#3E1F0A] px-4 py-2 rounded-lg text-sm font-bold uppercase tracking-wider hover:bg-[#3E1F0A] hover:text-[#fedeb8] transition-colors shadow-sm">
+                  Agregar
+                </button>
+              </div>
+            </div>
+            <div class="w-24 h-24 md:w-32 md:h-32 shrink-0 rounded-xl overflow-hidden">
+              <img [src]="producto.urlImagen" [alt]="producto.nombre"
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+            </div>
+          </div>
+          }
+        </div>
+      </div>
+      }
+      }
+    </main>
+  </div>
+
+  <!-- Product Detail Drawer -->
+  <p-drawer [(visible)]="drawerVisible" position="right" [modal]="true" [style]="{width: '100%', maxWidth: '450px'}"
+    [showCloseIcon]="true" (onHide)="selectedProducto.set(null)">
+    <ng-template pTemplate="content">
+      @if(selectedProducto()) {
+      <div class="flex flex-col h-full">
+        <div class="relative h-48 -mx-5 -mt-5 mb-6">
+          <img [src]="selectedProducto()?.urlImagen" [alt]="selectedProducto()?.nombre"
+            class="w-full h-full object-cover">
+        </div>
+        <div class="flex-1 overflow-y-auto px-1">
+          <div class="flex justify-between items-start mb-4">
+            <h2 class="serif-font text-3xl text-[#3E1F0A]">{{ selectedProducto()?.nombre }}</h2>
+            <span class="text-2xl font-bold text-[#8B4513]">S/ {{ selectedProducto()?.precio | number:'1.2-2' }}</span>
+          </div>
+          <p class="text-gray-600 leading-relaxed mb-8 text-lg">
+            {{ selectedProducto()?.descripcion || 'Disfruta de nuestra especialidad preparada con ingredientes frescos y
+            seleccionados para brindarte el mejor sabor tradicional.' }}
+          </p>
+        </div>
+
+        <div class="pt-4 mt-auto sticky bottom-0 bg-white pb-2">
+          <button (click)="addToCart(selectedProducto()!); closeProducto()"
+            class="w-full bg-[#8B4513] text-white py-6 text-xl rounded-2xl font-bold uppercase tracking-widest hover:bg-[#3E1F0A] transition-all flex items-center justify-center gap-3 shadow-xl hover:shadow-2xl transform active:scale-95">
+            Añadir al Carrito
+          </button>
+        </div>
+      </div>
+      }
+    </ng-template>
+  </p-drawer>
+
+  <!-- Shopping Cart Sidebar -->
+  <div class="fixed inset-0 z-[110]" [class.pointer-events-none]="!isCartOpen()"
+    [class.pointer-events-auto]="isCartOpen()">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-300"
+      [class.opacity-0]="!isCartOpen()" (click)="toggleCart()"></div>
+
+    <div
+      class="absolute top-0 right-0 h-full w-full max-w-md bg-white shadow-2xl transition-transform duration-300 transform pointer-events-auto"
+      [class.translate-x-full]="!isCartOpen()">
+
+      <div class="flex flex-col h-full">
+        <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-[#3E1F0A] text-white">
+          <h2 class="serif-font text-2xl">Tu Pedido</h2>
+          <button (click)="toggleCart()" class="hover:rotate-90 transition-transform">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-6 space-y-6 no-scrollbar">
+          @if(cart().length === 0) {
+          <div class="h-full flex flex-col items-center justify-center text-center space-y-4">
+            <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center text-gray-300">
+              <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+              </svg>
+            </div>
+            <p class="text-gray-500 font-medium">Tu carrito está vacío</p>
+            <button (click)="toggleCart()" class="text-[#8B4513] font-bold uppercase text-xs tracking-widest">Empezar a
+              comprar</button>
+          </div>
+          } @else {
+          @for(item of cart(); track item.productoID) {
+          <div class="flex gap-4 animate-in slide-in-from-right-4 duration-300">
+            <div class="w-20 h-20 rounded-xl overflow-hidden shrink-0">
+              <img [src]="item.urlImagen" [alt]="item.nombre" class="w-full h-full object-cover">
+            </div>
+            <div class="flex-1 flex flex-col justify-between">
+              <div class="flex justify-between items-start">
+                <h4 class="font-bold text-[#3E1F0A] text-sm">{{ item.nombre }}</h4>
+                <span class="font-bold text-sm">S/ {{ (item.precio * item.cantidad) | number:'1.2-2' }}</span>
+              </div>
+              <div class="flex items-center gap-4">
+                <div class="flex items-center border border-gray-200 rounded-lg">
+                  <button (click)="removeFromCart(item.productoID)"
+                    class="px-3 py-1 hover:bg-gray-50 text-[#8B4513] font-bold">-</button>
+                  <span class="px-2 text-sm font-bold w-8 text-center">{{ item.cantidad }}</span>
+                  <button (click)="addToCart(item)"
+                    class="px-3 py-1 hover:bg-gray-50 text-[#8B4513] font-bold">+</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          }
+          }
+        </div>
+
+        @if(cart().length > 0) {
+        <div class="p-6 border-t border-gray-100 bg-gray-50 space-y-4">
+          <div class="flex justify-between items-center text-lg font-bold text-[#3E1F0A]">
+            <span>Total</span>
+            <span>S/ {{ cartTotal() | number:'1.2-2' }}</span>
+          </div>
+          <button (click)="sendWhatsAppOrder()"
+            class="w-full bg-[#8B4513] text-white py-4 rounded-xl font-bold uppercase tracking-widest hover:bg-[#3E1F0A] transition-all flex items-center justify-center gap-3">
+            <i class="fab fa-whatsapp text-xl"></i>
+            Enviar Pedido
+          </button>
+        </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Cart Button (Mobile) -->
+  @if(cartCount() > 0 && !isCartOpen()) {
+  <button (click)="toggleCart()"
+    class="md:hidden fixed bottom-6 right-6 z-[90] bg-[#8B4513] text-white p-4 rounded-full shadow-2xl animate-in zoom-in duration-300 flex items-center gap-3">
+    <div class="relative">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+      </svg>
+      <span
+        class="absolute -top-2 -right-2 bg-[#fedeb8] text-[#3E1F0A] text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-[#8B4513]">
+        {{ cartCount() }}
+      </span>
+    </div>
+    <span class="font-bold text-sm">S/ {{ cartTotal() | number:'1.2-2' }}</span>
+  </button>
+  }
+
+  <!-- Footer -->
+  <footer class="bg-[#3E1F0A] text-white pt-20 pb-10">
+    <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+      <div class="space-y-6">
+        <img src="assets/logoamanro.png" alt="Amanro Logo" class="h-12 w-auto brightness-0 invert" />
+        <p class="text-white/70 text-sm leading-relaxed">
+          Llevamos lo mejor de la gastronomía a tu mesa. Pasión, sabor y calidad en cada bocado.
+        </p>
+        <div class="flex space-x-4">
+          <a href="#"
+            class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-[#fedeb8] hover:text-[#3E1F0A] transition-all">
+            <i class="fab fa-facebook-f"></i>
+          </a>
+          <a href="#"
+            class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-[#fedeb8] hover:text-[#3E1F0A] transition-all">
+            <i class="fab fa-instagram"></i>
+          </a>
+        </div>
+      </div>
+
+      <div>
+        <h4 class="text-[#fedeb8] font-bold uppercase tracking-widest mb-8">Enlaces</h4>
+        <ul class="space-y-4 text-sm text-white/70">
+          <li><a href="#" class="hover:text-white transition-colors">Inicio</a></li>
+          <li><a href="#" class="hover:text-white transition-colors">Nuestra Carta</a></li>
+          <li><a href="#" class="hover:text-white transition-colors">Promociones</a></li>
+          <li><a href="#" class="hover:text-white transition-colors">Ubicación</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 class="text-[#fedeb8] font-bold uppercase tracking-widest mb-8">Contacto</h4>
+        <div class="space-y-4 text-sm text-white/70">
+          <p class="flex items-start gap-3">
+            <svg class="w-5 h-5 text-[#fedeb8] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z">
+              </path>
+            </svg>
+            {{ negocio()?.direccion }}
+          </p>
+          <p class="flex items-center gap-3">
+            <svg class="w-5 h-5 text-[#fedeb8] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z">
+              </path>
+            </svg>
+            {{ negocio()?.telefono || '+51 954 121 196' }}
+          </p>
+          <p class="flex items-center gap-3">
+            <svg class="w-5 h-5 text-[#fedeb8] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
+              </path>
+            </svg>
+            {{ negocio()?.email || 'contacto@amanro.com' }}
+          </p>
+        </div>
+      </div>
+
+      <div>
+        <h4 class="text-[#fedeb8] font-bold uppercase tracking-widest mb-8">Horario</h4>
+        <ul class="space-y-4 text-sm text-white/70">
+          <li class="flex justify-between border-b border-white/10 pb-2"><span>Lun - Jue:</span> <span
+              class="text-white">12:00 - 22:00</span></li>
+          <li class="flex justify-between border-b border-white/10 pb-2"><span>Vie - Sáb:</span> <span
+              class="text-white">12:00 - 23:00</span></li>
+          <li class="flex justify-between border-b border-white/10 pb-2"><span>Dom:</span> <span
+              class="text-white">12:00
+              - 20:00</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-6 pt-8 border-t border-white/10 text-center text-white/40 text-xs">
+      <p>&copy; 2024 {{ negocio()?.nombre || 'Amanro' }}. Todos los derechos reservados.</p>
+    </div>
+  </footer>
+
+</div>

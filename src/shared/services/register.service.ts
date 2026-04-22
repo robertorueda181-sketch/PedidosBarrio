@@ -1,0 +1,55 @@
+import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { RegisterRequest, SocialUserRequest } from '../interfaces/register.interface';
+import { LoginRequest } from '../interfaces/login.interface';
+import { ClientGoogleLoginRequest, ClientRegisterRequest } from '../interfaces/client-auth.interface';
+import { AppConfigService } from './app-config.service';
+
+@Injectable({
+    providedIn: 'root'
+})
+export class RegisterService {
+    private http = inject(HttpClient);
+    private appConfigService = inject(AppConfigService);
+
+    get apiUrl() {
+        return this.appConfigService.apiUrl + '/register';
+    }
+
+    registerBusiness(data: RegisterRequest): Observable<any> {
+        return this.http.post(`${this.appConfigService.apiUrl}/Auth/Register/business`, data);
+    }
+
+    registerClient(data: ClientRegisterRequest): Observable<any> {
+        return this.http.post(`${this.appConfigService.apiUrl}/Auth/Register/client`, data);
+    }
+
+
+
+    login(data: LoginRequest): Observable<any> {
+        const url = `${this.appConfigService.apiUrl}/Auth/Login`;
+        console.log('Sending login request to:', url);
+        return this.http.post(url, data);
+    }
+
+    getCategories(param: string): Observable<any[]> {
+        return this.http.get<any[]>(`${this.appConfigService.apiUrl}/Tipos?param=${param}`);
+    }
+
+    reverseGeocode(lat: number, lng: number): Observable<any> {
+        return this.http.get(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`);
+    }
+
+    sendVerificationCode(correo: string): Observable<any> {
+        return this.http.post(`${this.appConfigService.apiUrl}/Verificacion/enviar-codigo`, { correo });
+    }
+
+    verifyCode(correo: string, codigo: string): Observable<any> {
+        return this.http.post(`${this.appConfigService.apiUrl}/Verificacion/verificar-codigo`, { correo, codigo });
+    }
+
+    loginClientGoogle(data: ClientGoogleLoginRequest): Observable<any> {
+        return this.http.post(`${this.appConfigService.apiUrl}/Clientes/Auth/GoogleAuth`, data);
+    }
+}

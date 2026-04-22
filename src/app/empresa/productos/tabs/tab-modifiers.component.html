@@ -1,0 +1,206 @@
+<div class="p-2 md:p-4">
+  <div class="surface-card rounded-lg p-3 md:p-4 mb-4">
+    <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 mb-3">
+      <div>
+        <h3 class="text-900 font-semibold m-0 mb-2">
+          <i class="pi pi-cog mr-2"></i>Categorías de Modificadores
+        </h3>
+        <p class="text-600 m-0">Configura opciones personalizables como tamaño, ingredientes extras, etc.</p>
+      </div>
+      <button 
+        pButton 
+        label="Crear Categoría" 
+        icon="pi pi-plus"
+        class="p-button-sm w-full md:w-auto"
+        (click)="openModifierDialog()">
+      </button>
+    </div>
+  </div>
+
+  @if (productForm.modifiers.length > 0) {
+    <div class="space-y-3">
+      @for (modifier of productForm.modifiers; track modifier.id) {
+        <div class="surface-card rounded-lg p-3 md:p-4">
+          <!-- Header de la categoría -->
+          <div class="flex flex-col md:flex-row items-start md:items-start justify-between gap-3 mb-3 pb-3 border-b border-gray-200">
+            <div class="flex-1">
+              <div class="flex align-items-center gap-2 mb-2">
+                <i class="pi pi-tag text-primary text-xl"></i>
+                <h4 class="text-900 font-semibold m-0 text-lg">{{ modifier.name }}</h4>
+              </div>
+              
+              <!-- Opciones de la categoría -->
+              <div class="flex flex-wrap gap-3 mt-2">
+                <div class="flex align-items-center gap-2">
+                  <i class="pi pi-circle-fill text-xs" [class.text-orange-500]="modifier.required" [class.text-blue-500]="!modifier.required"></i>
+                  <span class="text-sm font-medium" [class.text-orange-700]="modifier.required" [class.text-blue-700]="!modifier.required">
+                    {{ modifier.required ? 'Obligatorio' : 'Opcional' }}
+                  </span>
+                </div>
+                <div class="flex align-items-center gap-2">
+                  <i class="pi pi-list text-xs text-600"></i>
+                  <span class="text-sm text-600">
+                    {{ modifier.maxSelections ? 'Hasta ' + modifier.maxSelections + ' opciones' : 'Múltiples opciones' }}
+                  </span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="flex gap-2 w-full md:w-auto justify-content-end">
+              <p-checkbox 
+                [(ngModel)]="modifier.required" 
+                [binary]="true" 
+                label="Requerido"
+                styleClass="text-sm">
+              </p-checkbox>
+              <button 
+                pButton 
+                icon="pi pi-trash" 
+                class="p-button-rounded p-button-text p-button-danger p-button-sm"
+                pTooltip="Eliminar categoría"
+                (click)="removeModifier.emit(modifier.id)">
+              </button>
+            </div>
+          </div>
+
+          <!-- Lista de opciones/modificadores -->
+          <div class="mt-3">
+            <label class="block text-900 font-medium mb-2 text-sm">Agregar opciones de esta categoría</label>
+            @if (modifier.options && modifier.options.length > 0) {
+              <div class="flex flex-wrap gap-2 mb-3">
+                @for (option of modifier.options; track option) {
+                  <div class="flex items-center gap-2 bg-gray-100 rounded-lg px-3 py-2">
+                    <i class="pi pi-check text-green-600 text-sm"></i>
+                    <span class="font-medium">{{ option }}</span>
+                    <span class="text-primary font-semibold">S/. 0.00</span>
+                  </div>
+                }
+              </div>
+            }
+            
+            <!-- Formulario para agregar nueva opción -->
+            <div class="flex flex-column md:flex-row gap-2">
+              <input 
+                pInputText 
+                placeholder="Nombre del modificador (ej: Extra queso, Mediano)"
+                class="flex-1"
+                style="font-size: 0.875rem;">
+              <p-inputNumber 
+                mode="currency" 
+                currency="PEN" 
+                locale="es-PE"
+                placeholder="Precio"
+                styleClass="w-full md:w-9rem"
+                [showButtons]="false">
+              </p-inputNumber>
+              <button 
+                pButton 
+                icon="pi pi-plus" 
+                class="p-button-sm w-full md:w-auto"
+                pTooltip="Agregar opción">
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  } @else {
+    <div class="surface-card border-round p-6 text-center">
+      <i class="pi pi-inbox text-6xl text-400 mb-3 block"></i>
+      <h4 class="text-900 font-semibold mb-2">No hay categorías de modificadores</h4>
+      <p class="text-600 mb-3">Crea categorías como "Tamaño", "Ingredientes extras", etc.</p>
+      <button 
+        pButton 
+        label="Crear Primera Categoría" 
+        icon="pi pi-plus"
+        (click)="openModifierDialog()">
+      </button>
+    </div>
+  }
+</div>
+
+<!-- Dialog para crear modificador -->
+<p-dialog 
+  [(visible)]="showModifierDialog" 
+  header="Nueva Categoría de Modificadores" 
+  [modal]="true"
+  [closable]="true"
+  [style]="{width: '90%', 'max-width': '500px'}"
+  [breakpoints]="{'960px': '100vw', '640px': '100vw'}">
+  
+  <div class="flex flex-col gap-4">
+    <div>
+      <label class="block text-900 font-medium mb-2">
+        <i class="pi pi-tag mr-2"></i>Nombre de la Categoría *
+      </label>
+      <input 
+        pInputText 
+        [(ngModel)]="localModifier.name"
+        placeholder="Ej: Tamaño, Ingredientes extras, Tipo de masa"
+        class="w-full">
+      <small class="text-600 block mt-1">Nombre que identifica el grupo de opciones</small>
+    </div>
+
+    <div>
+      <label class="block text-900 font-medium mb-2">
+        <i class="pi pi-list mr-2"></i>Opciones *
+      </label>
+      <textarea 
+        pInputText
+        [(ngModel)]="localModifier.options"
+        placeholder="Pequeño, Mediano, Grande"
+        [rows]="3"
+        class="w-full">
+      </textarea>
+      <small class="text-600 block mt-1">Separa las opciones con comas. Ej: Pequeño, Mediano, Grande</small>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <div class="flex items-center gap-3">
+          <p-checkbox 
+            [(ngModel)]="localModifier.required" 
+            [binary]="true" 
+            inputId="modRequired">
+          </p-checkbox>
+          <label for="modRequired" class="cursor-pointer">
+            <div class="text-900 font-medium">¿Es obligatorio?</div>
+            <small class="text-600">Cliente debe elegir una opción</small>
+          </label>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-900 font-medium mb-2">Máximo de selecciones</label>
+        <p-inputNumber 
+          [(ngModel)]="localModifier.maxSelections" 
+          [min]="1"
+          [max]="10"
+          [showButtons]="true"
+          buttonLayout="horizontal"
+          incrementButtonIcon="pi pi-plus"
+          decrementButtonIcon="pi pi-minus"
+          class="w-full">
+        </p-inputNumber>
+      </div>
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <div class="flex gap-2 justify-end">
+      <button 
+        pButton 
+        label="Cancelar" 
+        icon="pi pi-times"
+        [text]="true"
+        (click)="closeModifierDialog()">
+      </button>
+      <button 
+        pButton 
+        label="Guardar" 
+        icon="pi pi-check"
+        (click)="saveModifier()">
+      </button>
+    </div>
+  </ng-template>
+</p-dialog>

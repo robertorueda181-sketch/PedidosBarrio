@@ -1,0 +1,322 @@
+<main class="min-h-screen" style="background-color: var(--color-background);">
+    <!-- Hero Section -->
+    <header class="relative h-[60vh] md:h-[80vh] overflow-hidden">
+        <img [src]="pageData.hero.imageUrl" [alt]="pageData.hero.title" class="w-full h-full object-cover">
+        <div class="absolute inset-0 flex items-center"
+            style="background: linear-gradient(to right, var(--color-primary) 0%, transparent 100%); opacity: 0.8;">
+            <div class="max-w-7xl mx-auto px-6 w-full">
+                <div class="max-w-2xl text-white animate-fade-in">
+                    <span
+                        class="text-xs font-bold uppercase tracking-widest px-4 py-1 rounded-full mb-4 inline-block bg-accent text-white">Admisiones
+                        {{ pageData.hero.admissionYear }}</span>
+                    <h1 class="text-4xl md:text-6xl font-black mb-6 leading-tight">{{ pageData.hero.title }}</h1>
+                    <p class="text-lg md:text-xl text-blue-50 mb-8 opacity-90">{{ pageData.hero.subtitle }}</p>
+                    <div class="flex flex-wrap gap-4">
+                        <button
+                            class="bg-white px-8 py-4 rounded-2xl font-bold shadow-xl transition-all active:scale-95 text-primary"
+                            style="background-color: white; color: var(--color-primary);"
+                            onmouseover="this.style.backgroundColor='var(--color-secondary)'; this.style.color='white';"
+                            onmouseout="this.style.backgroundColor='white'; this.style.color='var(--color-primary)';">{{
+                            pageData.hero.buttons.primary }}</button>
+                        <button
+                            class="bg-transparent border-2 border-white text-white px-8 py-4 rounded-2xl font-bold transition-all active:scale-95"
+                            style="border-color: white;"
+                            onmouseover="this.style.backgroundColor='rgba(255,255,255,0.1)';"
+                            onmouseout="this.style.backgroundColor='transparent';">{{
+                            pageData.hero.buttons.secondary }}</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Stats Section -->
+    <section class="max-w-7xl mx-auto px-6 -mt-16 relative z-10">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            @for (stat of pageData.stats; track stat.label) {
+            <div class="bg-white p-6 md:p-8 rounded-3xl shadow-xl text-center border transition-all"
+                style="border-color: rgba(var(--color-primary-rgb, 26, 54, 93), 0.1);"
+                onmouseover="this.style.borderColor='var(--color-secondary)'; this.style.transform='translateY(-4px)';"
+                onmouseout="this.style.borderColor='rgba(var(--color-primary-rgb, 26, 54, 93), 0.1)'; this.style.transform='translateY(0)';">
+                <div class="font-black mb-1 text-primary" style="font-size: clamp(1.5rem, 4vw, 2.5rem);">{{ stat.value
+                    }}</div>
+                <div class="text-gray-500 text-xs md:text-sm font-bold uppercase tracking-wider"
+                    style="color: var(--color-text-light);">{{ stat.label }}</div>
+            </div>
+            }
+        </div>
+    </section>
+
+    <!-- Educational Levels -->
+    <section class="max-w-7xl mx-auto px-6 py-20">
+        <div class="text-center max-w-3xl mx-auto mb-16">
+            <h2 class="text-3xl md:text-4xl font-black mb-4" style="color: var(--color-text);">Nuestros Niveles
+                Educativos</h2>
+            <p style="color: var(--color-text-light);">Ofrecemos una propuesta educativa integral que acompaña a
+                nuestros estudiantes en
+                cada etapa de su crecimiento.</p>
+        </div>
+
+        <div class="space-y-20">
+            @for (section of pageData.sections; track section.id) {
+                @if (section.type === 'text-image') {
+                    <div class="flex flex-col md:flex-row items-center gap-12" [ngClass]="{'md:flex-row-reverse': section.imagePosition === 'left'}">
+                        <div class="w-full md:w-1/2 group">
+                            <div class="relative overflow-hidden rounded-3xl shadow-2xl">
+                                <img [src]="section.imageUrl" [alt]="section.title"
+                                    class="w-full h-[300px] md:h-[450px] object-cover group-hover:scale-110 transition-transform duration-700">
+                                <div class="absolute inset-0 bg-blue-900/10 group-hover:bg-transparent transition-colors"></div>
+                            </div>
+                        </div>
+                        <div class="w-full md:w-1/2 space-y-6">
+                            <div class="w-12 h-1 bg-primary"
+                                style="background: linear-gradient(to right, var(--color-primary), var(--color-secondary));">
+                            </div>
+                            <h3 class="text-3xl font-black mb-4" style="color: var(--color-text);">{{ section.title }}</h3>
+                            <p class="text-lg leading-relaxed" style="color: var(--color-text-light);">{{ section.description }}
+                            </p>
+                            <ul class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                @for (feature of section.features; track feature) {
+                                <li class="flex items-center gap-3 font-medium" style="color: var(--color-text);">
+                                    <span class="w-6 h-6 rounded-full flex items-center justify-center text-primary"
+                                        style="background-color: rgba(var(--color-primary-rgb, 26, 54, 93), 0.1);">
+                                        <i class="pi pi-check text-[10px]"></i>
+                                    </span>
+                                    {{ feature }}
+                                </li>
+                                }
+                            </ul>
+                            <button
+                                class="font-black flex items-center gap-2 hover:gap-4 transition-all uppercase tracking-widest text-sm text-primary"
+                                style="color: var(--color-primary);" onmouseover="this.style.color='var(--color-secondary)';"
+                                onmouseout="this.style.color='var(--color-primary)';">
+                                Descubrir más <i class="pi pi-arrow-right font-black"></i>
+                            </button>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </section>
+
+    <!-- Video Gallery -->
+    @for (section of pageData.sections; track section.id) {
+        @if (section.type === 'video-gallery') {
+            <section class="max-w-7xl mx-auto px-6 py-10 rounded-[3rem] shadow-sm mb-20" style="background-color: white;">
+                <div class="text-center max-w-3xl mx-auto mb-16">
+                    <h2 class="text-3xl md:text-4xl font-black mb-4" style="color: var(--color-text);">{{ section.title }}</h2>
+                    <p style="color: var(--color-text-light);">{{ section.description }}</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    @for (video of section.videos; track video.title) {
+                    <div class="space-y-4">
+                        <div class="relative pt-[56.25%] overflow-hidden rounded-3xl shadow-lg bg-gray-100">
+                            <iframe [src]="video.url | safeUrl" class="absolute inset-0 w-full h-full border-0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowfullscreen>
+                            </iframe>
+                        </div>
+                        <div class="px-2">
+                            <h4 class="text-xl font-bold" style="color: var(--color-text);">{{ video.title }}</h4>
+                            <p class="text-sm" style="color: var(--color-text-light);">{{ video.description }}</p>
+                        </div>
+                    </div>
+                    }
+                </div>
+            </section>
+        }
+    }
+
+    <!-- Image Gallery -->
+    @for (section of pageData.sections; track section.id) {
+        @if (section.type === 'image-gallery') {
+            <section class="max-w-7xl mx-auto px-6 py-10 rounded-[3rem] shadow-sm mb-20" style="background-color: white;">
+                <div class="text-center max-w-3xl mx-auto mb-16">
+                    <h2 class="text-3xl md:text-4xl font-black mb-4" style="color: var(--color-text);">{{ section.title }}</h2>
+                    <p style="color: var(--color-text-light);">{{ section.description }}</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    @for (image of section.images; track image.url; let i = $index) {
+                    <div class="group relative overflow-hidden rounded-3xl shadow-lg bg-gray-100 cursor-pointer"
+                         (click)="openModal(section.images, i)">
+                        <img [src]="image.url" [alt]="image.alt"
+                            class="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500">
+                        @if (image.caption) {
+                        <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end">
+                            <p class="text-white p-4 font-medium">{{ image.caption }}</p>
+                        </div>
+                        }
+                        <!-- Overlay para indicar que es clickeable -->
+                        <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                            <i class="pi pi-eye text-white text-2xl"></i>
+                        </div>
+                    </div>
+                    }
+                </div>
+            </section>
+        }
+    }
+
+    <!-- Call to Action -->
+    @for (section of pageData.sections; track section.id) {
+        @if (section.type === 'cta') {
+            <section class="max-w-7xl mx-auto px-6 pb-5">
+                <div class="rounded-[3rem] p-10 md:p-20 text-center relative overflow-hidden bg-primary">
+                    <div class="absolute inset-0 opacity-10">
+                        <div
+                            class="absolute top-0 left-0 w-64 h-64 bg-white rounded-full blur-[100px] -translate-x-1/2 -translate-y-1/2">
+                        </div>
+                        <div
+                            class="absolute bottom-0 right-0 w-96 h-96 rounded-full blur-[120px] translate-x-1/3 translate-y-1/3 bg-accent">
+                        </div>
+                    </div>
+                    <div class="relative z-10 max-w-3xl mx-auto">
+                        <h2 class="text-3xl md:text-5xl font-black text-white mb-6">{{ section.title }}</h2>
+                        <p class="text-blue-100 text-lg mb-10">{{ section.description }}</p>
+                        <button class="bg-white px-10 py-5 rounded-2xl font-bold shadow-2xl transition-all text-primary"
+                            style="background-color: white; color: var(--color-primary);"
+                            onmouseover="this.style.backgroundColor='var(--color-secondary)'; this.style.color='white'; this.style.transform='scale(1.05)';"
+                            onmouseout="this.style.backgroundColor='white'; this.style.color='var(--color-primary)'; this.style.transform='scale(1)';">{{
+                            section.buttonText }}</button>
+                    </div>
+                </div>
+            </section>
+        }
+    }
+</main>
+
+<!-- Modal de Galería de Imágenes -->
+@if (isModalOpen && currentGalleryImages.length > 0) {
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm"
+     (click)="closeModal()">
+    <!-- Contenedor del modal -->
+    <div class="relative max-w-5xl max-h-[90vh] w-full mx-4"
+         (click)="$event.stopPropagation()">
+
+        <!-- Botón cerrar -->
+        <button class="absolute -top-12 right-0 text-white hover:text-gray-300 transition-colors z-10"
+                (click)="closeModal()">
+            <i class="pi pi-times text-2xl"></i>
+        </button>
+
+        <!-- Imagen principal -->
+        <div class="relative bg-white rounded-2xl overflow-hidden shadow-2xl">
+            <img [src]="currentGalleryImages[currentImageIndex].url"
+                 [alt]="currentGalleryImages[currentImageIndex].alt"
+                 class="w-full max-h-[70vh] object-contain">
+
+            <!-- Navegación -->
+            @if (currentGalleryImages.length > 1) {
+            <button class="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-all"
+                    (click)="previousImage()">
+                <i class="pi pi-chevron-left text-xl"></i>
+            </button>
+            <button class="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-all"
+                    (click)="nextImage()">
+                <i class="pi pi-chevron-right text-xl"></i>
+            </button>
+            }
+        </div>
+
+        <!-- Información de la imagen -->
+        <div class="mt-4 text-center">
+            @if (currentGalleryImages[currentImageIndex].caption) {
+            <p class="text-white text-lg font-medium">{{ currentGalleryImages[currentImageIndex].caption }}</p>
+            }
+            <p class="text-gray-300 text-sm mt-1">{{ currentImageIndex + 1 }} de {{ currentGalleryImages.length }}</p>
+        </div>
+
+        <!-- Indicadores de miniaturas -->
+        @if (currentGalleryImages.length > 1) {
+        <div class="mt-4 flex justify-center gap-2 overflow-x-auto max-w-full px-4">
+            @for (image of currentGalleryImages; track image.url; let i = $index) {
+            <button class="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all"
+                    [class.border-white]="i === currentImageIndex"
+                    [class.border-transparent]="i !== currentImageIndex"
+                    (click)="goToImage(i)">
+                <img [src]="image.url" [alt]="image.alt" class="w-full h-full object-cover">
+            </button>
+            }
+        </div>
+        }
+    </div>
+</div>
+}
+
+<!-- Footer -->
+<footer class="mt-5 py-12" style="background-color: var(--color-primary);">
+    <div class="max-w-7xl mx-auto px-6">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+            <!-- Información del colegio -->
+            <div class="md:col-span-2">
+                <h3 class="text-white text-xl font-bold mb-4">{{ pageData.hero.title }}</h3>
+                <p class="text-blue-100 mb-4">{{ pageData.hero.subtitle }}</p>
+                <div class="flex gap-4">
+                    <a href="#" class="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-all">
+                        <i class="pi pi-facebook"></i>
+                    </a>
+                    <a href="#" class="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-all">
+                        <i class="pi pi-instagram"></i>
+                    </a>
+                    <a href="#" class="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-all">
+                        <i class="pi pi-youtube"></i>
+                    </a>
+                    <a href="#" class="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-all">
+                        <i class="pi pi-envelope"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Enlaces rápidos -->
+            <div>
+                <h4 class="text-white font-bold mb-4">Enlaces Rápidos</h4>
+                <ul class="space-y-2">
+                    <li><a href="#" class="text-blue-100 hover:text-white transition-colors">Nosotros</a></li>
+                    <li><a href="#" class="text-blue-100 hover:text-white transition-colors">Admisiones</a></li>
+                    <li><a href="#" class="text-blue-100 hover:text-white transition-colors">Noticias</a></li>
+                    <li><a href="#" class="text-blue-100 hover:text-white transition-colors">Eventos</a></li>
+                    <li><a href="#" class="text-blue-100 hover:text-white transition-colors">Contáctanos</a></li>
+                </ul>
+            </div>
+
+            <!-- Contacto -->
+            <div>
+                <h4 class="text-white font-bold mb-4">Contacto</h4>
+                <ul class="space-y-3 text-blue-100">
+                    <li class="flex items-start gap-2">
+                        <i class="pi pi-map-marker mt-1"></i>
+                        <span>Av. Principal 123, Lima, Perú</span>
+                    </li>
+                    <li class="flex items-center gap-2">
+                        <i class="pi pi-phone"></i>
+                        <span>(01) 234-5678</span>
+                    </li>
+                    <li class="flex items-center gap-2">
+                        <i class="pi pi-envelope"></i>
+                        <span>info@pilar.edu.pe</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Horario de atención -->
+            <div>
+                <h4 class="text-white font-bold mb-4">Horario de Atención</h4>
+                <ul class="space-y-2 text-blue-100">
+                    @for (schedule of scheduleGrouped; track schedule.days) {
+                    <li class="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-4 p-2 rounded-lg hover:bg-white/5 transition-colors">
+                        <span class="font-semibold text-white">{{ schedule.days }}</span>
+                        <span class="text-sm sm:text-base">{{ schedule.hours }}</span>
+                    </li>
+                    }
+                </ul>
+            </div>
+        </div>
+
+        <!-- Copyright -->
+        <div class="border-t border-white/20 pt-8 text-center text-blue-100">
+            <p>&copy; {{ currentYear }} {{ pageData.hero.title }}. Todos los derechos reservados.</p>
+        </div>
+    </div>
+</footer>

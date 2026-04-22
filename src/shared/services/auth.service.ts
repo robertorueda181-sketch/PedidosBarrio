@@ -1,0 +1,146 @@
+import { Injectable, inject, signal } from '@angular/core';
+import { SocialAuthService, SocialUser, GoogleLoginProvider } from '@abacritt/angularx-social-login';
+import { Router } from '@angular/router';
+import { RegisterService } from './register.service';
+import { RegisterRequest } from '../interfaces/register.interface';
+import { LoginRequest } from '../interfaces/login.interface';
+import { ToastrService } from 'ngx-toastr';
+import { Observable, tap } from 'rxjs';
+
+@Injectable({
+    providedIn: 'root'
+})
+export class AuthService {
+    private socialAuthService = inject(SocialAuthService);
+    private router = inject(Router);
+    private registerService = inject(RegisterService);
+
+    private readonly TOKEN_KEY = 'auth_token';
+    private readonly USER_KEY = 'user_data';
+
+    user = signal<SocialUser | null>(null);
+    loggedIn = signal<boolean>(false);
+    autoRegisterSocial = true; 
+
+    constructor() {
+        this.checkExistingSession();
+
+        this.socialAuthService.authState.subscribe((user) => {
+            this.user.set(user);
+            this.loggedIn.set(user != null);
+            if (user) {
+                console.log('User logged in:', user);
+                if (this.autoRegisterSocial) {
+                    this.registerSocialUser(user);
+                }
+            } else {
+                this.clearSession();
+            }
+        });
+    }
+
+    login(credentials: LoginRequest): Observable<any> {
+        return this.registerService.login(credentials).pipe(
+            tap(response => {
+                if (response.token) {
+                    const mockSocialUser = {
+                        email: credentials.email,
+                        firstName: response.user?.nombre || '',
+                        lastName: response.user?.apellido || '',
+                        id: credentials.googleId || '',
+                        provider: credentials.provider || 'LOCAL'
+                    } as SocialUser;
+                    this.saveSession(response.token, mockSocialUser);
+                    this.loggedIn.set(true);
+                    this.user.set(mockSocialUser);
+                }
+            })
+        );
+    }
+
+    signOut(redirect: boolean = true) {
+        this.socialAuthService.signOut().catch(err => console.debug('No social session to sign out'));
+        this.clearSession();
+        if (redirect) {
+            this.router.navigate(['/business-auth']);
+        }
+    }
+
+    getToken(): string | null {
+        return localStorage.getItem(this.TOKEN_KEY);
+    }
+
+    isAuthenticated(): boolean {
+        const token = this.getToken();
+        if (!token) return false;
+
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            const expiry = payload.exp * 1000;
+            return Date.now() < expiry;
+        } catch {
+            return false;
+        }
+    }
+
+    private checkExistingSession() {
+        const token = this.getToken();
+        const userData = localStorage.getItem(this.USER_KEY);
+
+        if (token && userData && this.isAuthenticated()) {
+            try {
+                const user = JSON.parse(userData);
+                this.user.set(user);
+                this.loggedIn.set(true);
+            } catch (error) {
+                console.error('Error parsing stored user data:', error);
+                this.clearSession();
+            }
+        }
+    }
+
+    public saveSession(token: string, user: SocialUser) {
+        localStorage.setItem(this.TOKEN_KEY, token);
+        localStorage.setItem(this.USER_KEY, JSON.stringify(user));
+    }
+
+    public logout() {
+        this.socialAuthService.signOut().catch(() => {});
+        this.clearSession();
+        this.router.navigate(['/']);
+    }
+
+    private clearSession() {
+        localStorage.removeItem(this.TOKEN_KEY);
+        localStorage.removeItem(this.USER_KEY);
+        this.user.set(null);
+        this.loggedIn.set(false);
+    }
+
+    public registerSocialUser(user: SocialUser) {
+        // Only register if we have the required data
+        if (!user.id || !user.email) {
+            console.error('User data incomplete:', user);
+            return;
+        }
+
+        const userData: RegisterRequest = {
+            email: user.email,
+            nombre: user.firstName || '',
+            apellido: user.lastName || '',
+            nombreUsuario: user.email.split('@')[0],
+            contrasena: 'GoogleAuth123*',
+            nombreEmpresa: '',
+            tipoEmpresa: 1,
+            categoria: '',
+            telefono: '',
+            descripcion: '',
+            direccion: '',
+            referencia: '',
+            provider: 'google',
+            socialId: user.id,
+            idToken: user.idToken || ''
+        };
+
+     }
+}

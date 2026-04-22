@@ -1,0 +1,356 @@
+<div class="min-h-screen bg-gray-50 p-4 md:p-6">
+
+  <div class="max-w-6xl mx-auto">
+    <!-- Header -->
+    <div class="bg-white rounded-lg shadow-sm p-4 md:p-6 mb-6">
+      <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div class="flex items-center gap-4">
+          <div class="bg-primary-100 rounded-lg p-3">
+            <i class="pi pi-user text-primary text-2xl"></i>
+          </div>
+          <div>
+            <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Perfil del Negocio</h1>
+            <p class="text-gray-600 mt-1">Gestiona la información de tu negocio</p>
+          </div>
+        </div>
+
+        <button pButton label="Guardar Cambios" icon="" [loading]="isLoading()" class="w-full md:w-auto"
+          (click)="saveProfile()">
+        </button>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="bg-white rounded-lg shadow-sm p-4 md:p-6">
+      <!-- Usamos onTabChange para inicializar el mapa cuando se entra al tab de dirección -->
+      <p-tabs [value]="activeTab()" (valueChange)="onTabChange($event)">
+        <p-tablist>
+          <p-tab value="0">
+            <i class="pi pi-info-circle mr-2"></i>
+            <span class="hidden md:inline">Información Básica</span>
+            <span class="md:hidden">Info</span>
+          </p-tab>
+          <p-tab value="1">
+            <i class="pi pi-share-alt mr-2"></i>
+            <span class="hidden md:inline">Redes Sociales</span>
+            <span class="md:hidden">Redes</span>
+          </p-tab>
+          <p-tab value="2">
+            <i class="pi pi-phone mr-2"></i>
+            Contacto
+          </p-tab>
+          <p-tab value="3">
+            <i class="pi pi-map-marker mr-2"></i>
+            <span class="hidden md:inline">Dirección</span>
+            <span class="md:hidden">Mapa</span>
+          </p-tab>
+        </p-tablist>
+
+        <p-tabpanels>
+          <!-- Tab 1: Información Básica -->
+          <p-tabpanel value="0">
+            <div class="p-4 space-y-6">
+              <!-- Logo -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-3">
+                  <i class="pi pi-image mr-2"></i>Logo del Negocio
+                </label>
+                <div class="flex flex-col md:flex-row items-start gap-6">
+                  <div class="relative group">
+                    <div
+                      class="w-32 h-32 bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden">
+                      @if (companyProfile.logo) {
+                      <img [src]="companyProfile.logo" alt="Logo" class="w-full h-full object-cover">
+                      } @else {
+                      <i class="pi pi-image text-4xl text-gray-400"></i>
+                      }
+                    </div>
+                    <label
+                      class="absolute inset-0 bg-black/40 flex items-center justify-center cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity rounded-lg">
+                      <i class="pi pi-camera text-white text-2xl"></i>
+                      <input type="file" class="hidden" accept="image/*" (change)="onFileSelected($event)">
+                    </label>
+                  </div>
+                  <div class="flex-1 w-full">
+                    <p class="text-sm text-gray-600 mb-2">Sube el logo de tu negocio</p>
+                    <p class="text-xs text-gray-500 mb-3">Tamaño recomendado: 200x200px. Máximo 4MB</p>
+                    <div class="flex flex-wrap gap-2">
+                      <button pButton label="Cambiar Logo" icon="pi pi-upload" [outlined]="true" class="p-button-sm"
+                        (click)="fileInput.click()">
+                      </button>
+                      @if (companyProfile.logo) {
+                      <button pButton label="Eliminar" icon="pi pi-trash" severity="danger" [outlined]="true"
+                        class="p-button-sm" (click)="removeLogo()">
+                      </button>
+                      }
+                      <input #fileInput type="file" class="hidden" accept="image/*" (change)="onFileSelected($event)">
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Nombre -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  <i class="pi pi-tag mr-2"></i>Nombre del Negocio *
+                </label>
+                <input pInputText [(ngModel)]="companyProfile.name" placeholder="Ej: Restaurante El Buen Sabor"
+                  class="w-full">
+              </div>
+
+              <!-- Descripción -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                  <i class="pi pi-align-left"></i>
+                  <span>Descripción *</span>
+                  <i class="pi pi-search text-green-600"
+                    pTooltip="Una buena descripción ayuda a que los clientes encuentren tu negocio más rápido en las búsquedas"
+                    tooltipPosition="right"></i>
+                </label>
+                <textarea pInputText [(ngModel)]="companyProfile.description" [rows]="5"
+                  placeholder="Describe tu negocio, productos o servicios que ofreces..." class="w-full"></textarea>
+                <small class="text-gray-500 block mt-1">
+                  <i class="pi pi-info-circle mr-1"></i>
+                  Incluye palabras clave relacionadas con tu negocio para mejorar la búsqueda
+                </small>
+              </div>
+            </div>
+          </p-tabpanel>
+
+          <!-- Tab 2: Redes Sociales -->
+          <p-tabpanel value="1">
+            <div class="p-4 space-y-4">
+              <p class="text-sm text-gray-600 mb-4">
+                <i class="pi pi-info-circle mr-2"></i>
+                Conecta tus redes sociales para que los clientes puedan seguirte
+              </p>
+
+              <!-- Facebook -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  <i class="pi pi-facebook text-blue-600 mr-2"></i>Facebook
+                </label>
+                <div class="flex flex-col md:flex-row items-start md:items-center gap-2">
+                  <input pInputText [(ngModel)]="companyProfile.socialMedia.facebook"
+                    placeholder="Link de tu página o usuario" class="flex-1 w-full">
+                </div>
+              </div>
+
+              <!-- Instagram -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  <i class="pi pi-instagram text-pink-600 mr-2"></i>Instagram
+                </label>
+                <div class="flex flex-col md:flex-row items-start md:items-center gap-2">
+                  <input pInputText [(ngModel)]="companyProfile.socialMedia.instagram"
+                    placeholder="Link de tu página o usuario" class="flex-1 w-full">
+                </div>
+              </div>
+
+              <!-- Twitter -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  <i class="pi pi-twitter text-blue-400 mr-2"></i>Twitter / X
+                </label>
+                <div class="flex flex-col md:flex-row items-start md:items-center gap-2">
+                  <input pInputText [(ngModel)]="companyProfile.socialMedia.twitter"
+                    placeholder="Link de tu página o usuario" class="flex-1 w-full">
+                </div>
+              </div>
+
+              <!-- TikTok -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  <i class="pi pi-video text-gray-900 mr-2"></i>TikTok
+                </label>
+                <div class="flex flex-col md:flex-row items-start md:items-center gap-2">
+                  <input pInputText [(ngModel)]="companyProfile.socialMedia.tiktok"
+                    placeholder="Link de tu página o usuario" class="flex-1 w-full">
+                </div>
+              </div>
+
+              <!-- WhatsApp -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  <i class="pi pi-whatsapp text-green-600 mr-2"></i>WhatsApp
+                </label>
+                <div class="flex gap-2">
+                  <!-- Prefijo fijo -->
+                  <input pInputText [value]="+51" disabled class="w-20 text-center font-bold" />
+                  <p-inputMask mask="999 999 999" [(ngModel)]="companyProfile.socialMedia.whatsapp"
+                    placeholder="999 999 999" inputmode="numeric"></p-inputMask>
+
+
+                </div>
+              </div>
+            </div>
+          </p-tabpanel>
+
+          <!-- Tab 3: Contacto -->
+          <p-tabpanel value="2">
+            <div class="p-4 space-y-4">
+              <p class="text-sm text-gray-600 mb-4">
+                <i class="pi pi-info-circle mr-2"></i>
+                Información de contacto para que los clientes puedan comunicarse contigo
+              </p>
+
+              <!-- Email -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  <i class="pi pi-envelope mr-2"></i>Correo Electrónico *
+                </label>
+                <input disabled="true" pInputText [(ngModel)]="companyProfile.contact.email" type="email"
+                  placeholder="contacto@minegocio.com" class="w-full">
+              </div>
+
+              <!-- Teléfono Principal -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  <i class="pi pi-phone mr-2"></i>Teléfono Principal *
+                </label>
+                <div class="flex gap-2">
+                  <!-- Prefijo fijo -->
+                  <input pInputText [value]="+51" disabled class="w-20 text-center font-bold" />
+
+                  <p-inputMask mask="999 999 999" [(ngModel)]="companyProfile.contact.phone" placeholder="999 999 999"
+                    inputmode="numeric"></p-inputMask>
+
+
+                </div>
+              </div>
+
+
+              <!-- Teléfono Secundario -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  <i class="pi pi-phone mr-2"></i>Teléfono Secundario (Opcional)
+                </label>
+                <div>
+
+                  <div class="flex gap-2">
+                    <!-- Prefijo fijo -->
+                    <input pInputText [value]="+51" disabled class="w-20 text-center font-bold" />
+                    <p-inputMask mask="999 999 999" [(ngModel)]="companyProfile.contact.phone2"
+                      placeholder="999 999 999" inputmode="numeric"></p-inputMask>
+
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </p-tabpanel>
+
+          <!-- Tab 4: Dirección (Simplificada) -->
+          <p-tabpanel value="3">
+            <div class="p-4 space-y-6">
+              <p class="text-sm text-gray-600">
+                <i class="pi pi-info-circle mr-2"></i>
+                Define la ubicación principal de tu negocio.
+              </p>
+
+              <div class="space-y-4">
+                <!-- Nombre del Local (Opcional en perfil simple) -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <i class="pi pi-building mr-2"></i>Nombre de la Sede
+                  </label>
+                  <input pInputText [ngModel]="addrName()" (ngModelChange)="addrName.set($event)"
+                    placeholder="Ej: Local Principal" class="w-full">
+                </div>
+
+                <!-- Dirección Completa -->
+                <div class="relative">
+                  <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <i class="pi pi-map-marker mr-2"></i>Dirección Completa *
+                  </label>
+                  <div class="flex gap-2">
+                    <div class="relative flex-1">
+                      <input pInputText [ngModel]="addrLine()" (ngModelChange)="addrLine.set($event)"
+                        (input)="onAddressInput()" (focus)="onAddressInput()"
+                        placeholder="Av. Principal 123, Lima, Perú" class="w-full"
+                        [class.pr-10]="isLoadingSuggestions()" autocomplete="off">
+                      @if (isLoadingSuggestions()) {
+                      <div class="absolute right-3 top-1/2 -translate-y-1/2">
+                        <i class="pi pi-spinner pi-spin text-primary"></i>
+                      </div>
+                      }
+                    </div>
+                    <button pButton icon="pi pi-search" [outlined]="true" [loading]="isSearching()"
+                      pTooltip="Buscar en el mapa" (click)="searchAddress()">
+                    </button>
+                  </div>
+
+                  <!-- Sugerencias -->
+                  @if (showSuggestions() && addressSuggestions.length > 0) {
+                  <div
+                    class="absolute z-[9999] w-full mt-1 bg-white rounded-lg shadow-lg border border-gray-200 max-h-64 overflow-y-auto"
+                    style="left: 0;">
+                    @for (suggestion of addressSuggestions; track suggestion.place_id) {
+                    <div
+                      class="px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0 transition-colors"
+                      (click)="selectSuggestion(suggestion)">
+                      <div class="flex items-start gap-3">
+                        <i class="pi pi-map-marker text-primary mt-0.5 flex-shrink-0"></i>
+                        <div class="flex-1 min-w-0">
+                          <div class="text-sm font-medium text-gray-900 break-words">
+                            {{ suggestion.display_name }}
+                          </div>
+                          @if (suggestion.type) {
+                          <div class="text-xs text-gray-500 mt-1">
+                            <i class="pi pi-tag mr-1"></i>{{ suggestion.type }}
+                          </div>
+                          }
+                        </div>
+                      </div>
+                    </div>
+                    }
+                  </div>
+                  }
+                </div>
+
+                <!-- Ubigeo Dropdowns -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-gray-50 p-4 rounded-lg border border-gray-200">
+                  <div class="space-y-2">
+                    <label class="block text-xs font-black text-gray-500 uppercase tracking-widest">Departamento</label>
+                    <p-select [options]="departments()" [ngModel]="addrDept()" (ngModelChange)="addrDept.set($event)"
+                      name="dept" optionLabel="name" optionValue="code" placeholder="Seleccionar"
+                      (onChange)="onDepartmentChange()" [filter]="true" class="w-full">
+                    </p-select>
+                  </div>
+                  <div class="space-y-2">
+                    <label class="block text-xs font-black text-gray-500 uppercase tracking-widest">Provincia</label>
+                    <p-select [options]="provinces()" [ngModel]="addrProv()" (ngModelChange)="addrProv.set($event)"
+                      name="prov" optionLabel="name" optionValue="code" placeholder="Seleccionar"
+                      (onChange)="onProvinceChange()" [filter]="true" [disabled]="provinces().length === 0"
+                      class="w-full">
+                    </p-select>
+                  </div>
+                  <div class="space-y-2">
+                    <label class="block text-xs font-black text-gray-500 uppercase tracking-widest">Distrito</label>
+                    <p-select [options]="districts()" [ngModel]="addrDist()" (ngModelChange)="addrDist.set($event)"
+                      name="dist" optionLabel="name" optionValue="code" placeholder="Seleccionar"
+                      (onChange)="onDistrictChange()" [filter]="true" [disabled]="districts().length === 0"
+                      class="w-full">
+                    </p-select>
+                  </div>
+                </div>
+
+                <!-- Mapa -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <i class="pi pi-map mr-2"></i>Ubicación en el Mapa
+                  </label>
+                  <div id="addressMap" class="w-full h-64 md:h-96 rounded-lg border border-gray-300"></div>
+                  <div class="mt-2 text-xs text-gray-600 bg-gray-50 p-2 rounded flex justify-between items-center">
+                    <span><strong>Coordenadas:</strong> {{ addrLat().toFixed(6) }}, {{ addrLng().toFixed(6) }}</span>
+                    <span class="text-[10px] text-gray-400">Arrastra el marcador o haz clic en el mapa</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </p-tabpanel>
+        </p-tabpanels>
+      </p-tabs>
+    </div>
+  </div>
+</div>

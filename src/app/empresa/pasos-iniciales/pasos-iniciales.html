@@ -1,0 +1,117 @@
+<div class="space-y-6 animate-fade-in pb-20">
+  <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+    <div>
+      <h1 class="text-3xl font-black text-gray-900 tracking-tight">Pasos iniciales</h1>
+      <p class="text-gray-500 font-medium">
+        Completa la configuración básica para que tu negocio esté listo.
+      </p>
+    </div>
+
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 w-full md:w-[420px]">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-xs font-black uppercase tracking-widest text-gray-400">Progreso</span>
+        <span class="text-lg font-black text-gray-900">{{ progressService.progressPercentage() }}%</span>
+      </div>
+      <div class="bg-gray-100 rounded-full h-2 overflow-hidden">
+        <div class="bg-gradient-to-r from-cyan-500 to-blue-500 h-2 rounded-full transition-all duration-500"
+          [style.width.%]="progressService.progressPercentage()"></div>
+      </div>
+
+      <div class="mt-4 flex gap-2">
+        <button (click)="redirectToNextPending()" [disabled]="progressService.loading()"
+          class="flex-1 px-4 py-2.5 bg-cyan-600 hover:bg-cyan-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-black rounded-xl shadow-lg shadow-cyan-600/20 transition-all">
+          Continuar
+        </button>
+        <a class="px-4 py-2.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-800 font-black rounded-xl transition-all"
+          [routerLink]="['/empresa/inicio']">
+          Ir al panel
+        </a>
+      </div>
+    </div>
+  </div>
+
+  @if (progressService.loading()) {
+    <div class="flex flex-col items-center justify-center py-20">
+      <div class="animate-spin rounded-full h-12 w-12 border-4 border-cyan-500 border-t-transparent mb-4"></div>
+      <p class="text-gray-500 font-bold">Cargando pasos iniciales...</p>
+    </div>
+  } @else if (progressService.errorMessage()) {
+    <div class="bg-red-50 border border-red-200 rounded-2xl p-6">
+      <div class="flex items-center gap-3">
+        <i class="pi pi-exclamation-triangle text-red-600 text-2xl"></i>
+        <div>
+          <h3 class="font-black text-red-900">Error al cargar los pasos</h3>
+          <p class="text-sm text-red-700 mt-1">{{ progressService.errorMessage() }}</p>
+        </div>
+      </div>
+      <button (click)="progressService.loadProgress()"
+        class="mt-4 px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl transition-all">
+        Reintentar
+      </button>
+    </div>
+  } @else if (progressService.steps().length === 0) {
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-12 text-center">
+      <i class="pi pi-inbox text-5xl text-gray-300 mb-4"></i>
+      <h3 class="text-xl font-black text-gray-900 mb-2">No hay pasos disponibles</h3>
+      <p class="text-gray-500">No se encontraron pasos iniciales para completar.</p>
+    </div>
+  } @else {
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+      @for (step of progressService.steps(); track step.id) {
+        <div (click)="goToStep(step)"
+          class="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all cursor-pointer p-5 flex gap-4 items-start">
+          <div class="flex-shrink-0">
+            @if (step.completed) {
+              <div class="w-11 h-11 rounded-xl bg-green-100 flex items-center justify-center">
+                <i class="pi pi-check text-green-700 text-lg"></i>
+              </div>
+            } @else {
+              <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-cyan-100 to-blue-100 flex items-center justify-center">
+                <i class="pi {{ step.icon }} text-cyan-700 text-lg"></i>
+              </div>
+            }
+          </div>
+
+          <div class="flex-1 min-w-0">
+            <div class="flex items-start justify-between gap-3">
+              <div class="min-w-0">
+                <div class="flex items-center gap-2">
+                  <h3 class="font-black text-gray-900 truncate">{{ step.title }}</h3>
+                  @if (step.isPro) {
+                    <span
+                      class="bg-gradient-to-r from-yellow-400 to-yellow-600 text-white text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest">
+                      PRO
+                    </span>
+                  }
+                </div>
+                <p class="text-sm text-gray-500 line-clamp-2 mt-1">{{ step.description }}</p>
+              </div>
+
+              <div class="flex flex-col items-end gap-2">
+                @if (step.completed) {
+                  <span class="text-[10px] font-black uppercase tracking-widest bg-green-100 text-green-700 px-2 py-1 rounded-full">
+                    Completado
+                  </span>
+                } @else {
+                  <span class="text-[10px] font-black uppercase tracking-widest bg-gray-100 text-gray-600 px-2 py-1 rounded-full">
+                    Pendiente
+                  </span>
+                }
+                <i class="pi pi-chevron-right text-gray-300"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+    <h2 class="text-lg font-black text-gray-900">Redirección</h2>
+    <p class="text-sm text-gray-600 mt-1">
+      Si accedes a esta página con <code class="bg-gray-100 px-2 py-0.5 rounded">?auto=1</code>,
+      te redirige automáticamente al primer paso pendiente.
+    </p>
+  </div>
+</div>
+
