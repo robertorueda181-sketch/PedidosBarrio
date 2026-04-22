@@ -16,8 +16,7 @@ jobs:
       - name: Configurar Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20' # Puedes cambiar a la versión de Node.js que utilices
-          cache: 'npm'
+          node-version: '24' # Usando la misma versión que tienes localmente (v24.x)
 
       - name: Instalar dependencias
         run: npm ci || npm install
