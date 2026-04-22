@@ -24,7 +24,7 @@ jobs:
           cache-dependency-path: './package-lock.json'
 
       - name: Instalar dependencias
-        run: npm ci
+        run: npm install
 
       - name: Construir proyecto (Producción)
         # Angular 20 genera por defecto la carpeta dist/proyecto/browser
