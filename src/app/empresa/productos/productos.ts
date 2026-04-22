@@ -25,15 +25,7 @@ import { TabBasicInfoComponent } from './tabs/tab-basic-info.component';
 import { TabPricesComponent } from './tabs/tab-prices.component';
 import { TabInventoryComponent } from './tabs/tab-inventory.component';
 import { TabModifiersComponent } from './tabs/tab-modifiers.component';
-
-interface Category {
-  id: number;
-  name: string;
-  isFavorite: boolean;
-  productCount: number;
-  color?: string;
-  expanded?: boolean;
-}
+import { BulkProductsUploadComponent } from './bulk-products-upload.component';
 
 interface Variant {
   id: string;
@@ -73,7 +65,8 @@ interface Modifier {
     TabPricesComponent,
     TabInventoryComponent,
     TabModifiersComponent,
-    MenuModule
+    MenuModule,
+    BulkProductsUploadComponent
   ],
   providers: [ConfirmationService],
   templateUrl: './productos.html',
@@ -110,17 +103,9 @@ export class ProductosComponent {
   selectedProductForMenu: Producto | null = null;
 
   // Categoría seleccionada
-  selectedCategoryId: number | null = null;
   searchTerm: string = '';
 
   // Datos de formularios
-  categoryForm = {
-    id: null as number | null,
-    name: '',
-    isFavorite: false,
-    color: '#3b82f6'
-  };
-
   productForm = {
     id: null as number | null,
     name: '',
@@ -144,15 +129,11 @@ export class ProductosComponent {
 
   kitchenAreas = ['Cocina principal', 'Barra', 'Parrilla', 'Repostería', 'Bebidas'];
 
-  categories = signal<Category[]>([]);
-
   products = signal<Producto[]>([]);
 
   ngOnInit() {
     this.checkMobile();
-    this.loadCategorias();
-    this.selectedCategoryId = this.categories()[0]?.id || null;
-    this.updateProductCounts();
+    this.loadProductos();
   }
 
   openMobileMenu(event: any, product: Producto, menu: any) {
@@ -187,40 +168,19 @@ export class ProductosComponent {
     }
   }
 
-  loadCategorias() {
+  loadProductos() {
     this.productoService.getCategoriasConProductos().subscribe({
       next: (response) => {
-        console.log('Datos cargados desde el servicio:', response);
-
-        // Cargar categorías
-        this.categories.set(response.categorias.map(cat => ({
-          id: cat.categoriaID,
-          name: cat.descripcion,
-          isFavorite: false,
-          productCount: 0,
-          color: cat.color || '#3b82f6',
-          expanded: false
-        })));
-
-        // Cargar productos
+        // Cargar solo productos, sin estructura de categorías anidadas
         this.products.set(response.productos.map(prod => ({
           ...prod
         })));
 
-        if (this.categories().length > 0) {
-          this.categories.update(cats => {
-            cats[0].expanded = true;
-            return [...cats];
-          });
-          this.selectedCategoryId = this.categories()[0].id;
-        }
-
-        this.updateProductCounts();
         this.handleQueryProductAction();
       },
       error: (error) => {
-        console.error('Error al cargar categorías y productos:', error);
-        this.toastr.error('No se pudieron cargar las categorías y productos. Usando datos de ejemplo.', 'Error');
+        console.error('Error al cargar productos:', error);
+        this.toastr.error('No se pudieron cargar los productos', 'Error');
       }
     });
   }
@@ -257,102 +217,6 @@ export class ProductosComponent {
         replaceUrl: true
       });
     }
-  }
-
-  // === GESTIÓN DE CATEGORÍAS ===
-  selectCategory(categoryId: number) {
-    this.selectedCategoryId = categoryId;
-  }
-
-  openCategoryModal(category?: Category) {
-    if (category) {
-      this.categoryForm = {
-        id: category.id,
-        name: category.name,
-        isFavorite: category.isFavorite,
-        color: category.color || '#3b82f6'
-      };
-    } else {
-      this.categoryForm = {
-        id: null,
-        name: '',
-        isFavorite: false,
-        color: '#3b82f6'
-      };
-    }
-    this.showCategoryModal = true;
-  }
-
-  saveCategoryForm() {
-    if (!this.categoryForm.name.trim()) {
-      this.toastr.warning('Por favor ingresa un nombre para la categoría', 'Campo requerido');
-      return;
-    }
-
-    const categoriaData = {
-      descripcion: this.categoryForm.name,
-      color: this.categoryForm.color
-    };
-
-    if (this.categoryForm.id) {
-      // Actualizar categoría existente
-      this.productoService.actualizarCategoria(this.categoryForm.id, categoriaData).subscribe({
-        next: (response) => {
-          this.categories.update(cats => {
-            const index = cats.findIndex(c => c.id === this.categoryForm.id);
-            if (index !== -1) {
-              cats[index] = {
-                ...cats[index],
-                name: this.categoryForm.name,
-                isFavorite: this.categoryForm.isFavorite,
-                color: this.categoryForm.color
-              };
-            }
-            return [...cats];
-          });
-          this.toastr.success('La categoría se ha actualizado correctamente', 'Categoría actualizada');
-          this.closeCategoryModal();
-        },
-        error: (error) => {
-          console.error('Error al actualizar categoría:', error);
-          this.toastr.error('No se pudo actualizar la categoría', 'Error');
-        }
-      });
-    } else {
-      // Crear nueva categoría
-      this.productoService.crearCategoria(categoriaData).subscribe({
-        next: (response) => {
-          this.categories.update(cats => [...cats, {
-            id: response.categoriaID,
-            name: response.descripcion,
-            isFavorite: false,
-            productCount: 0,
-            color: response.color || this.categoryForm.color,
-            expanded: false
-          }]);
-          this.toastr.success('La categoría se ha creado correctamente', 'Categoría creada');
-          this.closeCategoryModal();
-        },
-        error: (error) => {
-          console.error('Error al crear categoría:', error);
-          this.toastr.error('No se pudo crear la categoría', 'Error');
-        }
-      });
-    }
-  }
-
-  toggleFavorite(categoryId: number) {
-    this.categories.update(cats => {
-      const category = cats.find(c => c.id === categoryId);
-      if (category) {
-        category.isFavorite = !category.isFavorite;
-      }
-      return [...cats];
-    });
-  }
-
-  closeCategoryModal() {
-    this.showCategoryModal = false;
   }
 
   // === GESTIÓN DE PRODUCTOS ===
@@ -518,7 +382,6 @@ export class ProductosComponent {
               }
               return [...prods];
             });
-            this.updateProductCounts();
             this.closeProductModal();
 
           };
@@ -530,7 +393,7 @@ export class ProductosComponent {
                   response.imagenPrincipal = imgRes.url;
                 }
                 updateLocalProduct(response);
-                this.loadCategorias();
+                this.loadProductos();
                 this.toastr.success('El producto y la imagen se han actualizado correctamente', 'Producto actualizado');
                 this.pendingImageData = null;
               },
@@ -538,12 +401,12 @@ export class ProductosComponent {
                 console.error('Error updating image', err);
                 this.toastr.warning('Producto actualizado, pero hubo error al subir la imagen', 'Advertencia');
                 updateLocalProduct(response);
-                this.loadCategorias();
+                this.loadProductos();
               }
             });
           } else {
             updateLocalProduct(response);
-            this.loadCategorias();
+            this.loadProductos();
             this.toastr.success('El producto se ha actualizado correctamente', 'Producto actualizado');
           }
         },
@@ -572,7 +435,6 @@ export class ProductosComponent {
               visible: prodResponse.visible,
               aprobado: prodResponse.aprobado ?? false
             }]);
-            this.updateProductCounts();
             this.closeProductModal();
 
           };
@@ -584,7 +446,7 @@ export class ProductosComponent {
                   response.imagenPrincipal = imgRes.url;
                 }
                 addLocalProduct(response);
-                this.loadCategorias();
+                this.loadProductos();
                 this.toastr.success('El producto y la imagen se han creado correctamente', 'Producto creado');
                 this.pendingImageData = null;
               },
@@ -592,12 +454,12 @@ export class ProductosComponent {
                 console.error("Error uploading image for new product", err);
                 this.toastr.warning('Producto creado, pero hubo error al subir la imagen', 'Advertencia');
                 addLocalProduct(response);
-                this.loadCategorias();
+                this.loadProductos();
               }
             })
           } else {
             addLocalProduct(response);
-            this.loadCategorias();
+            this.loadProductos();
             this.toastr.success('El producto se ha creado correctamente', 'Producto creado');
           }
         },
@@ -678,53 +540,6 @@ export class ProductosComponent {
   get filteredProducts(): Producto[] {
     if (!this.selectedCategoryId) return this.products();
     return this.products().filter(p => p.categoriaID === this.selectedCategoryId);
-  }
-
-  getSelectedCategoryName(): string {
-    return this.categories().find(c => c.id === this.selectedCategoryId)?.name || 'Productos';
-  }
-
-  getProductsByCategory(categoryId: number): Producto[] {
-    let filtered = this.products().filter(p => p.categoriaID === categoryId);
-
-    if (this.searchTerm.trim()) {
-      const search = this.searchTerm.toLowerCase();
-      filtered = filtered.filter(p =>
-        p.nombre.toLowerCase().includes(search) ||
-        (p.descripcion && p.descripcion.toLowerCase().includes(search))
-      );
-    }
-
-    return filtered;
-  }
-
-  get filteredCategories(): Category[] {
-    if (!this.searchTerm.trim()) {
-      return this.categories();
-    }
-
-    return this.categories().filter(category =>
-      this.getProductsByCategory(category.id).length > 0
-    );
-  }
-
-  toggleCategory(categoryId: number) {
-    this.categories.update(cats => {
-      const category = cats.find(c => c.id === categoryId);
-      if (category) {
-        category.expanded = !category.expanded;
-      }
-      return [...cats];
-    });
-  }
-
-  updateProductCounts() {
-    this.categories.update(cats => {
-      cats.forEach(category => {
-        category.productCount = this.products().filter(p => p.categoriaID === category.id).length;
-      });
-      return [...cats];
-    });
   }
 
   togglePreview() {

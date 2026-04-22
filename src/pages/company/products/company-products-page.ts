@@ -2,8 +2,10 @@ import { CommonModule } from '@angular/common';
 import { Component, computed, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { catchError, forkJoin, of } from 'rxjs';
 import { NegocioDetalle, NegocioService } from '../../../shared/services/negocio.service';
-import { TEMPLATE_THREE_STATIC_CONTENT } from '../templates/template3/template3-content';
+import { PaginasService } from '../../../shared/services/paginas.service';
+import { TEMPLATE_THREE_STATIC_CONTENT, TemplateThreePageData } from '../templates/template3/template3-content';
 import { CompanyCartItem } from '../interfaces/company-template.interface';
 
 interface SiteBuilderDraft {
@@ -34,9 +36,11 @@ export class CompanyProductsPage {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly negocioService = inject(NegocioService);
+  private readonly paginasService = inject(PaginasService);
   private readonly storageKey = 'empresa_mi_sitio_template3';
 
   readonly business = signal<NegocioDetalle | null>(null);
+  readonly publishedPageData = signal<TemplateThreePageData | null>(null);
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
   readonly searchTerm = signal('');
@@ -48,7 +52,10 @@ export class CompanyProductsPage {
   readonly isPreview = computed(() => this.router.url.includes('/preview'));
   readonly businessSlug = computed(() => this.route.snapshot.paramMap.get('codigoempresa') || '');
   readonly brandName = computed(() => this.business()?.nombre || 'Mi catálogo');
-  readonly logoUrl = computed(() => this.business()?.logoUrl || (this.business() as any)?.urlLogo || '');
+  readonly logoUrl = computed(() => this.publishedPageData()?.branding?.logoUrl
+    || this.business()?.logoUrl
+    || (this.business() as any)?.urlLogo
+    || '');
   readonly pageTitle = computed(() => `Productos de ${this.brandName()}`);
   readonly pageDescription = computed(() => this.business()?.descripcion || 'Explora todos los productos disponibles y encuentra lo que buscas rápidamente.');
 
@@ -224,9 +231,17 @@ export class CompanyProductsPage {
     }
 
     this.loading.set(true);
-    this.negocioService.getNegocioPorNombre(slug).subscribe({
-      next: business => {
-        this.business.set(business);
+    this.publishedPageData.set(null);
+
+    forkJoin({
+      negocio: this.negocioService.getNegocioPorNombre(slug),
+      pagina: this.paginasService.getPaginaPorCodigo(slug).pipe(catchError(() => of(null)))
+    }).subscribe({
+      next: ({ negocio, pagina }) => {
+        const pageData = this.parsePageData(pagina?.contenido);
+        this.publishedPageData.set(pageData);
+        this.business.set(this.mergeBusinessWithPublishedBranding(negocio, pageData));
+        this.theme.set(this.buildTheme(pageData?.theme?.colors));
         this.loading.set(false);
       },
       error: error => {
@@ -251,11 +266,39 @@ export class CompanyProductsPage {
 
     try {
       const draft = JSON.parse(raw) as SiteBuilderDraft;
+      this.publishedPageData.set(draft.pageData || null);
       this.business.set(draft.business || null);
       this.theme.set(this.buildTheme(draft.pageData?.theme?.colors));
     } catch {
       this.error.set('No se pudo leer el borrador de la vista previa.');
     }
+  }
+
+  private parsePageData(contenido?: string | null): TemplateThreePageData | null {
+    if (!contenido) {
+      return null;
+    }
+
+    try {
+      return JSON.parse(contenido) as TemplateThreePageData;
+    } catch {
+      return null;
+    }
+  }
+
+  private mergeBusinessWithPublishedBranding(
+    business: NegocioDetalle,
+    pageData: TemplateThreePageData | null
+  ): NegocioDetalle {
+    if (!pageData?.branding) {
+      return business;
+    }
+
+    return {
+      ...business,
+      urlBanner: pageData.branding.urlBanner || business.urlBanner,
+      logoUrl: pageData.branding.logoUrl || business.logoUrl
+    };
   }
 
   private buildTheme(colors?: typeof TEMPLATE_THREE_STATIC_CONTENT.theme.colors): CompanyProductsTheme {

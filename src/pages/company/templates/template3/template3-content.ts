@@ -144,7 +144,6 @@ export interface TemplateThreeContactSection {
   type: 'contact';
   id: string;
   content: {
-    social_title: string;
     address_label: string;
     phone_label: string;
     email_label: string;
@@ -179,6 +178,10 @@ export type TemplateThreeSectionData =
 export interface TemplateThreePageData {
   theme: TemplateThreeThemeConfig;
   sections: TemplateThreeSectionData[];
+  branding?: {
+    urlBanner?: string;
+    logoUrl?: string;
+  };
 }
 
 export const TEMPLATE_THREE_STATIC_CONTENT: TemplateThreePageData = {
@@ -351,7 +354,6 @@ export const TEMPLATE_THREE_STATIC_CONTENT: TemplateThreePageData = {
       type: 'contact',
       id: 'contacto',
       content: {
-        social_title: 'Síguenos en redes sociales',
         address_label: 'Dirección',
         phone_label: 'Teléfono / WhatsApp',
         email_label: 'Correo electrónico',

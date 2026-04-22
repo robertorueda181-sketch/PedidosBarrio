@@ -2,8 +2,10 @@ import { Component, OnInit, inject, signal, computed, effect } from '@angular/co
 import { ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { catchError, forkJoin, of } from 'rxjs';
 import { NegocioService, NegocioDetalle, NegocioImagen, NegocioSeccion, NegocioVideo } from '../../shared/services/negocio.service';
 import { AnalyticsService } from '../../shared/services/analytics.service';
+import { PaginasService } from '../../shared/services/paginas.service';
 import {
   CompanyBannerSection,
   CompanyCartItem,
@@ -16,6 +18,7 @@ import {
 import { TemplateOneComponent } from './templates/template1/template1';
 import { TemplateTwoComponent } from './templates/template2/template2';
 import { TemplateThreeComponent } from './templates/template3/template3';
+import { TemplateThreePageData } from './templates/template3/template3-content';
 
 @Component({
   selector: 'app-company',
@@ -28,12 +31,14 @@ export class Company implements OnInit {
   private route = inject(ActivatedRoute);
   private negocioService = inject(NegocioService);
   private analyticsService = inject(AnalyticsService);
+  private paginasService = inject(PaginasService);
   private sanitizer = inject(DomSanitizer);
   
   codigoempresa: string | null = null;
   company = signal<NegocioDetalle | null>(null);
   loading = signal<boolean>(false);
   error = signal<string | null>(null);
+  publishedPageData = signal<TemplateThreePageData | null>(null);
 
   // Cart State
   cartItems = signal<CompanyCartItem[]>([]);
@@ -56,6 +61,7 @@ export class Company implements OnInit {
   });
 
   templateStyles = computed<CompanyTemplateStyles>(() => {
+    const pageTheme = this.publishedPageData()?.theme;
     const business = this.company() as (NegocioDetalle & {
       bannerColor?: string;
       textColor?: string;
@@ -63,10 +69,13 @@ export class Company implements OnInit {
     }) | null;
 
     return {
-      bannerColor: business?.colorBanner || business?.bannerColor || '#312e81',
-      textColor: business?.colorTexto || business?.textColor || '#0f172a',
-      fontFamily: business?.estiloLetra || business?.fontFamily || 'Inter, sans-serif',
-      mutedTextColor: business?.colorTexto || business?.textColor || '#475569'
+      bannerColor: pageTheme?.colors?.primary || business?.colorBanner || business?.bannerColor || '#312e81',
+      primaryColor: pageTheme?.colors?.primary,
+      secondaryColor: pageTheme?.colors?.secondary,
+      backgroundColor: pageTheme?.colors?.background,
+      textColor: pageTheme?.colors?.text_main || business?.colorTexto || business?.textColor || '#0f172a',
+      fontFamily: pageTheme?.typography?.font_family_body || business?.estiloLetra || business?.fontFamily || 'Inter, sans-serif',
+      mutedTextColor: pageTheme?.colors?.text_main || business?.colorTexto || business?.textColor || '#475569'
     };
   });
 
@@ -289,12 +298,20 @@ export class Company implements OnInit {
   loadCompany(nombre: string) {
     this.loading.set(true);
     this.error.set(null);
-    this.negocioService.getNegocioPorNombre(nombre).subscribe({
-      next: (data) => {
-        this.company.set(data);
+    this.publishedPageData.set(null);
+
+    forkJoin({
+      negocio: this.negocioService.getNegocioPorNombre(nombre),
+      pagina: this.paginasService.getPaginaPorCodigo(nombre).pipe(catchError(() => of(null)))
+    }).subscribe({
+      next: ({ negocio, pagina }) => {
+        const pageData = this.parsePageData(pagina?.contenido);
+        this.publishedPageData.set(pageData);
+
+        this.company.set(this.mergeBusinessWithPublishedBranding(negocio, pageData));
         this.loading.set(false);
-        if (data.empresaID) {
-          this.analyticsService.trackCompanyView(data.nombre);
+        if (negocio.empresaID) {
+          this.analyticsService.trackCompanyView(negocio.nombre);
         }
       },
       error: (err) => {
@@ -303,6 +320,33 @@ export class Company implements OnInit {
         this.loading.set(false);
       }
     });
+  }
+
+  private parsePageData(contenido?: string | null): TemplateThreePageData | null {
+    if (!contenido) {
+      return null;
+    }
+
+    try {
+      return JSON.parse(contenido) as TemplateThreePageData;
+    } catch {
+      return null;
+    }
+  }
+
+  private mergeBusinessWithPublishedBranding(
+    business: NegocioDetalle,
+    pageData: TemplateThreePageData | null
+  ): NegocioDetalle {
+    if (!pageData?.branding) {
+      return business;
+    }
+
+    return {
+      ...business,
+      urlBanner: pageData.branding.urlBanner || business.urlBanner,
+      logoUrl: pageData.branding.logoUrl || business.logoUrl
+    };
   }
 
   addToCart(product: any) {

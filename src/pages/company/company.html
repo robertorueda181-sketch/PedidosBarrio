@@ -17,7 +17,7 @@
   [checkout]="checkout.bind(this)"></app-company-template-two>
 } @else if (templateType() === 3) {
 <app-company-template-three [business]="company()" [styles]="templateStyles()" [config]="templateThreeConfig()"
-  [mapUrl]="mapUrl()" [whatsappUrl]="whatsappUrl()" [cartItems]="cartItems()" [isCartOpen]="isCartOpen()"
+  [pageData]="publishedPageData()" [mapUrl]="mapUrl()" [whatsappUrl]="whatsappUrl()" [cartItems]="cartItems()" [isCartOpen]="isCartOpen()"
   [cartCount]="cartCount()" [cartTotal]="cartTotal()" [addToCart]="addToCart.bind(this)"
   [removeFromCart]="removeFromCart.bind(this)" [updateQuantity]="updateQuantity.bind(this)"
   [toggleCart]="toggleCart.bind(this)" [checkout]="checkout.bind(this)"></app-company-template-three>

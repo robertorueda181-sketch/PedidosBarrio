@@ -1,0 +1,172 @@
+<p-menu #mobileMenu [model]="mobileMenuItems()" [popup]="true" appendTo="body"></p-menu>
+<p-confirmDialog></p-confirmDialog>
+
+<div class="categorias-container">
+  <!-- Header -->
+  <div class="header">
+    <div class="header-info">
+      <div class="business-badge">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.5a2 2 0 00-1 .267M7 21H5m12 0h2m0-4V5m0 16V5" />
+        </svg>
+        <div>
+          <h2>Gestión de Categorías</h2>
+          <span class="domain-hint">Organiza las categorías de tus productos</span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="btn-primary" (click)="openModal()" [disabled]="loading()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+          </svg>
+          Nueva Categoría
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenido -->
+  <div class="content">
+    <!-- Buscador -->
+    <div class="search-container">
+      <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+      </svg>
+      <input
+        type="text"
+        class="search-input"
+        [ngModel]="searchTerm()"
+        (ngModelChange)="updateSearchTerm($event)"
+        placeholder="Buscar categoría..." />
+      @if (searchTerm()) {
+      <button class="clear-search" (click)="clearSearch()" title="Limpiar búsqueda">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+      }
+    </div>
+
+    <!-- Estado de carga -->
+    @if (loading()) {
+    <div class="state-card">
+      <div class="spinner"></div>
+      <p>Cargando categorías...</p>
+    </div>
+    } @else {
+      @if (filteredCategories().length > 0) {
+      <!-- Tabla en escritorio -->
+      <div class="table-container desktop-view">
+        <p-table [value]="filteredCategories()" responsiveLayout="scroll" [paginator]="true" [rows]="10"
+          [showCurrentPageReport]="true" currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} categorías"
+          [rowsPerPageOptions]="[5, 10, 20]">
+          <ng-template pTemplate="header">
+            <tr>
+              <th pSortableColumn="descripcion">
+                Nombre <p-sortIcon field="descripcion"></p-sortIcon>
+              </th>
+              <th>Color</th>
+              <th>Acciones</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-category>
+            <tr>
+              <td>
+                <strong>{{ category.descripcion }}</strong>
+              </td>
+              <td>
+                <div class="color-badge" [style.background-color]="category.color"></div>
+              </td>
+              <td>
+                <div class="actions-group">
+                  <button class="btn-icon" (click)="openModal(category)" pTooltip="Editar" tooltipPosition="top">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                    </svg>
+                  </button>
+                  <button class="btn-icon btn-danger" (click)="deleteCategory(category)"
+                    pTooltip="Eliminar" tooltipPosition="top">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
+
+      <!-- Vista móvil -->
+      <div class="mobile-view">
+        @for (category of filteredCategories(); track trackByCategory($index, category)) {
+        <div class="category-card">
+          <div class="card-header" [style.border-left-color]="category.color">
+            <div class="card-info">
+              <h3>{{ category.descripcion }}</h3>
+              <div class="color-badge" [style.background-color]="category.color"></div>
+            </div>
+            <button #menu class="btn-menu" (click)="openMobileMenu($event, category, menu)">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 8c1.1 0 2-1 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />
+              </svg>
+            </button>
+          </div>
+        </div>
+        }
+      </div>
+      } @else {
+      <!-- Sin resultados -->
+      <div class="state-card empty-state">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+        </svg>
+        <h3>No hay categorías</h3>
+        <p>Crea tu primera categoría para organizar tus productos.</p>
+        <button class="btn-primary" (click)="openModal()">Crear Categoría</button>
+      </div>
+      }
+    }
+  </div>
+</div>
+
+<!-- Modal para crear/editar categoría -->
+<p-dialog
+  [(visible)]="showModal()"
+  [header]="categoryForm().id ? 'Editar Categoría' : 'Nueva Categoría'"
+  [modal]="true"
+  [style]="{ width: '90vw', maxWidth: '500px' }"
+  [draggable]="false">
+  <div class="modal-content">
+    <div class="form-group">
+      <label>Nombre de la categoría *</label>
+      <input
+        type="text"
+        pInputText
+        [(ngModel)]="categoryForm"
+        (ngModelChange)="categoryForm.set({ ...categoryForm(), descripcion: $event })"
+        placeholder="Ej. Platos principales"
+        class="w-full" />
+    </div>
+
+    <div class="form-group">
+      <label>Color</label>
+      <p-colorPicker
+        [(ngModel)]="categoryForm"
+        (ngModelChange)="categoryForm.set({ ...categoryForm(), color: $event })"
+        [inline]="true"
+        [append]="true"></p-colorPicker>
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <button pButton type="button" label="Cancelar" icon="pi pi-times" (click)="closeModal()" class="p-button-text"></button>
+    <button pButton type="button" label="Guardar" icon="pi pi-check" (click)="saveCategory()"
+      [disabled]="loading()"></button>
+  </ng-template>
+</p-dialog>

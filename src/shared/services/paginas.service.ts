@@ -16,7 +16,11 @@ export class PaginasService {
   private readonly config = inject(AppConfigService);
 
   getPagina(): Observable<PaginaDto> {
-    return this.http.get<PaginaDto>(`${this.config.apiUrl}/Paginas`);
+    return this.http.get<PaginaDto>(`${this.config.apiUrl}/Paginas/codigo`);
+  }
+
+  getPaginaPorCodigo(codigo: string): Observable<PaginaDto> {
+    return this.http.get<PaginaDto>(`${this.config.apiUrl}/Paginas/${encodeURIComponent(codigo)}`);
   }
 
   savePagina(pagina: PaginaDto): Observable<any> {

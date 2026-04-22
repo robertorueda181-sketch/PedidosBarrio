@@ -1,59 +1,144 @@
-# PedidosBarrio
+🚀 Tecnologías y Enfoque
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.3.9.
+Este proyecto ha sido desarrollado utilizando Angular 19, aplicando las mejores prácticas actuales del framework:
 
-## Development server
-
-To start a local development server, run:
-
-```bash
+Uso de Signals para la gestión reactiva del estado.
+Nueva sintaxis de control de flujo (@if, @else, @for).
+Arquitectura basada en componentes reutilizables.
+Integración con Tailwind CSS.
+Uso de PrimeNG.
+Implementación de autenticación con JWT.
+Uso de Guards e Interceptores HTTP.
+Enfoque en rendimiento, mantenibilidad y escalabilidad.
+⚙️ Requisitos
+Node.js (18+)
+Angular CLI (v19)
+npm install -g @angular/cli
+▶️ Ejecución del proyecto
+git clone <URL_DEL_REPOSITORIO>
+cd <NOMBRE_DEL_PROYECTO>
+npm install
 ng serve
-```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+Abrir en:
+http://localhost:4200
 
-## Code scaffolding
+🎨 Estilos y UI
+Tailwind CSS
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+Uso de utilidades para diseño rápido y responsive.
 
-```bash
-ng generate component component-name
-```
+PrimeNG
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+Componentes avanzados como tablas, modales, formularios y más.
 
-```bash
-ng generate --help
-```
+🧠 Uso de Signals
+const contador = signal(0);
+contador.update(v => v + 1);
 
-## Building
+✔️ Estado simple → Signals
+✔️ Estado complejo → Servicios + Signals
 
-To build the project run:
+🔀 Control de flujo moderno
+@if (isLoggedIn) {
+  <dashboard />
+} @else {
+  <login />
+}
+🧩 Arquitectura y Componentes
 
-```bash
-ng build
-```
+Estructura basada en features:
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+/features
+  /auth
+  /alumnos
+  /matriculas
+/shared
+  /components
+  /services
+  /guards
+  /interceptors
 
-## Running unit tests
+✔️ Componentes pequeños y reutilizables
+✔️ Separación clara de responsabilidades
 
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+⚙️ Configuración (config.json)
 
-```bash
+Las variables de entorno se manejan mediante config.json.
+
+{
+  "apiUrl": "https://api.midominio.com"
+}
+Reglas:
+No hardcodear endpoints.
+Cargar al iniciar la app.
+Manejar múltiples entornos.
+🔐 Autenticación (JWT)
+
+El sistema utiliza autenticación basada en JSON Web Tokens (JWT):
+
+Flujo:
+Usuario inicia sesión.
+API retorna access_token.
+Token se almacena (preferiblemente en memoria o storage seguro).
+Se envía en cada request HTTP.
+🛡️ Guards
+
+Se utilizan Guards para proteger rutas:
+
+Ejemplo: AuthGuard
+canActivate(): boolean {
+  return this.authService.isAuthenticated();
+}
+Tipos usados:
+AuthGuard → protege rutas privadas
+RoleGuard → valida roles/permisos
+🌐 Interceptores HTTP
+
+Se utilizan interceptores para:
+
+1. Agregar token automáticamente
+intercept(req, next) {
+  const token = this.authService.getToken();
+
+  const cloned = req.clone({
+    setHeaders: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+
+  return next.handle(cloned);
+}
+2. Manejo global de errores
+Detectar 401 → redirigir a login
+Manejo centralizado de errores
+🔑 Manejo de Tokens
+
+Buenas prácticas implementadas:
+
+✔️ Uso de JWT
+✔️ Expiración controlada
+✔️ Logout limpia almacenamiento
+✔️ Evitar guardar tokens sensibles en localStorage si no es necesario
+✔️ Posibilidad de implementar refresh tokens
+📐 Buenas prácticas
+✔️ Lazy Loading
+✔️ Reactive Forms
+✔️ Tipado fuerte (TypeScript)
+✔️ Servicios desacoplados
+✔️ Clean Code
+✔️ Manejo centralizado de errores
+✔️ Uso de Signals para performance
+✔️ Interfaces creadas en su carpeta respectiva
+🧪 Testing
 ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+📦 Build producción
+ng build --configuration production
+📌 Notas finales
+Basado en recomendaciones del Angular Team.
+Arquitectura preparada para sistemas empresariales.
+Escalable para módulos como:
+Productos
+Diseño de pagina
+Banners
+Editar perfil

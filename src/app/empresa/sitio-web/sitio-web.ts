@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, HostListener, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { catchError, forkJoin, map, of } from 'rxjs';
+import { catchError, firstValueFrom, forkJoin, map, of } from 'rxjs';
 import { TemplateThreeComponent } from '../../../pages/company/templates/template3/template3';
 import {
   TEMPLATE_THREE_STATIC_CONTENT,
@@ -19,6 +19,7 @@ import {
   TemplateThreeVideoSection
 } from '../../../pages/company/templates/template3/template3-content';
 import { EmpresaService } from '../../../shared/services/empresa.service';
+import { ImagenesService } from '../../../shared/services/imagenes.service';
 import { NegocioDetalle } from '../../../shared/services/negocio.service';
 import { PaginasService, PaginaDto } from '../../../shared/services/paginas.service';
 import { ProductoService } from '../../../shared/services/producto.service';
@@ -44,12 +45,6 @@ interface ColorPreset {
 }
 
 type ThemeEditableColorKey = 'primary' | 'secondary' | 'background' | 'text_main';
-
-interface SiteBuilderDraft {
-  pageData: TemplateThreePageData;
-  business: NegocioDetalle;
-  savedAt: string | null;
-}
 
 interface EditorSectionOption {
   key: EditorSectionKey;
@@ -79,11 +74,11 @@ interface WeeklyHourConfig {
   styleUrl: './sitio-web.css'
 })
 export class SitioWeb {
-  private readonly storageKey = 'empresa_mi_sitio_template3';
   private readonly inlinePreviewMinWidth = 1600;
   private readonly mobilePreviewMaxWidth = 767;
   private readonly router = inject(Router);
   private readonly empresaService = inject(EmpresaService);
+  private readonly imagenesService = inject(ImagenesService);
   private readonly paginasService = inject(PaginasService);
   private readonly productoService = inject(ProductoService);
   private readonly sectionOrder: TemplateThreeSectionData['type'][] = [
@@ -102,18 +97,18 @@ export class SitioWeb {
     secondary: { text: 'Ver nuestros productos', link: '#menu' }
   };
 
-  private readonly initialDraft = this.loadDraft();
-
   readonly isMobilePreviewOpen = signal(false);
   readonly isInitialLoading = signal(true);
+  readonly isImageUploading = signal(false);
+  readonly imageUploadMessage = signal('Procesando imagen...');
   readonly isColorOptionsPopupOpen = signal(false);
   readonly isContactProfileEditing = signal(false);
   readonly isPublishing = signal(false);
   readonly publishMessage = signal<{ type: 'success' | 'error'; text: string } | null>(null);
   readonly selectedEditorSection = signal<EditorSectionKey>('branding');
-  readonly pageData = signal<TemplateThreePageData>(this.initialDraft.pageData);
-  readonly previewBusiness = signal<NegocioDetalle>(this.initialDraft.business);
-  readonly lastSavedAt = signal<string | null>(this.initialDraft.savedAt);
+  readonly pageData = signal<TemplateThreePageData>(this.deepClone(TEMPLATE_THREE_STATIC_CONTENT));
+  readonly previewBusiness = signal<NegocioDetalle>(this.buildDefaultBusiness());
+  readonly lastPersistedSignature = signal(this.buildDraftSignature(this.pageData(), this.previewBusiness()));
   readonly viewportWidth = signal(typeof window !== 'undefined' ? window.innerWidth : this.inlinePreviewMinWidth);
 
   readonly sectionOptions: Array<{ type: EditableOptionalSection; label: string; description: string }> = [
@@ -188,10 +183,10 @@ export class SitioWeb {
   ];
   readonly basicColors: string[] = ['#000000', '#FFFFFF', '#EF4444', '#F97316', '#FACC15', '#22C55E', '#14B8A6', '#3B82F6', '#6366F1', '#8B5CF6', '#EC4899', '#64748B'];
   readonly colorBase = signal<Record<ThemeEditableColorKey, string>>({
-    primary: this.normalizeHexColor(this.initialDraft.pageData.theme.colors.primary, '#4A2F27'),
-    secondary: this.normalizeHexColor(this.initialDraft.pageData.theme.colors.secondary, '#C2A06B'),
-    background: this.normalizeHexColor(this.initialDraft.pageData.theme.colors.background, '#F6F0E6'),
-    text_main: this.normalizeHexColor(this.initialDraft.pageData.theme.colors.text_main, '#2B211D')
+    primary: this.normalizeHexColor(TEMPLATE_THREE_STATIC_CONTENT.theme.colors.primary, '#4A2F27'),
+    secondary: this.normalizeHexColor(TEMPLATE_THREE_STATIC_CONTENT.theme.colors.secondary, '#C2A06B'),
+    background: this.normalizeHexColor(TEMPLATE_THREE_STATIC_CONTENT.theme.colors.background, '#F6F0E6'),
+    text_main: this.normalizeHexColor(TEMPLATE_THREE_STATIC_CONTENT.theme.colors.text_main, '#2B211D')
   });
   readonly colorOpacity = signal<Record<ThemeEditableColorKey, number>>({
     primary: 100,
@@ -211,6 +206,7 @@ export class SitioWeb {
   readonly shouldOpenPreviewInNewTab = computed(() => this.viewportWidth() <= this.mobilePreviewMaxWidth);
   readonly shouldUsePreviewPopup = computed(() => !this.isInlinePreviewVisible() && !this.shouldOpenPreviewInNewTab());
   readonly mobilePreviewActionLabel = computed(() => this.shouldOpenPreviewInNewTab() ? 'Abrir preview' : 'Ver mobile');
+  readonly hasUnsavedChanges = computed(() => this.buildDraftSignature(this.pageData(), this.previewBusiness()) !== this.lastPersistedSignature());
 
   readonly heroSection = computed(() => this.findSection('hero') as TemplateThreeHeroSection | null);
   readonly aboutSection = computed(() => this.findSection('about_us') as TemplateThreeAboutSection | null);
@@ -232,6 +228,7 @@ export class SitioWeb {
   readonly previewConfig = computed(() => ({
     brandName: this.previewBusiness().nombre,
     logoUrl: this.previewBusiness().logoUrl || (this.previewBusiness() as any)?.urlLogo,
+    heroImageUrl: this.previewBusiness().urlBanner,
     productsPageUrl: this.previewProductsUrl(),
     reservationPhone: this.previewBusiness().whatsapp || this.previewBusiness().telefono || '+51 999 999 999',
     openingHours: this.contactSection()?.content.hours || []
@@ -273,9 +270,17 @@ export class SitioWeb {
     }
   }
 
-  openMobilePreview() {
-    this.persistDraft();
+  @HostListener('window:beforeunload', ['$event'])
+  onBeforeUnload(event: BeforeUnloadEvent) {
+    if (!this.hasUnsavedChanges()) {
+      return;
+    }
 
+    event.preventDefault();
+    event.returnValue = '';
+  }
+
+  openMobilePreview() {
     if (this.shouldOpenPreviewInNewTab()) {
       this.openWebPreview();
       return;
@@ -314,8 +319,6 @@ export class SitioWeb {
   }
 
   openWebPreview() {
-    this.persistDraft();
-
     if (typeof window === 'undefined') {
       return;
     }
@@ -329,10 +332,6 @@ export class SitioWeb {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-  }
-
-  saveDraft() {
-    this.persistDraft();
   }
 
   publishSite() {
@@ -353,7 +352,7 @@ export class SitioWeb {
               type: 'success',
               text: '✓ Sitio publicado exitosamente'
             });
-            this.lastSavedAt.set(new Date().toISOString());
+            this.lastPersistedSignature.set(this.buildDraftSignature(this.pageData(), this.previewBusiness()));
             setTimeout(() => this.publishMessage.set(null), 4000);
           },
           error: err => {
@@ -370,8 +369,6 @@ export class SitioWeb {
   }
 
   openProductsManager(mode: 'new' | 'edit' | 'list' = 'list', product?: any) {
-    this.persistDraft();
-
     const queryParams: Record<string, string | number> = {};
 
     if (mode === 'new') {
@@ -411,22 +408,6 @@ export class SitioWeb {
 
   isEditorSectionSelected(key: EditorSectionKey): boolean {
     return this.selectedEditorSection() === key;
-  }
-
-  private persistDraft() {
-    if (typeof window === 'undefined') {
-      return;
-    }
-
-    const savedAt = new Date().toISOString();
-    const payload: SiteBuilderDraft = {
-      pageData: this.pageData(),
-      business: this.previewBusiness(),
-      savedAt
-    };
-
-    localStorage.setItem(this.storageKey, JSON.stringify(payload));
-    this.lastSavedAt.set(savedAt);
   }
 
   hasSection(type: EditableOptionalSection): boolean {
@@ -695,8 +676,21 @@ export class SitioWeb {
       return;
     }
 
-    const dataUrl = await this.optimizeImageFile(file, field);
-    this.updateBusinessField(field, dataUrl);
+    this.imageUploadMessage.set(field === 'urlBanner' ? 'Subiendo banner...' : 'Subiendo logo...');
+    this.isImageUploading.set(true);
+
+    try {
+      const tipo = field === 'urlBanner' ? 'Banner' : 'Empresa';
+      const imageUrl = await firstValueFrom(this.imagenesService.optimizeImage(file, tipo));
+      this.updateBusinessField(field, imageUrl);
+      this.patchPageData(draft => {
+        draft.branding = { ...(draft.branding || {}), [field]: imageUrl };
+      });
+    } catch (error) {
+      console.error('No se pudo optimizar/cargar imagen del negocio:', error);
+    } finally {
+      this.isImageUploading.set(false);
+    }
 
     if (input) {
       input.value = '';
@@ -720,8 +714,17 @@ export class SitioWeb {
       return;
     }
 
-    const dataUrl = await this.optimizeImageFile(file, 'aboutImage');
-    this.updateAboutHighlight('url', dataUrl);
+    this.imageUploadMessage.set('Subiendo imagen destacada...');
+    this.isImageUploading.set(true);
+
+    try {
+      const dataUrl = await this.optimizeImageFile(file, 'aboutImage');
+      this.updateAboutHighlight('url', dataUrl);
+    } catch (error) {
+      console.error('No se pudo procesar/cargar imagen destacada:', error);
+    } finally {
+      this.isImageUploading.set(false);
+    }
 
     if (input) {
       input.value = '';
@@ -867,8 +870,17 @@ export class SitioWeb {
       return;
     }
 
-    const dataUrl = await this.optimizeImageFile(file, 'aboutImage');
-    this.updateGalleryItem(index, 'url', dataUrl);
+    this.imageUploadMessage.set('Subiendo imagen de galería...');
+    this.isImageUploading.set(true);
+
+    try {
+      const imageUrl = await firstValueFrom(this.imagenesService.optimizeImage(file, 'Producto'));
+      this.updateGalleryItem(index, 'url', imageUrl);
+    } catch (error) {
+      console.error('No se pudo optimizar/cargar imagen de galería:', error);
+    } finally {
+      this.isImageUploading.set(false);
+    }
 
     if (input) {
       input.value = '';
@@ -1021,89 +1033,6 @@ export class SitioWeb {
     });
   }
 
-  addProduct() {
-    this.patchBusiness(draft => {
-      const nextId = Math.max(0, ...draft.productos.map((product: any) => Number(product.productoID) || 0)) + 1;
-      draft.productos.push({
-        productoID: nextId,
-        categoriaID: 1,
-        nombre: 'Nuevo producto',
-        descripcion: 'Describe aquí tu producto estrella.',
-        precio: 25,
-        stock: 20,
-        urlImagen: '/assets/image-default.webp',
-        categoria: {
-          categoriaID: 1,
-          descripcion: 'Especialidades',
-          codigo: 'especialidades'
-        }
-      });
-      return this.normalizeBusiness(draft);
-    });
-  }
-
-  updateProductField(index: number, field: 'nombre' | 'descripcion' | 'urlImagen', value: string) {
-    this.patchBusiness(draft => {
-      draft.productos[index][field] = value;
-      return this.normalizeBusiness(draft);
-    });
-  }
-
-  updateProductPrice(index: number, value: string) {
-    this.patchBusiness(draft => {
-      draft.productos[index].precio = Number(value) || 0;
-      return this.normalizeBusiness(draft);
-    });
-  }
-
-  updateProductCategory(index: number, value: string) {
-    this.patchBusiness(draft => {
-      draft.productos[index].categoria = {
-        ...(draft.productos[index].categoria || {}),
-        descripcion: value
-      };
-      return this.normalizeBusiness(draft);
-    });
-  }
-
-  removeProduct(index: number) {
-    this.patchBusiness(draft => {
-      draft.productos.splice(index, 1);
-      return this.normalizeBusiness(draft);
-    });
-  }
-
-  private loadDraft(): SiteBuilderDraft {
-    if (typeof window === 'undefined') {
-      return this.buildDefaultDraft();
-    }
-
-    const raw = localStorage.getItem(this.storageKey);
-    if (!raw) {
-      return this.buildDefaultDraft();
-    }
-
-    try {
-      const draft = JSON.parse(raw) as SiteBuilderDraft;
-      const draftBusiness = this.normalizeBusiness(draft.business || this.buildDefaultBusiness());
-      return {
-        pageData: draft.pageData || this.deepClone(TEMPLATE_THREE_STATIC_CONTENT),
-        business: this.sanitizeDemoDraftBusiness(draftBusiness),
-        savedAt: draft.savedAt || null
-      };
-    } catch {
-      return this.buildDefaultDraft();
-    }
-  }
-
-  private buildDefaultDraft(): SiteBuilderDraft {
-    return {
-      pageData: this.deepClone(TEMPLATE_THREE_STATIC_CONTENT),
-      business: this.buildDefaultBusiness(),
-      savedAt: null
-    };
-  }
-
   private buildDefaultBusiness(): NegocioDetalle {
     return this.normalizeBusiness({
       empresaID: 'preview-demo',
@@ -1123,20 +1052,6 @@ export class SitioWeb {
       productos: [],
       categorias: []
     });
-  }
-
-  private sanitizeDemoDraftBusiness(business: NegocioDetalle): NegocioDetalle {
-    const isDemoBusiness = business.empresaID === 'preview-demo';
-
-    if (!isDemoBusiness) {
-      return business;
-    }
-
-    return {
-      ...business,
-      productos: [],
-      categorias: []
-    };
   }
 
   private patchPageData(mutator: (draft: TemplateThreePageData) => void) {
@@ -1246,8 +1161,7 @@ export class SitioWeb {
           next: ({ catalog, products, pagina }) => {
             const resolvedProducts = products?.length ? products : (catalog?.productos || []);
             const configuredBusiness = this.mapConfiguredBusiness(profile, catalog, resolvedProducts);
-            const merged = this.mergeDraftWithConfiguredBusiness(this.previewBusiness(), configuredBusiness);
-            this.previewBusiness.set(merged);
+            this.previewBusiness.set(configuredBusiness);
            console.log('5',pagina)
              console.log('5',pagina?.contenido)
             if (pagina?.contenido) {
@@ -1256,12 +1170,21 @@ export class SitioWeb {
                 const savedPageData = JSON.parse(pagina.contenido) as TemplateThreePageData;
                 this.pageData.set(savedPageData);
                 console.log(savedPageData);
+                if (savedPageData.branding?.urlBanner || savedPageData.branding?.logoUrl) {
+                  this.previewBusiness.update(current => ({
+                    ...current,
+                    ...(savedPageData.branding!.urlBanner ? { urlBanner: savedPageData.branding!.urlBanner } : {}),
+                    ...(savedPageData.branding!.logoUrl ? { logoUrl: savedPageData.branding!.logoUrl } : {})
+                  }));
+                }
                 this.syncContactProfileDraft();
                 this.syncWeeklyHoursFromSection();
               } catch {
                 console.error('No se pudo parsear el contenido de la página guardada.');
               }
             }
+
+            this.lastPersistedSignature.set(this.buildDraftSignature(this.pageData(), this.previewBusiness()));
 
             this.isInitialLoading.set(false);
           },
@@ -1334,17 +1257,6 @@ export class SitioWeb {
     });
   }
 
-  private mergeDraftWithConfiguredBusiness(draftBusiness: NegocioDetalle, configuredBusiness: NegocioDetalle): NegocioDetalle {
-    return this.normalizeBusiness({
-      ...configuredBusiness,
-      ...draftBusiness,
-      productos: configuredBusiness.productos,
-      categorias: configuredBusiness.categorias,
-      urlBanner: draftBusiness.urlBanner || configuredBusiness.urlBanner,
-      logoUrl: draftBusiness.logoUrl || configuredBusiness.logoUrl
-    });
-  }
-
   private fallbackProductImage(): string {
     return '/assets/image-default.webp';
   }
@@ -1373,82 +1285,190 @@ export class SitioWeb {
     const section = this.contactSection();
     const hours = section?.content.hours || [];
 
+    const rawConfig = (section?.content as any)?.hours_config ?? (section?.content as any)?.hoursConfig;
+    const hoursConfigEntries = this.extractHoursConfigEntries(rawConfig);
+    if (hoursConfigEntries.length > 0) {
+      const defaults = this.createDefaultWeeklyHoursConfig();
+      const defaultByKey = new Map(defaults.map(day => [day.dayKey, day]));
+      const parsedByKey = new Map<WeeklyHourConfig['dayKey'], any>();
+      hoursConfigEntries.forEach((item: any) => {
+        const normalizedKey = this.normalizeDayKey(item?.dayKey || item?.day || item?.dayLabel);
+        if (normalizedKey) {
+          parsedByKey.set(normalizedKey, item);
+        }
+      });
+
+      if (parsedByKey.size === 0) {
+        // Si llegó un objeto de configuración pero sin claves de día reconocibles,
+        // no forzamos defaults: seguimos con fallback de `hours` textual.
+      } else {
+
+        const mappedFromRaw = defaults.map(day => {
+          const source = parsedByKey.get(day.dayKey);
+          if (!source) {
+            return day;
+          }
+
+          const fromRaw = source.from
+            ?? source.open
+            ?? source.apertura
+            ?? source.horaApertura
+            ?? source.start
+            ?? source.startTime
+            ?? source.horaInicio
+            ?? source.horaDesde
+            ?? source.openingTime
+            ?? day.from;
+          const toRaw = source.to
+            ?? source.close
+            ?? source.cierre
+            ?? source.horaCierre
+            ?? source.end
+            ?? source.endTime
+            ?? source.horaFin
+            ?? source.horaHasta
+            ?? source.closingTime
+            ?? day.to;
+
+          const from = this.parseTimeToken(String(fromRaw)) || day.from;
+          const to = this.parseTimeToken(String(toRaw)) || day.to;
+          const fallbackDay = defaultByKey.get(day.dayKey) || day;
+          const isOpen = this.parseBooleanLike(source.isOpen)
+            ?? this.parseBooleanLike(source.abierto)
+            ?? this.parseBooleanLike(source.opened)
+            ?? this.parseBooleanLike(source.closed, true)
+            ?? !(String(source.estado || '').toLowerCase() === 'cerrado');
+
+          return {
+            ...day,
+            isOpen: isOpen ?? fallbackDay.isOpen,
+            from,
+            to
+          };
+        });
+
+        this.weeklyHoursConfig.set(mappedFromRaw);
+        this.persistWeeklyHoursConfig(mappedFromRaw);
+        return;
+      }
+    }
+
     const defaultConfig = this.createDefaultWeeklyHoursConfig();
-    const mapped = defaultConfig.map(day => {
-      const matched = hours.find(line => line.toLowerCase().startsWith(day.dayLabel.toLowerCase()));
-      if (!matched) {
-        return day;
+    const mapped = defaultConfig.map(day => ({ ...day }));
+    const dayIndexes = new Map(mapped.map((day, index) => [this.normalizeText(day.dayLabel), index]));
+
+    for (const line of hours) {
+      const span = this.parseDaySpan(line, dayIndexes);
+      if (!span) {
+        continue;
       }
 
-      const normalized = matched.normalize('NFD').replace(/[ -]/g, '').replace(/\s+/g, ' ').trim().toLowerCase();
-
+      const normalized = this.normalizeText(line);
       if (normalized.includes('cerrado') || normalized.includes('no abre')) {
-        return { ...day, isOpen: false };
+        for (let index = span.start; index <= span.end; index += 1) {
+          mapped[index] = { ...mapped[index], isOpen: false };
+        }
+        continue;
       }
 
-      const timeMatch = matched.match(/(\d{1,2}):(\d{2}).*?(\d{1,2}):(\d{2})/);
-      if (!timeMatch) {
-        return day;
+      const parsedRange = this.parseHoursRange(line);
+      if (!parsedRange) {
+        continue;
       }
 
-      const from = `${timeMatch[1].padStart(2, '0')}:${timeMatch[2]}`;
-      const to = `${timeMatch[3].padStart(2, '0')}:${timeMatch[4]}`;
-      return {
-        ...day,
-        isOpen: true,
-        from,
-        to
-      };
-    });
+      for (let index = span.start; index <= span.end; index += 1) {
+        mapped[index] = {
+          ...mapped[index],
+          isOpen: true,
+          from: parsedRange.from,
+          to: parsedRange.to
+        };
+      }
+    }
 
     this.weeklyHoursConfig.set(mapped);
     this.persistWeeklyHoursConfig(mapped);
+  }
+
+  private extractHoursConfigEntries(rawConfig: unknown): any[] {
+    if (!rawConfig) {
+      return [];
+    }
+
+    let parsed: unknown = rawConfig;
+    if (typeof rawConfig === 'string') {
+      try {
+        parsed = JSON.parse(rawConfig);
+      } catch {
+        return [];
+      }
+    }
+
+    if (Array.isArray(parsed)) {
+      return parsed;
+    }
+
+    if (parsed && typeof parsed === 'object') {
+      const wrapper = parsed as Record<string, any>;
+
+      const nestedCandidates = [
+        wrapper['hours_config'],
+        wrapper['hoursConfig'],
+        wrapper['items'],
+        wrapper['data'],
+        wrapper['value'],
+        wrapper['days'],
+        wrapper['schedule'],
+        wrapper['horarios']
+      ];
+
+      for (const candidate of nestedCandidates) {
+        const extracted = this.extractHoursConfigEntries(candidate);
+        if (extracted.length > 0) {
+          return extracted;
+        }
+      }
+
+      const objectEntries = Object.entries(parsed as Record<string, any>);
+      return objectEntries.map(([key, value]) => {
+        if (value && typeof value === 'object') {
+          return {
+            dayKey: (value as any).dayKey ?? key,
+            ...(value as any)
+          };
+        }
+
+        return {
+          dayKey: key,
+          from: value
+        };
+      });
+    }
+
+    return [];
   }
 
   private persistWeeklyHoursConfig(config: WeeklyHourConfig[]) {
     const labels = this.buildWeeklyHoursLabels(config);
     this.patchSection('contact', section => {
       section.content.hours = labels;
+      (section.content as any).hours_config = config.map(day => ({
+        dayKey: day.dayKey,
+        isOpen: day.isOpen,
+        from: day.from,
+        to: day.to
+      }));
     });
   }
 
   private buildWeeklyHoursLabels(config: WeeklyHourConfig[]): string[] {
-    const labels: string[] = [];
-    let index = 0;
-
-    while (index < config.length) {
-      const current = config[index];
-
-      if (!current.isOpen) {
-        index += 1;
-        continue;
+    return config.map(day => {
+      if (!day.isOpen) {
+        return `${day.dayLabel}: Cerrado`;
       }
 
-      let end = index;
-
-      while (end + 1 < config.length && this.hasSameSchedule(current, config[end + 1])) {
-        end += 1;
-      }
-
-      const dayLabel = end > index
-        ? `${current.dayLabel} a ${config[end].dayLabel}`
-        : current.dayLabel;
-
-      const scheduleText = `${this.formatTimeLabel(current.from)} - ${this.formatTimeLabel(current.to)}`;
-
-      labels.push(`${dayLabel}: ${scheduleText}`);
-      index = end + 1;
-    }
-
-    return labels;
-  }
-
-  private hasSameSchedule(a: WeeklyHourConfig, b: WeeklyHourConfig): boolean {
-    if (!a.isOpen || !b.isOpen) {
-      return false;
-    }
-
-    return a.from === b.from && a.to === b.to;
+      return `${day.dayLabel}: ${day.from} - ${day.to}`;
+    });
   }
 
   private buildHalfHourOptions(): Array<{ value: string; label: string }> {
@@ -1475,6 +1495,178 @@ export class SitioWeb {
     return `${normalizedHour}:${minuteText} ${suffix}`;
   }
 
+  private parseHoursRange(line: string): { from: string; to: string } | null {
+    const matches = line.match(/(\d{1,2}:\d{2}(?::\d{2})?(?:\s*[ap]\.?(?:\s*m\.?)?)?)/gi);
+    if (!matches || matches.length < 2) {
+      return null;
+    }
+
+    const from = this.parseTimeToken(matches[0]);
+    const to = this.parseTimeToken(matches[1]);
+
+    if (!from || !to) {
+      return null;
+    }
+
+    return { from, to };
+  }
+
+  private parseDaySpan(line: string, dayIndexes: Map<string, number>): { start: number; end: number } | null {
+    const normalized = this.normalizeText(line);
+    const headerMatch = normalized.match(/^([a-zñ]+)(?:\s+a\s+([a-zñ]+))?\s*:/i);
+
+    if (!headerMatch) {
+      return null;
+    }
+
+    const startName = headerMatch[1];
+    const endName = headerMatch[2] || startName;
+
+    const start = dayIndexes.get(startName);
+    const end = dayIndexes.get(endName);
+
+    if (start == null || end == null) {
+      return null;
+    }
+
+    return {
+      start: Math.min(start, end),
+      end: Math.max(start, end)
+    };
+  }
+
+  private parseTimeToken(value: string): string | null {
+    const cleaned = this.normalizeText(String(value || ''));
+    const meridiemMatch = cleaned.match(/\b([ap])\.?\s*m\.?\b/i);
+    const timeMatch = cleaned.match(/(\d{1,2})\s*[:h]\s*(\d{2})(?:\s*[:]\s*\d{2})?/i);
+
+    if (!timeMatch) {
+      return null;
+    }
+
+    let hour = Number(timeMatch[1]);
+    const minute = Number(timeMatch[2]);
+    const meridiem = meridiemMatch?.[1]?.toLowerCase();
+
+    if (minute < 0 || minute > 59 || hour < 0 || hour > 23) {
+      return null;
+    }
+
+    if (meridiem === 'p' && hour < 12) {
+      hour += 12;
+    } else if (meridiem === 'a' && hour === 12) {
+      hour = 0;
+    }
+
+    if (hour > 23) {
+      return null;
+    }
+
+    return `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+  }
+
+  private normalizeDayKey(value: unknown): WeeklyHourConfig['dayKey'] | null {
+    const rawValue = String(value || '').trim();
+    const normalized = this.normalizeText(rawValue);
+
+    const numericMap: Record<string, WeeklyHourConfig['dayKey']> = {
+      '1': 'monday',
+      '2': 'tuesday',
+      '3': 'wednesday',
+      '4': 'thursday',
+      '5': 'friday',
+      '6': 'saturday',
+      '7': 'sunday',
+      '0': 'sunday'
+    };
+
+    if (numericMap[rawValue]) {
+      return numericMap[rawValue];
+    }
+
+    const normalizedCompact = normalized.replace(/[_-]/g, '');
+    const aliases: Record<string, WeeklyHourConfig['dayKey']> = {
+      monday: 'monday',
+      mon: 'monday',
+      lun: 'monday',
+      lunes: 'monday',
+      tuesday: 'tuesday',
+      tue: 'tuesday',
+      tues: 'tuesday',
+      mar: 'tuesday',
+      martes: 'tuesday',
+      wednesday: 'wednesday',
+      wed: 'wednesday',
+      mie: 'wednesday',
+      miercoles: 'wednesday',
+      thursday: 'thursday',
+      thu: 'thursday',
+      thur: 'thursday',
+      thurs: 'thursday',
+      jue: 'thursday',
+      jueves: 'thursday',
+      friday: 'friday',
+      fri: 'friday',
+      vie: 'friday',
+      viernes: 'friday',
+      saturday: 'saturday',
+      sat: 'saturday',
+      sab: 'saturday',
+      sabado: 'saturday',
+      sunday: 'sunday',
+      sun: 'sunday',
+      dom: 'sunday',
+      domingo: 'sunday'
+    };
+
+    return aliases[normalized] || aliases[normalizedCompact] || null;
+  }
+
+  private parseBooleanLike(value: unknown, invert = false): boolean | null {
+    if (value == null) {
+      return null;
+    }
+
+    if (typeof value === 'boolean') {
+      return invert ? !value : value;
+    }
+
+    if (typeof value === 'number') {
+      if (value === 0 || value === 1) {
+        return invert ? value === 0 : value === 1;
+      }
+      return null;
+    }
+
+    const normalized = this.normalizeText(String(value));
+    if (!normalized) {
+      return null;
+    }
+
+    const truthy = ['true', '1', 'si', 'sí', 'yes', 'abierto', 'open', 'activo', 'on'];
+    const falsy = ['false', '0', 'no', 'cerrado', 'closed', 'inactivo', 'off'];
+
+    if (truthy.includes(normalized)) {
+      return invert ? false : true;
+    }
+
+    if (falsy.includes(normalized)) {
+      return invert ? true : false;
+    }
+
+    return null;
+  }
+
+  private normalizeText(value: string): string {
+    return value
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[\u0000-\u001F]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .toLowerCase();
+  }
+
   private buildHashUrl(route: string): string {
     const normalizedRoute = route.startsWith('/') ? route : `/${route}`;
 
@@ -1487,6 +1679,10 @@ export class SitioWeb {
 
   private deepClone<T>(value: T): T {
     return JSON.parse(JSON.stringify(value));
+  }
+
+  private buildDraftSignature(pageData: TemplateThreePageData, business: NegocioDetalle): string {
+    return JSON.stringify({ pageData, business });
   }
 
   private readFileAsDataUrl(file: File): Promise<string> {
