@@ -25,7 +25,13 @@ jobs:
         run: npm run build
         # Por defecto, Angular 17+ genera los archivos en 'dist/PedidosBarrio/browser'
         # Si usas una versión anterior puede ser solo 'dist/PedidosBarrio'
-
+      - name: Listar archivos para depuración
+        run: |
+          echo "Buscando archivos en la raíz..."
+          ls -R
+          echo "Buscando específicamente en la carpeta dist..."
+          ls -R PedidosBarrio/dist || echo "No existe la carpeta PedidosBarrio/dist"
+          
       - name: Desplegar en el servidor VPS via SCP
         uses: appleboy/scp-action@v0.1.7
         with:
