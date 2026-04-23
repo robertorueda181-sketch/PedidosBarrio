@@ -23,6 +23,7 @@ jobs:
 
       - name: Construir la aplicación (Build)
         run: npm run build
+        
         # Por defecto, Angular 17+ genera los archivos en 'dist/PedidosBarrio/browser'
         # Si usas una versión anterior puede ser solo 'dist/PedidosBarrio'
       - name: Listar archivos para depuración
@@ -38,9 +39,11 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          # Ajustamos la ruta de origen para que coincida con la subcarpeta
-          source: "PedidosBarrio/dist/*"
+          # Usamos un comodín doble (**) para que busque los archivos 
+          # sin importar el nombre de la carpeta del proyecto
+          source: "dist/**/browser/*"
           target: "/var/www/EspacioOnline"
-          # Subimos a 4 porque ahora hay una carpeta más: PedidosBarrio/dist/pedidos-barrio/browser
-          strip_components: 4
+          # strip_components: 3 suele ser el correcto para dist/nombre-proyecto/browser
+          # Si tu estructura es PedidosBarrio/dist/... entonces sería 4
+          strip_components: 3
           rm: true
