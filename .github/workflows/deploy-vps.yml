@@ -39,7 +39,7 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           # Ajustamos la ruta de origen para que coincida con la subcarpeta
-          source: "PedidosBarrio/dist/pedidos-barrio/browser/*"
+          source: "PedidosBarrio/dist/PedidosBarrio/browser/*"
           target: "/var/www/EspacioOnline"
           # Subimos a 4 porque ahora hay una carpeta más: PedidosBarrio/dist/pedidos-barrio/browser
           strip_components: 4
