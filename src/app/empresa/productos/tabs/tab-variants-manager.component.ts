@@ -24,8 +24,6 @@ export interface VariantFormValue {
   name: string;
   key: string;
   price: number;
-  sku: string;
-  stock: number;
 }
 
 export interface VariantOptionPayload {
@@ -37,8 +35,6 @@ type VariantRowForm = FormGroup<{
   name: FormControl<string>;
   key: FormControl<string>;
   price: FormControl<number>;
-  sku: FormControl<string>;
-  stock: FormControl<number>;
 }>;
 
 @Component({
@@ -67,7 +63,7 @@ export class TabVariantsManagerComponent implements OnChanges {
 
   protected readonly maxOptions = 3;
   protected readonly options = signal<VariantOption[]>([
-    { id: crypto.randomUUID(), name: 'Talla', values: [], draftValue: '' }
+    { id: crypto.randomUUID(), name: '', values: [], draftValue: '' }
   ]);
   protected readonly groupByOptionIndex = signal(0);
   private hasBootstrapped = false;
@@ -94,6 +90,22 @@ export class TabVariantsManagerComponent implements OnChanges {
   );
   protected readonly groupedRows = computed(() => {
     const snapshot = this.rowsSnapshot();
+    if (!snapshot.length) {
+      return [] as VariantGroup[];
+    }
+
+    const options = this.options();
+    if (options.length <= 1) {
+      const groupLabel = options[0]?.name.trim() || 'Variante';
+      return [
+        {
+          groupKey: 'single-variant-group',
+          groupLabel,
+          rowIndexes: snapshot.map((_, rowIndex) => rowIndex)
+        }
+      ];
+    }
+
     const groupsMap = new Map<string, VariantGroup>();
     const groupIndex = this.groupByOptionIndex();
 
@@ -255,8 +267,6 @@ export class TabVariantsManagerComponent implements OnChanges {
         name: String(variant.name ?? '').trim(),
         key: String(variant.key ?? variant.name ?? '').trim(),
         price: Number(variant.price ?? this.basePrice ?? 0),
-        sku: String(variant.sku ?? ''),
-        stock: Number(variant.stock ?? 0)
       }))
       .filter((variant) => variant.name.length > 0);
 
@@ -307,8 +317,6 @@ export class TabVariantsManagerComponent implements OnChanges {
         key,
         name,
         price: Number(previous?.price ?? 0),
-        sku: String(previous?.sku ?? ''),
-        stock: Number(previous?.stock ?? 0)
       });
     });
 
@@ -321,8 +329,6 @@ export class TabVariantsManagerComponent implements OnChanges {
       name: this.fb.nonNullable.control(row.name),
       key: this.fb.nonNullable.control(row.key),
       price: this.fb.nonNullable.control(Number(row.price), { validators: [Validators.min(0)] }),
-      sku: this.fb.nonNullable.control(row.sku),
-      stock: this.fb.nonNullable.control(Number(row.stock), { validators: [Validators.min(0)] })
     });
   }
 

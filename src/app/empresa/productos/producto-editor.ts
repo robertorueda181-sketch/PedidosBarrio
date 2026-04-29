@@ -176,7 +176,6 @@ export class ProductoEditorComponent {
       id: variant.key,
       label: variant.name,
       price: Number(variant.price ?? this.form.basePrice),
-      stock: Number(variant.stock ?? 0)
     }));
 
     this.form.priceVaries = this.form.variants.length > 0;
