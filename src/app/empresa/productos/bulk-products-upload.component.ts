@@ -102,7 +102,6 @@ export class BulkProductsUploadComponent {
     this.excelFile.set(null);
     this.excelData.set([]);
     this.showExcelDialog.set(true);
-    this.loadCategories();
   }
 
   /**
@@ -348,21 +347,6 @@ export class BulkProductsUploadComponent {
     this.imageFiles.set([]);
     this.uploadResults.set(null);
     this.uploadProgress.set(0);
-  }
-
-  /**
-   * Carga categorías
-   */
-  private loadCategories(): void {
-    this.productoService.getCategorias().subscribe({
-      next: (categories) => {
-        this.categories.set(categories);
-      },
-      error: (error) => {
-        console.error('Error loading categories:', error);
-        this.toastr.error('Error al cargar las categorías');
-      }
-    });
   }
 
   /**

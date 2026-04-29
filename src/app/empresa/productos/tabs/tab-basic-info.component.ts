@@ -1,19 +1,14 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { InputTextModule } from 'primeng/inputtext';
-import { TextareaModule } from 'primeng/textarea';
-import { SelectModule } from 'primeng/select';
-import { CheckboxModule } from 'primeng/checkbox';
 import { ButtonModule } from 'primeng/button';
-import { TooltipModule } from 'primeng/tooltip';
-import { ToggleSwitchModule } from 'primeng/toggleswitch';
+import { CheckboxModule } from 'primeng/checkbox';
 import { InputNumberModule } from 'primeng/inputnumber';
-
-interface Category {
-  id: number;
-  name: string;
-}
+import { InputTextModule } from 'primeng/inputtext';
+import { SelectModule } from 'primeng/select';
+import { TextareaModule } from 'primeng/textarea';
+import { ToggleSwitchModule } from 'primeng/toggleswitch';
+import { TooltipModule } from 'primeng/tooltip';
 
 @Component({
   selector: 'app-tab-basic-info',
@@ -24,17 +19,17 @@ interface Category {
     InputTextModule,
     TextareaModule,
     SelectModule,
-    CheckboxModule,
     ButtonModule,
-    TooltipModule,
+    CheckboxModule,
     ToggleSwitchModule,
-    InputNumberModule
+    InputNumberModule,
+    TooltipModule
   ],
   templateUrl: './tab-basic-info.component.html'
 })
 export class TabBasicInfoComponent {
-  @Input() productForm: any;
-  @Input() categories: Category[] = [];
+  @Input({ required: true }) productForm!: any;
+  @Input() categories: any[] = [];
   @Input() kitchenAreas: string[] = [];
   @Output() openImageModal = new EventEmitter<void>();
   @Output() deleteImage = new EventEmitter<void>();

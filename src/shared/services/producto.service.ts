@@ -1,12 +1,12 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, map, switchMap, of } from 'rxjs';
+import { Observable, map, switchMap, of, forkJoin } from 'rxjs';
 import { AppConfigService } from './app-config.service';
 import { NegocioService } from './negocio.service';
-import { 
-    Producto, 
-    ProductoCreateRequest, 
-    Categoria, 
+import {
+    Producto,
+    ProductoCreateRequest,
+    Categoria,
     CategoriasProductosResponse,
     ProductoDetalle
 } from '../models/producto.model';
@@ -15,17 +15,17 @@ import {
     providedIn: 'root'
 })
 export class ProductoService {
-        cambiarVisibilidadProducto(productoId: number, visible: boolean) {
-            // Llama al endpoint para cambiar la visibilidad del producto
-            return this.http.patch<any>(
-                `${this.config.apiUrl}/Categorias/productos/visible`,
-                { productoId, visible }
-            );
-        }
+    cambiarVisibilidadProducto(productoId: number, visible: boolean) {
+        // Llama al endpoint para cambiar la visibilidad del producto
+        return this.http.patch<any>(
+            `${this.config.apiUrl}/Categorias/productos/visible`,
+            { productoId, visible }
+        );
+    }
 
-        getProductoDetalle(id: number): Observable<ProductoDetalle> {
-            return this.http.get<ProductoDetalle>(`${this.config.apiUrl}/Categorias/productos/${id}`);
-        }
+    getProductoDetalle(id: number): Observable<ProductoDetalle> {
+        return this.http.get<ProductoDetalle>(`${this.config.apiUrl}/Categorias/productos/${id}`);
+    }
     private http = inject(HttpClient);
     private config = inject(AppConfigService);
     private negocioService = inject(NegocioService);
@@ -55,13 +55,29 @@ export class ProductoService {
         return this.http.get<Categoria[]>(`${this.config.apiUrl}/Categorias`);
     }
 
+    getSoloCategorias(): Observable<any> {
+        return this.http.get<any>(`${this.config.apiUrl}/Categorias/getAll`);
+    }
+
     getCategoriasConProductos(): Observable<CategoriasProductosResponse> {
-        return this.http.get<CategoriasProductosResponse>(`${this.config.apiUrl}/Categorias/getAll`).pipe(
-           
-            map(response => ({
-                categorias: response.categorias || [],
-                productos: response.productos?.map(p => this.transformProducto(p)) || []
+        return forkJoin({
+            categoriasRes: this.getSoloCategorias(),
+            productosRes: this.getSoloProductos()
+        }).pipe(
+            map(({ categoriasRes, productosRes }) => ({
+                categorias: categoriasRes.categorias || [],
+                productos: productosRes // getSoloProductos already returns mapped products array
             }))
+        );
+    }
+
+    getSoloProductos(): Observable<any> {
+        return this.http.get<any>(`${this.config.apiUrl}/Categorias/productos/getAll`).pipe(
+            map(res => {
+                console.log('--- RAW PRODUCTOS RESP ---', res);
+                const arr = Array.isArray(res) ? res : (res.productos || res.data || res.items || []);
+                return arr.map((p: any) => this.transformProducto(p));
+            })
         );
     }
 
@@ -100,8 +116,8 @@ export class ProductoService {
 
     private transformProducto(producto: Producto): Producto {
         const urlImagen = producto.imagenPrincipal != '' ?
-          producto.imagenPrincipal :
-         '/assets/image-default.webp';
+            producto.imagenPrincipal :
+            '/assets/image-default.webp';
 
         return {
             ...producto,

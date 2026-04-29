@@ -1,0 +1,164 @@
+:host {
+  display: block;
+  width: 100%;
+  min-width: 0;
+}
+
+.variants-manager {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+}
+
+.variants-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.variants-header h3 {
+  margin: 0;
+  color: #0f172a;
+}
+
+.variants-header p {
+  margin: 0.25rem 0 0;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.options-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 0.75rem;
+}
+
+.option-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0.75rem;
+  background: #fff;
+  display: grid;
+  gap: 0.7rem;
+}
+
+.option-card-header,
+.option-add-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.35rem;
+}
+
+.option-card-header input,
+.option-add-row input {
+  width: 100%;
+  min-width: 0;
+}
+
+.chips-list {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.chip-item {
+  background: #eef2ff;
+  color: #3730a3;
+  border-radius: 999px;
+  padding: 0.2rem 0.45rem 0.2rem 0.6rem;
+  font-size: 0.78rem;
+  display: inline-flex;
+  gap: 0.35rem;
+  align-items: center;
+}
+
+.chip-item button {
+  border: none;
+  background: transparent;
+  color: #4338ca;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.variants-table-wrap {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow-x: auto;
+  background: #fff;
+  width: 100%;
+}
+
+.variants-alert {
+  background: #fff7ed;
+  color: #9a3412;
+  border-bottom: 1px solid #fed7aa;
+  padding: 0.6rem 0.75rem;
+  font-size: 0.85rem;
+}
+
+.group-by-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.65rem 0.75rem;
+  border-bottom: 1px solid #e2e8f0;
+  flex-wrap: wrap;
+}
+
+.group-by-row label {
+  font-size: 0.84rem;
+  color: #334155;
+  font-weight: 600;
+}
+
+.group-by-row select {
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 0.35rem 0.55rem;
+  min-width: 170px;
+  background: #fff;
+}
+
+.variants-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 650px;
+}
+
+.variants-table th,
+.variants-table td {
+  border-bottom: 1px solid #f1f5f9;
+  padding: 0.55rem;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.variants-table thead th {
+  background: #f8fafc;
+  color: #0f172a;
+  font-weight: 600;
+}
+
+.group-row td {
+  background: #f8fafc;
+}
+
+.group-row strong {
+  display: block;
+  color: #0f172a;
+}
+
+.group-row small {
+  color: #64748b;
+  font-size: 0.75rem;
+}
+
+.empty-row {
+  text-align: center;
+  color: #64748b;
+  padding: 1rem;
+}
+

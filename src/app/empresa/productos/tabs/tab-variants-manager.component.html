@@ -1,0 +1,114 @@
+<section class="variants-manager">
+  <header class="variants-header">
+    <div>
+      <h3>Gestion de variantes</h3>
+      <p>Paso 1: agrega mas de una variante (Talla, Color...) y sus opciones. Paso 2: completa precios por combinacion
+        cartesiana.</p>
+    </div>
+    <button pButton type="button" icon="pi pi-plus" label="Agregar variante" [disabled]="options().length >= maxOptions"
+      (click)="addOption()">
+    </button>
+  </header>
+
+  <div class="options-grid">
+    @for (option of options(); track trackByOptionId($index, option)) {
+    <article class="option-card">
+      <label for="optionValues">Titulo</label>
+      <div class="option-card-header">
+        <input pInputText [ngModel]="option.name" (ngModelChange)="updateOptionName(option.id, $event)"
+          placeholder="Ej: Talla" />
+        @if (options().length > 1) {
+        <button pButton type="button" icon="pi pi-times" severity="danger" [text]="true"
+          (click)="removeOption(option.id)">
+        </button>
+        }
+      </div>
+      <label for="optionValues">Opciones de {{ option.name }}</label>
+      <div class="option-add-row">
+        
+        <input pInputText [ngModel]="option.draftValue" (ngModelChange)="updateDraftValue(option.id, $event)"
+          (keydown.enter)="addOptionValue(option.id)" placeholder="Ej: S, M, L" />
+        <button pButton type="button" icon="pi pi-plus" [text]="true" (click)="addOptionValue(option.id)">
+        agregar</button>
+      </div>
+
+      <div class="chips-list">
+        @for (value of option.values; track value) {
+        <span class="chip-item">
+          {{ value }}
+          <button type="button" (click)="removeOptionValue(option.id, value)">x</button>
+        </span>
+        }
+      </div>
+    </article>
+    }
+  </div>
+
+  <form class="variants-form" [formGroup]="variantsForm" novalidate>
+    <div class="variants-table-wrap">
+      @if (variantsArray.length > 0) {
+      <div class="group-by-row">
+        <label for="groupBySelect">Agrupar por</label>
+        <select id="groupBySelect" [ngModel]="groupByOptionIndex()" (ngModelChange)="setGroupByIndex($event)"
+          [ngModelOptions]="{ standalone: true }">
+          @for (option of groupByOptions(); track option.index) {
+          <option [value]="option.index">{{ option.label }}</option>
+          }
+        </select>
+      </div>
+      <div class="variants-alert">
+        Tienes {{ variantsArray.length }} combinaciones. Faltan {{ pendingPricesCount() }} precios por completar.
+      </div>
+      }
+      <table class="variants-table">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Precio</th>
+            <th>Stock</th>
+          </tr>
+        </thead>
+        <tbody formArrayName="variants">
+          @if (!variantsArray.length) {
+          <tr>
+            <td colspan="4" class="empty-row">
+              Agrega valores en tus opciones para generar variantes.
+            </td>
+          </tr>
+          } @else {
+          @for (group of groupedRows(); track group.groupKey) {
+          <tr class="group-row">
+            <td>
+              <strong>{{ group.groupLabel }}</strong>
+              <small>{{ group.rowIndexes.length }} variantes</small>
+            </td>
+            <td>
+              <p-inputNumber [ngModel]="groupPrice(group)" (ngModelChange)="applyGroupPrice(group, $event)"
+                [ngModelOptions]="{ standalone: true }" mode="currency" currency="PEN" locale="es-PE"
+                [minFractionDigits]="2">
+              </p-inputNumber>
+            </td>
+            <td colspan="2"></td>
+          </tr>
+          @for (rowIndex of group.rowIndexes; track rowIndex) {
+          <tr [formGroupName]="rowIndex">
+            <td>
+              <input pInputText formControlName="name" readonly />
+            </td>
+            <td>
+              <p-inputNumber formControlName="price" mode="currency" currency="PEN" locale="es-PE"
+                [minFractionDigits]="2">
+              </p-inputNumber>
+            </td>
+            <td>
+              <p-inputNumber formControlName="stock" [min]="0"></p-inputNumber>
+            </td>
+          </tr>
+          }
+          }
+          }
+        </tbody>
+      </table>
+    </div>
+  </form>
+</section>

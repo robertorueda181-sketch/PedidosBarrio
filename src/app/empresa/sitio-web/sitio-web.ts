@@ -1147,8 +1147,8 @@ export class SitioWeb {
               return of({ categorias: [], productos: [] });
             })
           ),
-          products: this.productoService.getCategoriasConProductos().pipe(
-            map(response => response?.productos || []),
+          products: this.productoService.getProductosByEmpresa(empresaID).pipe(
+            map(response => response || []),
             catchError(error => {
               console.error('No se pudo obtener productos por empresa para Mi Sitio:', error);
               return of([]);

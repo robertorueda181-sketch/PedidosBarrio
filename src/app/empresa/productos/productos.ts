@@ -1,3 +1,7 @@
+
+
+
+import { forkJoin } from 'rxjs';
 import { Component, inject, signal, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -19,12 +23,8 @@ import { ButtonModule } from 'primeng/button';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { ChipModule } from 'primeng/chip';
 import { TooltipModule } from 'primeng/tooltip';
-import { ImageCropperComponent, ImageCroppedEvent, LoadedImage } from 'ngx-image-cropper';
+import { ImageCroppedEvent, LoadedImage } from 'ngx-image-cropper';
 import { AnalyticsService } from '../../../shared/services/analytics.service';
-import { TabBasicInfoComponent } from './tabs/tab-basic-info.component';
-import { TabPricesComponent } from './tabs/tab-prices.component';
-import { TabInventoryComponent } from './tabs/tab-inventory.component';
-import { TabModifiersComponent } from './tabs/tab-modifiers.component';
 import { BulkProductsUploadComponent } from './bulk-products-upload.component';
 
 interface Variant {
@@ -60,11 +60,6 @@ interface Modifier {
     ToggleSwitchModule,
     ChipModule,
     TooltipModule,
-    ImageCropperComponent,
-    TabBasicInfoComponent,
-    TabPricesComponent,
-    TabInventoryComponent,
-    TabModifiersComponent,
     MenuModule,
     BulkProductsUploadComponent
   ],
@@ -77,15 +72,11 @@ export class ProductosComponent {
   private productoService = inject(ProductoService);
   private toastr = inject(ToastrService);
   private confirmationService = inject(ConfirmationService);
-  private analyticsService = inject(AnalyticsService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private queryActionHandled = false;
 
-  @ViewChild('tabPrices') tabPrices!: TabPricesComponent;
-
   // Estados de modales
-  showCategoryModal = false;
   showProductModal = false;
   showPreview = false;
   showStockInfoDialog = false;
@@ -127,8 +118,6 @@ export class ProductosComponent {
   newVariant = { name: '', price: 0 };
   newModifier = { name: '', options: '', required: false, maxSelections: 1 };
 
-  kitchenAreas = ['Cocina principal', 'Barra', 'Parrilla', 'Repostería', 'Bebidas'];
-
   products = signal<Producto[]>([]);
 
   ngOnInit() {
@@ -142,7 +131,7 @@ export class ProductosComponent {
       {
         label: 'Editar',
         icon: 'pi pi-pencil',
-        command: () => this.openProductModal(product)
+        command: () => this.openProductEditor(product.productoID)
       },
       {
         label: product.visible ? 'Ocultar' : 'Mostrar',
@@ -167,6 +156,7 @@ export class ProductosComponent {
       });
     }
   }
+
 
   loadProductos() {
     this.productoService.getCategoriasConProductos().subscribe({
@@ -204,11 +194,11 @@ export class ProductosComponent {
       const product = this.products().find(item => item.productoID === editProductId);
       if (product) {
         this.queryActionHandled = true;
-        this.openProductModal(product);
+        this.openProductEditor(product.productoID);
       }
     } else if (openNew) {
       this.queryActionHandled = true;
-      this.openProductModal();
+      this.openNewProductEditor();
     }
 
     if (this.queryActionHandled) {
@@ -221,93 +211,14 @@ export class ProductosComponent {
   }
 
   // === GESTIÓN DE PRODUCTOS ===
-  openProductModal(product?: Producto) {
-    this.pendingImageData = null; // Limpiar imagen pendiente al abrir el modal
-    // Registrar evento de abrir modal
-    // this.analyticsService.trackEvent(
-    //   product ? 'Editar Producto' : 'Crear Producto',
-    //   { categoryId: this.selectedCategoryId }
-    // );
-
-    if (product) {
-      // Inicializar con datos básicos
-      this.productForm = {
-        id: product.productoID,
-        name: product.nombre,
-        description: product.descripcion,
-        categoryId: product.categoriaID ?? null,
-        price: product.precioActual,
-        discount: 0,
-        image: product.imagenPrincipal,
-        visible: product.visible,
-        isPrincipal: false,
-        variants: [],
-        hasStockControl: false,
-        currentStock: 0,
-        minStock: 0,
-        modifiers: []
-      };
-
-      this.originalImageUrl = product.imagenPrincipal;
-
-      // Cargar detalles completos del producto
-      this.productoService.getProductoDetalle(product.productoID).subscribe({
-        next: (detalle: ProductoDetalle) => {
-          console.log('Detalles del producto:', detalle);
-          console.log(product)
-          const otherPrices = detalle.precios.filter(p => !p.esPrincipal);
-          const variants: Variant[] = otherPrices.map(p => ({
-            id: p.idPrecio.toString(),
-            name: p.descripcion,
-            price: p.precioValor
-          }));
-
-          this.productForm = {
-            ...this.productForm,
-            price: detalle.precioActual, // Asegurar precio actual del detalle
-            image: detalle.imagenPrincipal || this.productForm.image,
-            variants: variants,
-            // Asumiendo que el detalle puede traer info de stock
-            currentStock: detalle.stock || 0,
-            minStock: detalle.stockMinimo || 0,
-            hasStockControl: detalle.inventario || false,
-            modifiers: [] // TODO: Si el detalle trae modificadores, mapearlos aquí
-          };
-          this.originalImageUrl = detalle.imagenPrincipal || this.originalImageUrl;
-
-          if (detalle.descripcion) {
-            this.productForm.description = detalle.descripcion;
-          }
-        },
-        error: (error) => {
-          console.error('Error al cargar detalles del producto:', error);
-          this.toastr.error('No se pudieron cargar los detalles completos del producto', 'Error de carga');
-        }
-      });
-
-    } else {
-      this.productForm = {
-        id: null,
-        name: '',
-        description: '',
-        categoryId: this.selectedCategoryId,
-        price: 0,
-        discount: 0,
-        image: '',
-        visible: true,
-        isPrincipal: false,
-        variants: [],
-        hasStockControl: false,
-        currentStock: 0,
-        minStock: 0,
-        modifiers: []
-      };
-      this.originalImageUrl = undefined;
-    }
-    this.newVariant = { name: '', price: 0 };
-    this.newModifier = { name: '', options: '', required: false, maxSelections: 1 };
-    this.showProductModal = true;
+  openProductEditor(productId: number) {
+    this.router.navigate(['/empresa/productos', productId, 'editar']);
   }
+
+  openNewProductEditor() {
+    this.router.navigate(['/empresa/productos/nuevo']);
+  }
+
 
   saveProductForm() {
     if (!this.productForm.name.trim()) {
@@ -320,10 +231,6 @@ export class ProductosComponent {
       return;
     }
 
-    // Validar precio usando el componente hijo
-    if (this.tabPrices && !this.tabPrices.validatePrice()) {
-      return;
-    }
     let precios: Precio[] = [];
     if (this.productForm.variants.length == 0) {
       // Preparar los precios según el formato de la API
@@ -413,12 +320,12 @@ export class ProductosComponent {
         },
         error: (error) => {
           console.error('Error al crear producto:', error.error);
-           if (error.status === 400 && error.error) {
-              this.toastr.error(error.error.detail, 'Error');
+          if (error.status === 400 && error.error) {
+            this.toastr.error(error.error.detail, 'Error');
           } else {
-             this.toastr.error('No se pudo crear el producto', 'Error');
+            this.toastr.error('No se pudo crear el producto', 'Error');
           }
-          
+
         }
       });
     } else {
@@ -465,10 +372,10 @@ export class ProductosComponent {
           }
         },
         error: (error) => {
-           if (error.status === 400 && error.error) {
-             this.toastr.error(error.error.detail, 'Error');
+          if (error.status === 400 && error.error) {
+            this.toastr.error(error.error.detail, 'Error');
           } else {
-             this.toastr.error('No se pudo crear el producto', 'Error');
+            this.toastr.error('No se pudo crear el producto', 'Error');
           }
         }
       });
@@ -508,7 +415,7 @@ export class ProductosComponent {
 
   deleteProduct(productId: number) {
     this.confirmationService.confirm({
-      message: '¿Estás seguro de eliminar este producto?',
+      message: '¿Estás seguro de eliminar este producto?,esta acción es irreversible',
       header: 'Confirmar eliminación',
       icon: 'pi pi-exclamation-triangle',
       acceptLabel: 'Sí, eliminar',
@@ -539,8 +446,16 @@ export class ProductosComponent {
 
   // === UTILIDADES ===
   get filteredProducts(): Producto[] {
-    if (!this.selectedCategoryId) return this.products();
-    return this.products().filter(p => p.categoriaID === this.selectedCategoryId);
+    const term = this.searchTerm.trim().toLowerCase();
+
+    return this.products().filter((product) => {
+      const matchesCategory = !this.selectedCategoryId || product.categoriaID === this.selectedCategoryId;
+      const matchesSearch = !term
+        || product.nombre?.toLowerCase().includes(term)
+        || product.descripcion?.toLowerCase().includes(term);
+
+      return matchesCategory && matchesSearch;
+    });
   }
 
   togglePreview() {

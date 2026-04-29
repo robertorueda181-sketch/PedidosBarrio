@@ -9,7 +9,14 @@
   [style.--products-muted-text]="theme().mutedText">
   <div class="company-products-page__hero">
     <div class="company-products-page__container">
-      <a [routerLink]="backUrl()" class="company-products-page__back-link">← Volver al sitio</a>
+      <a [routerLink]="backUrl()" class="company-products-page__back-link">
+        <span class="company-products-page__icon company-products-page__icon--inline" aria-hidden="true">
+          <svg viewBox="0 0 24 24" focusable="false">
+            <path d="M15.5 19 8.5 12l7-7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        Volver al sitio
+      </a>
 
       <div class="company-products-page__hero-grid">
         <div>
@@ -79,7 +86,14 @@
 
             <div class="company-products-page__footer">
               <strong class="company-products-page__price">S/ {{ product.precio | number:'1.2-2' }}</strong>
-              <button type="button" class="company-products-page__order-btn" (click)="addToCart(product)">Agregar</button>
+              <button type="button" class="company-products-page__order-btn" (click)="addToCart(product)">
+                <span class="company-products-page__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" focusable="false">
+                    <path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+                  </svg>
+                </span>
+                Agregar
+              </button>
             </div>
           </div>
         </article>
@@ -98,7 +112,13 @@
 
   @if (cartItems().length > 0 && !isCartOpen()) {
   <button type="button" class="company-products-page__floating-cart" (click)="toggleCart()">
-    <span>🛒</span>
+    <span class="company-products-page__icon company-products-page__icon--cart" aria-hidden="true">
+      <svg viewBox="0 0 24 24" focusable="false">
+        <circle cx="9" cy="20" r="1.8" />
+        <circle cx="18" cy="20" r="1.8" />
+        <path d="M3.5 4h2.2l1.7 9.2a2 2 0 0 0 2 1.6h8.7a2 2 0 0 0 2-1.6L21.6 7H7.2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </span>
     <strong>{{ cartCount() }} · S/ {{ cartTotal() | number:'1.2-2' }}</strong>
   </button>
   }
@@ -112,7 +132,13 @@
           <p>Carrito</p>
           <h3>{{ brandName() }}</h3>
         </div>
-        <button type="button" (click)="toggleCart()">✕</button>
+        <button type="button" (click)="toggleCart()" aria-label="Cerrar carrito">
+          <span class="company-products-page__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" focusable="false">
+              <path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+            </svg>
+          </span>
+        </button>
       </div>
 
       <div class="company-products-page__cart-body">
@@ -130,9 +156,21 @@
             <small>S/ {{ item.price | number:'1.2-2' }} c/u</small>
             <div class="company-products-page__cart-item-actions">
               <div class="company-products-page__cart-qty">
-                <button type="button" (click)="updateQuantity(item.id, -1)">-</button>
+                <button type="button" (click)="updateQuantity(item.id, -1)" aria-label="Disminuir cantidad">
+                  <span class="company-products-page__icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" focusable="false">
+                      <path d="M6 12h12" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+                    </svg>
+                  </span>
+                </button>
                 <span>{{ item.quantity }}</span>
-                <button type="button" (click)="updateQuantity(item.id, 1)">+</button>
+                <button type="button" (click)="updateQuantity(item.id, 1)" aria-label="Aumentar cantidad">
+                  <span class="company-products-page__icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" focusable="false">
+                      <path d="M12 6v12M6 12h12" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+                    </svg>
+                  </span>
+                </button>
               </div>
               <button type="button" class="company-products-page__cart-remove" (click)="removeFromCart(item.id)">Quitar</button>
             </div>
