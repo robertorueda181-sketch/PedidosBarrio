@@ -5,7 +5,7 @@ import { Inmueble, InmuebleService } from '../services/inmueble.service';
 import { Negocio, NegocioService } from '../services/negocio.service';
 import { Servicio, ServicioService } from '../services/servicio.service';
 import { TipoService, TipoValor } from '../services/tipo.service';
-import { BannerService } from '../../app/empresa/services/banner.service';
+import { BannerService } from '../../app/empresa/shared/services/banner.service';
 import { CarouselModule } from 'primeng/carousel';
 
 import { FormsModule } from '@angular/forms';
@@ -34,7 +34,7 @@ export class Main implements OnInit {
   currentSlide = signal<number>(1); // Empieza en el primero real
   isTransitioning = signal<boolean>(false);
   showAllCategories = signal<boolean>(false);
-  banners= signal<any[]>([]);
+  banners = signal<any[]>([]);
 
   responsiveOptions = [
     { breakpoint: '1400px', numVisible: 4, numScroll: 4 },
@@ -52,7 +52,7 @@ export class Main implements OnInit {
     this.loadCategorias();
     this.startAutoSlide();
   }
-  
+
   loadBanners() {
     this.bannerService.obtenerBannersPublicos().subscribe({
       next: (data) => {
@@ -66,17 +66,17 @@ export class Main implements OnInit {
             ctaText: b.textoBoton
           })));
         } else {
-               this.banners.set([
+          this.banners.set([
             { url: 'assets/Banner1.png', title: 'Bienvenido a espacio online', subtitle: 'Puedes registrar tu negocio 100% gratis' }
           ]);
         }
       },
       error: (err) => {
         console.error('Error loading banners', err);
-         // Fallback default banners on error
-         this.banners.set([
-            { url: 'assets/banner.png', title: 'Bienvenido a espacio online', subtitle: 'Puedes registrar tu negocio 100% gratis' }
-          ]);
+        // Fallback default banners on error
+        this.banners.set([
+          { url: 'assets/banner.png', title: 'Bienvenido a espacio online', subtitle: 'Puedes registrar tu negocio 100% gratis' }
+        ]);
       }
     });
   }

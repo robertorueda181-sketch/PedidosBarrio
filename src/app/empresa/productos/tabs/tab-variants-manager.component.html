@@ -1,13 +1,21 @@
 <section class="variants-manager">
+  @if (isDownloadingTemplate()) {
+  <app-loader />
+  }
   <header class="variants-header">
     <div>
       <h3>Gestion de variantes</h3>
       <p>Paso 1: agrega mas de una variante (Talla, Color...) y sus opciones. Paso 2: completa precios por combinacion
         cartesiana.</p>
     </div>
-    <button pButton type="button" icon="pi pi-plus" label="Agregar variante" [disabled]="options().length >= maxOptions"
-      (click)="addOption()">
-    </button>
+    <div class="flex flex-wrap gap-2">
+      <button pButton type="button" icon="pi pi-download" label="Descargar plantilla" [outlined]="true"
+        (click)="downloadTemplate()">
+      </button>
+      <button pButton type="button" icon="pi pi-plus" label="Agregar variante" [disabled]="options().length >= maxOptions"
+        (click)="addOption()">
+      </button>
+    </div>
   </header>
 
   <div class="options-grid">

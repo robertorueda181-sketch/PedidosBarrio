@@ -1,8 +1,10 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, forkJoin, of } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 import { AppConfigService } from './app-config.service';
 import { ProductoService } from './producto.service';
+import * as XLSX from 'xlsx';
 
 /**
  * Interfaz para mapeo de columnas de Excel
@@ -62,15 +64,9 @@ export class BulkUploadService {
 
       reader.onload = (e: any) => {
         try {
-          // Usamos SheetJS (xlsx) que debe estar instalado
-          const workbook = (window as any).XLSX?.read(e.target.result, { type: 'array' });
-          if (!workbook) {
-            reject(new Error('Por favor instala la librería XLSX o asegúrate que está cargada'));
-            return;
-          }
-
+          const workbook = XLSX.read(e.target.result, { type: 'array' });
           const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-          const jsonData = (window as any).XLSX.utils.sheet_to_json(worksheet);
+          const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
           const productsData: ExcelProductData[] = jsonData.map((row: any, index: number) => ({
             nombre: row[columnMapping.nombre]?.toString().trim(),
@@ -95,89 +91,26 @@ export class BulkUploadService {
   }
 
   /**
-   * Carga múltiples productos de forma masiva
-   * @param products Array de productos a crear
+   * Envía el archivo Excel al endpoint de importación
+   * @param file Archivo Excel a enviar
    * @returns Observable con resultado de la carga
    */
-  uploadProductsBulk(products: ExcelProductData[]): Observable<BulkUploadResult> {
-    const result: BulkUploadResult = {
-      successful: 0,
-      failed: 0,
-      errors: [],
-      productIds: []
-    };
+  uploadProductsBulk(file: File): Observable<BulkUploadResult> {
+    const formData = new FormData();
+    formData.append('archivo', file);
 
-    // Validar datos básicos
-    const validProducts = products.filter((product, index) => {
-      if (!product.nombre || product.nombre.length === 0) {
-        result.errors.push({ row: index + 2, error: 'El nombre es obligatorio' });
-        result.failed++;
-        return false;
-      }
-      if (product.precio < 0) {
-        result.errors.push({ row: index + 2, error: 'El precio no puede ser negativo' });
-        result.failed++;
-        return false;
-      }
-      return true;
-    });
-
-    if (validProducts.length === 0) {
-      return of(result);
-    }
-
-    // Crear observables para cada producto
-    const uploadObservables = validProducts.map((product, originalIndex) =>
-      this.productoService.crearProducto({
-        categoriaID: product.categoriaID,
-        nombre: product.nombre,
-        descripcion: product.descripcion || '',
-        stock: product.stock || 0,
-        stockMinimo: product.stockMinimo || 0,
-        inventario: product.inventario || false,
-        precios: [
-          {
-            precioValor: product.precio,
-            descripcion: 'Precio estándar',
-            cantidadMinima: 1,
-            modalidad: 'Unitario',
-            esPrincipal: true
-          }
-        ]
-      }).pipe(
-        // Capturar el ID del producto creado
-        (source) => new Observable(observer => {
-          source.subscribe({
-            next: (product: any) => {
-              result.successful++;
-              result.productIds.push(product.productoID || product.id);
-              observer.next(product);
-              observer.complete();
-            },
-            error: (error) => {
-              result.errors.push({
-                row: originalIndex + 2,
-                error: error?.error?.message || 'Error al crear el producto'
-              });
-              result.failed++;
-              observer.next(null);
-              observer.complete();
-            }
+    return this.http.post<BulkUploadResult>(`${this.config.apiUrl}/Presentaciones/importar-excel`, formData)
+      .pipe(
+        catchError(error => {
+          console.error('Error uploading products bulk:', error);
+          return of({
+            successful: 0,
+            failed: 0,
+            errors: [{ row: 0, error: error.message }],
+            productIds: []
           });
         })
-      )
-    );
-
-    // Ejecutar todas las cargas en paralelo
-    return forkJoin(uploadObservables).pipe(
-      (source) => new Observable(observer => {
-        source.subscribe({
-          next: () => observer.next(result),
-          error: () => observer.next(result),
-          complete: () => observer.complete()
-        });
-      })
-    );
+      );
   }
 
   /**
@@ -272,18 +205,18 @@ export class BulkUploadService {
       }
     ];
 
-    try {
-      // Usar SheetJS para crear el Excel
-      const ws = (window as any).XLSX?.utils.json_to_sheet(template);
-      const wb = (window as any).XLSX?.utils.book_new();
-      (window as any).XLSX?.utils.book_append_sheet(wb, ws, 'Productos');
+     try {
+       // Usar SheetJS para crear el Excel
+       const ws = XLSX.utils.json_to_sheet(template);
+       const wb = XLSX.utils.book_new();
+       XLSX.utils.book_append_sheet(wb, ws, 'Productos');
 
-      // Descargar
-      (window as any).XLSX?.writeFile(wb, 'plantilla-productos.xlsx');
-    } catch (error) {
-      console.error('Error al descargar plantilla:', error);
-      alert('Por favor instala la librería XLSX o asegúrate que está cargada');
-    }
+       // Descargar
+       XLSX.writeFile(wb, 'plantilla-productos.xlsx');
+     } catch (error) {
+       console.error('Error al descargar plantilla:', error);
+       alert('Error al generar la plantilla Excel');
+     }
   }
 
   /**

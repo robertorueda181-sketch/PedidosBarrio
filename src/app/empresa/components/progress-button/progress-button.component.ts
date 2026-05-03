@@ -2,7 +2,7 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
-import { ProgressService } from '../../services/progress.service';
+import { ProgressService } from '../../shared/services/progress.service';
 
 @Component({
   selector: 'app-progress-button',
@@ -136,7 +136,7 @@ import { ProgressService } from '../../services/progress.service';
 export class ProgressButtonComponent implements OnInit {
   progressService = inject(ProgressService);
   private router = inject(Router);
-  
+
   showPanel = signal(false);
 
   ngOnInit() {
@@ -149,13 +149,13 @@ export class ProgressButtonComponent implements OnInit {
 
   navigateToStep(step: any) {
     this.showPanel.set(false);
-    
+
     // Si tiene una acción específica, emitir evento o manejar
     if (step.action) {
       // Aquí podrías emitir un evento para que el componente padre maneje la acción
       console.log('Action:', step.action);
     }
-    
+
     // Navegar a la ruta
     this.router.navigate([step.route]);
   }

@@ -10,7 +10,7 @@ import { TextareaModule } from 'primeng/textarea';
 import { TabsModule } from 'primeng/tabs';
 import { TooltipModule } from 'primeng/tooltip';
 import { DialogModule } from 'primeng/dialog';
-import { ProgressService } from '../services/progress.service';
+import { ProgressService } from '../shared/services/progress.service';
 import { LocationService, LocationItem } from '../../../shared/services/location.service';
 import { EmpresaService } from '../../../shared/services/empresa.service';
 import { SelectModule } from 'primeng/select';
@@ -158,7 +158,7 @@ export class Perfil implements OnInit {
       const foundDept = this.departments().find(d => d.code == deptId || d.name === deptId);
       if (foundDept) deptId = foundDept.code;
       this.addrDept.set(deptId);
-      console.log('Departamento encontrado para dirección:',this.addrDept());
+      console.log('Departamento encontrado para dirección:', this.addrDept());
       // Load dropdowns based on ID
       if (deptId) {
         this.locationService.getProvinces(deptId).subscribe(data => {
@@ -179,10 +179,10 @@ export class Perfil implements OnInit {
               const foundDist = dataDist.find(d => d.code == distId || d.name === distId);
               if (foundDist) distId = foundDist.code;
               this.addrDist.set(distId);
-              console.log('Id de direccion:',this.companyProfile.addresses[0].id );
-              if(this.companyProfile.addresses[0].id == '0') {
+              console.log('Id de direccion:', this.companyProfile.addresses[0].id);
+              if (this.companyProfile.addresses[0].id == '0') {
                 this.addrDept.set('15');
-                this.addrProv.set('1505');  
+                this.addrProv.set('1505');
                 this.addrDist.set('150505');
               }
             });

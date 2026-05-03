@@ -1,4 +1,7 @@
 <!-- Botones de carga masiva -->
+@if (downloadingTemplate()) {
+  <app-loader />
+}
 <div class="bulk-upload-buttons">
 
      <button (click)="openExcelDialog()" class="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-slate-900 rounded-xl">

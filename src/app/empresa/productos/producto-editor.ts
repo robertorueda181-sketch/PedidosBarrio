@@ -16,16 +16,9 @@ import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { ImageCropperComponent, ImageCroppedEvent, LoadedImage } from 'ngx-image-cropper';
 import { ImagenesService } from '../../../shared/services/imagenes.service';
 import { TabVariantsManagerComponent, VariantFormValue, VariantOptionPayload } from './tabs/tab-variants-manager.component';
-
-import { Producto, ProductoDetalle } from '../../../shared/models/producto.model';
+import { ProductoDetalle } from '../../../shared/models/producto.model';
 import { ProductoService } from '../../../shared/services/producto.service';
-
-interface EditorVariant {
-  id: string;
-  label: string;
-  price: number;
-}
-
+import { EditorVariant } from '../shared/interfaces/productos/editor-variant.interface';
 @Component({
   selector: 'app-producto-editor',
   standalone: true,
@@ -50,11 +43,11 @@ interface EditorVariant {
   styleUrl: './producto-editor.css'
 })
 export class ProductoEditorComponent {
-  private productoService = inject(ProductoService);
-  private imagenesService = inject(ImagenesService);
-  private route = inject(ActivatedRoute);
-  private router = inject(Router);
-  private toastr = inject(ToastrService);
+  private readonly productoService = inject(ProductoService);
+  private readonly imagenesService = inject(ImagenesService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly toastr = inject(ToastrService);
 
   isEditMode = false;
   productId: number | null = null;
@@ -92,6 +85,7 @@ export class ProductoEditorComponent {
 
 
   ngOnInit(): void {
+    console.log(this.productoService);
     this.loadCategorias();
     this.resolveModeAndData();
   }

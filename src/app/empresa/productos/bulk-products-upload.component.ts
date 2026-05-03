@@ -1,8 +1,10 @@
 import { Component, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { HttpClient, HttpResponse } from '@angular/common/http';
 import { BulkUploadService, ExcelColumnMapping, ExcelProductData, BulkUploadResult } from '../../../shared/services/bulk-upload.service';
 import { ProductoService } from '../../../shared/services/producto.service';
+import { AppConfigService } from '../../../shared/services/app-config.service';
 import { ToastrService } from 'ngx-toastr';
 import { DialogModule } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
@@ -10,17 +12,9 @@ import { ProgressBarModule } from 'primeng/progressbar';
 import { TooltipModule } from 'primeng/tooltip';
 import { SelectModule } from 'primeng/select';
 import { Categoria } from '../../../shared/models/producto.model';
-
-interface ColumnMapConfig {
-  nombre: string;
-  descripcion: string;
-  precio: string;
-  categoriaID: string;
-  codigo: string;
-  stock: string;
-  stockMinimo: string;
-  inventario: string;
-}
+import { ColumnMapConfig } from '../shared/interfaces/column-map-config.interface';
+import { finalize } from 'rxjs/operators';
+import { LoaderComponent } from '../../../shared/components/loader/loader';
 
 @Component({
   selector: 'app-bulk-products-upload',
@@ -32,14 +26,16 @@ interface ColumnMapConfig {
     ButtonModule,
     ProgressBarModule,
     TooltipModule,
-    SelectModule
+    SelectModule,
+    LoaderComponent
   ],
   templateUrl: './bulk-products-upload.component.html',
   styleUrl: './bulk-products-upload.component.css'
 })
 export class BulkProductsUploadComponent {
   private readonly bulkUploadService = inject(BulkUploadService);
-  private readonly productoService = inject(ProductoService);
+  private readonly http = inject(HttpClient);
+  private readonly config = inject(AppConfigService);
   private readonly toastr = inject(ToastrService);
 
   // Estados
@@ -49,6 +45,7 @@ export class BulkProductsUploadComponent {
   readonly loading = signal(false);
   readonly uploading = signal(false);
   readonly uploadProgress = signal(0);
+  readonly downloadingTemplate = signal(false);
 
   // Datos de Excel
   readonly excelFile = signal<File | null>(null);
@@ -173,54 +170,90 @@ export class BulkProductsUploadComponent {
    * Descarga plantilla de ejemplo
    */
   downloadTemplate(): void {
-    this.bulkUploadService.downloadExcelTemplate();
-    this.toastr.info('Descargando plantilla...');
+    const url = `${this.config.apiUrl}/Presentaciones/descargar-plantilla`;
+    this.downloadingTemplate.set(true);
+
+    this.http.get(url, { observe: 'response', responseType: 'blob' })
+      .pipe(finalize(() => this.downloadingTemplate.set(false)))
+      .subscribe({
+        next: (response: HttpResponse<Blob>) => {
+          const blob = response.body;
+          if (!blob) {
+            return;
+          }
+
+          const contentDisposition = response.headers.get('content-disposition') ?? '';
+          const match = /filename\*?=(?:UTF-8''|")?([^\";\n]+)"?/i.exec(contentDisposition);
+          const fileName = match?.[1] ? decodeURIComponent(match[1]) : 'plantilla-presentaciones.xlsx';
+
+          const objectUrl = URL.createObjectURL(blob);
+          const anchor = document.createElement('a');
+          anchor.href = objectUrl;
+          anchor.download = fileName;
+          document.body.appendChild(anchor);
+          anchor.click();
+          anchor.remove();
+          URL.revokeObjectURL(objectUrl);
+        },
+        error: (error) => {
+          console.error('Error descargando plantilla:', error);
+          this.toastr.error('No se pudo descargar la plantilla');
+        }
+      });
   }
 
-  /**
-   * Carga los productos desde Excel
-   */
-  uploadExcelProducts(): void {
-    const data = this.excelData();
-    if (data.length === 0) {
-      this.toastr.warning('No hay productos para cargar');
-      return;
-    }
+   /**
+    * Carga los productos desde Excel
+    */
+   uploadExcelProducts(): void {
+     const file = this.excelFile();
+     if (!file) {
+       this.toastr.warning('No hay archivo seleccionado');
+       return;
+     }
 
-    this.uploading.set(true);
-    this.uploadProgress.set(0);
+     this.uploading.set(true);
+     this.uploadProgress.set(0);
 
-    this.bulkUploadService.uploadProductsBulk(data).subscribe({
-      next: (result) => {
-        this.uploadResults.set(result);
-        this.uploading.set(false);
-        this.uploadProgress.set(100);
+     this.bulkUploadService.uploadProductsBulk(file).subscribe({
+       next: (result) => {
+         this.uploadResults.set(result);
+         this.uploading.set(false);
+         this.uploadProgress.set(100);
 
-        if (result.successful > 0) {
-          this.toastr.success(
-            `Se crearon exitosamente ${result.successful} productos`
-          );
-        }
+         if (result.successful > 0) {
+           this.toastr.success(
+             `Se crearon exitosamente ${result.successful} productos`
+           );
+         }
 
-        if (result.failed > 0) {
-          this.toastr.warning(
-            `${result.failed} productos no se pudieron crear`
-          );
-        }
+         if (result.failed > 0) {
+           this.toastr.warning(
+             `${result.failed} productos no se pudieron crear`
+           );
+           // Mostrar errores detallados
+           result.errors.forEach(err => {
+             this.toastr.error(`Fila ${err.row}: ${err.error}`, 'Error en producto', {
+               timeOut: 10000,
+               extendedTimeOut: 2000
+             });
+           });
+         }
 
-        // Simular progreso
-        setTimeout(() => {
-          this.closeExcelDialog();
-          this.showImagesDialog.set(true);
-        }, 1500);
-      },
-      error: (error) => {
-        this.uploading.set(false);
-        console.error('Error uploading products:', error);
-        this.toastr.error('Error al cargar los productos');
-      }
-    });
-  }
+         setTimeout(() => {
+           this.closeExcelDialog();
+           if (result.successful > 0) {
+             this.showImagesDialog.set(true);
+           }
+         }, 1500);
+       },
+       error: (error) => {
+         this.uploading.set(false);
+         console.error('Error uploading products:', error);
+         this.toastr.error('Error al cargar los productos: ' + (error.message || 'Error desconocido'));
+       }
+     });
+   }
 
   // ========== MANEJO DE IMÁGENES ==========
 

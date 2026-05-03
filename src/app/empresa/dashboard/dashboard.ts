@@ -2,7 +2,8 @@ import { Component, AfterViewInit, OnInit, inject, signal, computed } from '@ang
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { Chart, registerables } from 'chart.js';
-import { DashboardService, DashboardResponse } from '../services/dashboard.service';
+import { DashboardService } from '../shared/services/dashboard.service';
+import { DashboardResponse } from '../shared/interfaces/response/dashboard-response.interface';
 
 Chart.register(...registerables);
 
@@ -15,7 +16,7 @@ Chart.register(...registerables);
 })
 export class DashboardComponent implements AfterViewInit, OnInit {
   private dashboardService = inject(DashboardService);
-  
+
   userType: string = 'NEGOCIO';
   businessLabel: string = 'Negocio';
   private charts: { [key: string]: Chart } = {};
@@ -37,7 +38,7 @@ export class DashboardComponent implements AfterViewInit, OnInit {
 
   // Signal computed para productos
   cantidadProductos = computed(() => this.dashboardData()?.cantidadProductos || 0);
-  
+
   // Signal computed para suscripcion
   suscripcion = computed(() => this.dashboardData()?.suscripcion || null);
 
@@ -92,11 +93,11 @@ export class DashboardComponent implements AfterViewInit, OnInit {
     this.stats.mainCount = data.cantidadProductos;
     this.stats.secondaryCount = data.vistasHoy;
     this.stats.secondaryLabel = 'Vistas Hoy';
-    
+
     if (data.suscripcion) {
       this.stats.subscriptionLevel = data.suscripcion.nivelDescripcion;
       this.stats.subscriptionActive = data.suscripcion.activa;
-      this.stats.revenue = data.suscripcion.monto; 
+      this.stats.revenue = data.suscripcion.monto;
     }
   }
 

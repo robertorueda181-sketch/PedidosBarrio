@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { SelectModule } from 'primeng/select';
 import { DialogModule } from 'primeng/dialog';
-import { BannerService } from '../services/banner.service';
+import { BannerService } from '../shared/services/banner.service';
 import { DatePickerModule } from 'primeng/datepicker';
 
 interface BannerConfig {
@@ -23,7 +23,7 @@ interface BannerConfig {
 @Component({
   selector: 'app-banner',
   standalone: true,
-  imports: [CommonModule, FormsModule,DatePickerModule  , SelectModule, DialogModule],
+  imports: [CommonModule, FormsModule, DatePickerModule, SelectModule, DialogModule],
   templateUrl: './banner.html',
   styleUrl: './banner.css'
 })
@@ -65,7 +65,7 @@ export class Banner implements OnInit {
         // Mapear desde API al formato de BannerConfig
         console.log('Banners obtenidos:', data);
         const mappedBanners: BannerConfig[] = data.map(b => ({
-          id: b.bannerID, 
+          id: b.bannerID,
           title: b.titulo,
           subtitle: b.descripcion,
           urlImagen: b.urlImagen || '/assets/image-default.webp', // URL imagen
@@ -85,11 +85,11 @@ export class Banner implements OnInit {
           this.isLoading.set(false); // Fixed: need to stop loading even on 404
           return;
         }
-        
+
         console.error(err);
         this.toastr.error('Error al cargar banners');
         this.isLoading.set(false);
-        
+
 
       },
       complete: () => this.isLoading.set(false)
@@ -138,10 +138,10 @@ export class Banner implements OnInit {
 
   deleteBanner(id: string) {
     if (!confirm('¿Estás seguro de eliminar este banner?')) return;
-    
+
     this.isLoading.set(true);
     // Asegurarse de que el ID es válido
-    if (!id || id.length < 5) return; 
+    if (!id || id.length < 5) return;
 
     this.bannerService.eliminarBanner(id).subscribe({
       next: () => {
@@ -181,64 +181,64 @@ export class Banner implements OnInit {
   async saveBanner() {
     this.isLoading.set(true);
     try {
-         const bannerData: any = {
-           titulo: this.banner.title,
-           descripcion: this.banner.subtitle,
-           textoBoton: this.banner.ctaText,
-           link: this.banner.link,
-           redireccion: this.banner.ctaAction,
-           fechaInicio: this.banner.startDate ? new Date(this.banner.startDate) : new Date(),
-           fechaFin: this.banner.endDate ? new Date(this.banner.endDate) : new Date(),
-           fechaExpiracion: this.banner.expirationDate ? new Date(this.banner.expirationDate) : new Date(),
-         };
-         
-         if (this.selectedFile) {
-            bannerData['imagen'] = this.selectedFile;
-         } else if (this.banner.urlImagen && !this.banner.urlImagen.startsWith('data:')) {
-            bannerData['urlImagen'] = this.banner.urlImagen;
-         }
-         console.log('Datos a enviar:', bannerData);
-         let request$;
-         if (this.banner.id) {
-            request$ = this.bannerService.actualizarBanner(this.banner.id, bannerData);
-         } else {
-            request$ = this.bannerService.crearBanner(bannerData);
-         }
-         
-         request$.subscribe({
-            next: (response) => {
-              this.toastr.success(this.banner.id ? 'Banner actualizado correctamente' : 'Banner creado correctamente', 'Éxito');
-              this.viewMode.set('list');
-              this.cargarBanners();
-               this.isLoading.set(false);
-               this.selectedFile = null; // Reset file input after successful upload
-            },
-            error: (err) => {
-               this.isLoading.set(false);
-               console.error(err);
-               this.toastr.error('Error al guardar banner', 'Error');
-            },
-            complete: () => {
-              this.isLoading.set(false);
-            }
-         });
+      const bannerData: any = {
+        titulo: this.banner.title,
+        descripcion: this.banner.subtitle,
+        textoBoton: this.banner.ctaText,
+        link: this.banner.link,
+        redireccion: this.banner.ctaAction,
+        fechaInicio: this.banner.startDate ? new Date(this.banner.startDate) : new Date(),
+        fechaFin: this.banner.endDate ? new Date(this.banner.endDate) : new Date(),
+        fechaExpiracion: this.banner.expirationDate ? new Date(this.banner.expirationDate) : new Date(),
+      };
+
+      if (this.selectedFile) {
+        bannerData['imagen'] = this.selectedFile;
+      } else if (this.banner.urlImagen && !this.banner.urlImagen.startsWith('data:')) {
+        bannerData['urlImagen'] = this.banner.urlImagen;
+      }
+      console.log('Datos a enviar:', bannerData);
+      let request$;
+      if (this.banner.id) {
+        request$ = this.bannerService.actualizarBanner(this.banner.id, bannerData);
+      } else {
+        request$ = this.bannerService.crearBanner(bannerData);
+      }
+
+      request$.subscribe({
+        next: (response) => {
+          this.toastr.success(this.banner.id ? 'Banner actualizado correctamente' : 'Banner creado correctamente', 'Éxito');
+          this.viewMode.set('list');
+          this.cargarBanners();
+          this.isLoading.set(false);
+          this.selectedFile = null; // Reset file input after successful upload
+        },
+        error: (err) => {
+          this.isLoading.set(false);
+          console.error(err);
+          this.toastr.error('Error al guardar banner', 'Error');
+        },
+        complete: () => {
+          this.isLoading.set(false);
+        }
+      });
     } catch (e) {
       this.toastr.error('No se pudo guardar', 'Error');
       this.isLoading.set(false);
-    } 
+    }
   }
-  
+
   private updateLocalList() {
-      this.banners.update(list => {
-        const index = list.findIndex(b => b.id === this.banner.id);
-        if (index >= 0) {
-          const newList = [...list];
-          newList[index] = this.banner;
-          return newList;
-        }
-        return [...list, this.banner];
-      });
-      this.saveList();
+    this.banners.update(list => {
+      const index = list.findIndex(b => b.id === this.banner.id);
+      if (index >= 0) {
+        const newList = [...list];
+        newList[index] = this.banner;
+        return newList;
+      }
+      return [...list, this.banner];
+    });
+    this.saveList();
   }
 
   private saveList() {

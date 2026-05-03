@@ -6,5 +6,5 @@ export interface ProgressStep {
   route: string;
   icon: string;
   isPro?: boolean;
-  action?: string; // Opcional para acciones específicas como abrir un modal
+  action?: string;
 }

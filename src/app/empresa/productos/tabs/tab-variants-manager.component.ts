@@ -1,11 +1,14 @@
 import { CommonModule } from '@angular/common';
 import { Component, DestroyRef, EventEmitter, Input, OnChanges, Output, SimpleChanges, computed, inject, signal } from '@angular/core';
+import { HttpClient, HttpResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ButtonModule } from 'primeng/button';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { InputTextModule } from 'primeng/inputtext';
+import { finalize } from 'rxjs/operators';
+import { LoaderComponent } from '../../../../shared/components/loader/loader';
 
 interface VariantOption {
   id: string;
@@ -46,7 +49,8 @@ type VariantRowForm = FormGroup<{
     ReactiveFormsModule,
     InputTextModule,
     InputNumberModule,
-    ButtonModule
+    ButtonModule,
+    LoaderComponent
   ],
   templateUrl: './tab-variants-manager.component.html',
   styleUrl: './tab-variants-manager.component.css'
@@ -54,6 +58,7 @@ type VariantRowForm = FormGroup<{
 export class TabVariantsManagerComponent implements OnChanges {
   private readonly fb = inject(FormBuilder);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly http = inject(HttpClient);
 
   @Input() basePrice = 0;
   @Input() initialVariants: Array<Partial<VariantFormValue>> = [];
@@ -62,6 +67,7 @@ export class TabVariantsManagerComponent implements OnChanges {
   @Output() groupByChange = new EventEmitter<number>();
 
   protected readonly maxOptions = 3;
+  protected readonly isDownloadingTemplate = signal(false);
   protected readonly options = signal<VariantOption[]>([
     { id: crypto.randomUUID(), name: '', values: [], draftValue: '' }
   ]);
@@ -157,12 +163,18 @@ export class TabVariantsManagerComponent implements OnChanges {
     if (this.options().length >= this.maxOptions) {
       return;
     }
+    let nameOption = ''
+    if(this.options().length === 1)
+      nameOption = 'Color'
+    else
+      nameOption = `Opcion ${this.options().length + 1}`
+
 
     this.options.update((current) => [
       ...current,
       {
         id: crypto.randomUUID(),
-        name: `Opcion ${current.length + 1}`,
+        name: nameOption,
         values: [],
         draftValue: ''
       }
@@ -259,6 +271,38 @@ export class TabVariantsManagerComponent implements OnChanges {
     group.rowIndexes.forEach((rowIndex) => {
       this.variantsArray.at(rowIndex).controls.price.setValue(normalized);
     });
+  }
+
+  protected downloadTemplate(): void {
+    const url = 'https://localhost:7045/api/Presentaciones/descargar-plantilla';
+    this.isDownloadingTemplate.set(true);
+
+    this.http.get(url, { observe: 'response', responseType: 'blob' })
+      .pipe(finalize(() => this.isDownloadingTemplate.set(false)))
+      .subscribe({
+        next: (response: HttpResponse<Blob>) => {
+          const blob = response.body;
+          if (!blob) {
+            return;
+          }
+
+          const contentDisposition = response.headers.get('content-disposition') ?? '';
+          const match = /filename\*?=(?:UTF-8''|")?([^\";\n]+)"?/i.exec(contentDisposition);
+          const fileName = match?.[1] ? decodeURIComponent(match[1]) : 'plantilla-presentaciones.xlsx';
+
+          const objectUrl = URL.createObjectURL(blob);
+          const anchor = document.createElement('a');
+          anchor.href = objectUrl;
+          anchor.download = fileName;
+          document.body.appendChild(anchor);
+          anchor.click();
+          anchor.remove();
+          URL.revokeObjectURL(objectUrl);
+        },
+        error: (err) => {
+          console.error('Error descargando plantilla', err);
+        }
+      });
   }
 
   private bootstrapFromInitialVariants(): void {

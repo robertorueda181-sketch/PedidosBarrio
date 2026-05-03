@@ -6,12 +6,7 @@ import { TEMPLATE_THREE_STATIC_CONTENT, TemplateThreePageData } from '../../../p
 import { EmpresaService } from '../../../shared/services/empresa.service';
 import { NegocioDetalle } from '../../../shared/services/negocio.service';
 import { ProductoService } from '../../../shared/services/producto.service';
-
-interface SiteBuilderDraft {
-  pageData: TemplateThreePageData;
-  business: NegocioDetalle;
-  savedAt: string | null;
-}
+import { SiteBuilderDraft } from '../shared/interfaces/site-builder-draft.interface';
 
 @Component({
   selector: 'app-sitio-web-preview',

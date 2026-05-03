@@ -1,19 +1,8 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ToastrService } from 'ngx-toastr';
-
-interface Plan {
-  id: string;
-  name: string;
-  price: number;
-  period: string;
-  features: string[];
-  popular?: boolean;
-  current?: boolean;
-}
-
 import { FormsModule } from '@angular/forms';
-
+import { Plan } from '../shared/interfaces/plan.interface';
 @Component({
   selector: 'app-suscripcion',
   imports: [CommonModule, FormsModule],

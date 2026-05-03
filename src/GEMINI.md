@@ -142,3 +142,7 @@ Productos
 Diseño de pagina
 Banners
 Editar perfil
+
+Se trata de una web donde las personas pueden crear su pagina web para vender sus productos
+Se llama espacio online, por ello, tiene una tematica de espacio estelar con colores sobrios
+pero llamativos

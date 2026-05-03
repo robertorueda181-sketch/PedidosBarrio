@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { ProgressService } from '../services/progress.service';
-import { ProgressStep } from '../services/progress-step.interface';
+import { ProgressService } from '../shared/services/progress.service';
+import { ProgressStep } from '../shared/interfaces/progress-step.interface';
 
 @Component({
   selector: 'app-pasos-iniciales',

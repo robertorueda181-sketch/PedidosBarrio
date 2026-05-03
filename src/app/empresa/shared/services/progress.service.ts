@@ -1,14 +1,14 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
 import { lastValueFrom } from 'rxjs';
 import { PasosInicialesService } from './pasos-iniciales.service';
-import { ProgressStep } from './progress-step.interface';
+import { ProgressStep } from '../interfaces/progress-step.interface';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProgressService {
   private pasosInicialesService = inject(PasosInicialesService);
-  
+
   // Signal para almacenar los pasos desde el backend
   private stepsData = signal<ProgressStep[]>([]);
   private isLoading = signal(false);
@@ -44,7 +44,7 @@ export class ProgressService {
   async loadProgress() {
     this.isLoading.set(true);
     this.error.set(null);
-    
+
     try {
       const pasos = await lastValueFrom(this.pasosInicialesService.getPasosIniciales());
       this.stepsData.set(pasos);

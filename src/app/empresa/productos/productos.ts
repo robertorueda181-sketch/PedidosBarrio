@@ -1,17 +1,14 @@
-
-
-
-import { forkJoin } from 'rxjs';
-import { Component, inject, signal, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, DestroyRef, inject, signal, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, NavigationStart, Router } from '@angular/router';
+import { filter } from 'rxjs/operators';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ProductoService } from '../../../shared/services/producto.service';
-import { Precio, Producto, ProductoDetalle } from '../../../shared/models/producto.model';
+import { Precio, Producto } from '../../../shared/models/producto.model';
 import { ConfirmationService, MenuItem } from 'primeng/api';
 import { ToastrService } from 'ngx-toastr';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { MenuModule } from 'primeng/menu';
 import { DialogModule } from 'primeng/dialog';
 import { TabsModule } from 'primeng/tabs';
 import { InputTextModule } from 'primeng/inputtext';
@@ -24,8 +21,10 @@ import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { ChipModule } from 'primeng/chip';
 import { TooltipModule } from 'primeng/tooltip';
 import { ImageCroppedEvent, LoadedImage } from 'ngx-image-cropper';
-import { AnalyticsService } from '../../../shared/services/analytics.service';
 import { BulkProductsUploadComponent } from './bulk-products-upload.component';
+import { MenuModule } from 'primeng/menu';
+
+
 
 interface Variant {
   id: string;
@@ -74,7 +73,9 @@ export class ProductosComponent {
   private confirmationService = inject(ConfirmationService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private destroyRef = inject(DestroyRef);
   private queryActionHandled = false;
+  @ViewChild('mobileMenu') mobileMenu: any;
 
   // Estados de modales
   showProductModal = false;
@@ -121,28 +122,55 @@ export class ProductosComponent {
   products = signal<Producto[]>([]);
 
   ngOnInit() {
+    this.router.events
+      .pipe(
+        filter((event) => event instanceof NavigationStart),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe(() => this.hideMobileMenu());
+
     this.checkMobile();
     this.loadProductos();
   }
 
+  ngOnDestroy() {
+    this.hideMobileMenu();
+  }
+
+  private hideMobileMenu(menu?: any) {
+    const target = menu ?? this.mobileMenu;
+    target?.hide?.();
+    setTimeout(() => target?.hide?.(), 0);
+  }
+
   openMobileMenu(event: any, product: Producto, menu: any) {
+    console.log(menu);
     this.selectedProductForMenu = product;
     this.mobileMenuItems = [
       {
         label: 'Editar',
         icon: 'pi pi-pencil',
-        command: () => this.openProductEditor(product.productoID)
+        command: () => {
+        this.hideMobileMenu(menu);
+          this.openProductEditor(product.productoID);
+        }
       },
       {
         label: product.visible ? 'Ocultar' : 'Mostrar',
         icon: product.visible ? 'pi pi-eye-slash' : 'pi pi-eye',
         disabled: product.aprobado === false,
-        command: () => this.toggleProductVisibility(product.productoID)
+        command: () => {
+          this.hideMobileMenu(menu);
+          this.toggleProductVisibility(product.productoID);
+        }
       },
       {
         label: 'Eliminar',
         icon: 'pi pi-trash',
-        command: () => this.deleteProduct(product.productoID)
+        command: () => {
+          this.hideMobileMenu(menu);
+          this.deleteProduct(product.productoID);
+        }
       }
     ];
     menu.toggle(event);
@@ -212,7 +240,10 @@ export class ProductosComponent {
 
   // === GESTIÓN DE PRODUCTOS ===
   openProductEditor(productId: number) {
-    this.router.navigate(['/empresa/productos', productId, 'editar']);
+    this.hideMobileMenu();
+    setTimeout(() => {
+      this.router.navigate(['/empresa/productos', productId, 'editar']);
+    }, 0);
   }
 
   openNewProductEditor() {
