@@ -24,8 +24,6 @@ import { ImageCroppedEvent, LoadedImage } from 'ngx-image-cropper';
 import { BulkProductsUploadComponent } from './bulk-products-upload.component';
 import { MenuModule } from 'primeng/menu';
 
-
-
 interface Variant {
   id: string;
   name: string;
@@ -151,7 +149,7 @@ export class ProductosComponent {
         label: 'Editar',
         icon: 'pi pi-pencil',
         command: () => {
-        this.hideMobileMenu(menu);
+          this.hideMobileMenu(menu);
           this.openProductEditor(product.productoID);
         }
       },

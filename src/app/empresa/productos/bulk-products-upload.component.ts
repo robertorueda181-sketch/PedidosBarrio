@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import { Component, inject, signal, computed, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpResponse } from '@angular/common/http';
@@ -43,6 +43,8 @@ export class BulkProductsUploadComponent {
   readonly showImagesDialog = signal(false);
   readonly showPreviewDialog = signal(false);
   readonly loading = signal(false);
+
+  @Output() uploadClosed = new EventEmitter<void>();
   readonly uploading = signal(false);
   readonly uploadProgress = signal(0);
   readonly downloadingTemplate = signal(false);
@@ -108,6 +110,7 @@ export class BulkProductsUploadComponent {
     this.showExcelDialog.set(false);
     this.excelFile.set(null);
     this.excelData.set([]);
+    this.uploadClosed.emit();
   }
 
   /**
@@ -202,58 +205,58 @@ export class BulkProductsUploadComponent {
       });
   }
 
-   /**
-    * Carga los productos desde Excel
-    */
-   uploadExcelProducts(): void {
-     const file = this.excelFile();
-     if (!file) {
-       this.toastr.warning('No hay archivo seleccionado');
-       return;
-     }
+  /**
+   * Carga los productos desde Excel
+   */
+  uploadExcelProducts(): void {
+    const file = this.excelFile();
+    if (!file) {
+      this.toastr.warning('No hay archivo seleccionado');
+      return;
+    }
 
-     this.uploading.set(true);
-     this.uploadProgress.set(0);
+    this.uploading.set(true);
+    this.uploadProgress.set(0);
 
-     this.bulkUploadService.uploadProductsBulk(file).subscribe({
-       next: (result) => {
-         this.uploadResults.set(result);
-         this.uploading.set(false);
-         this.uploadProgress.set(100);
+    this.bulkUploadService.uploadProductsBulk(file).subscribe({
+      next: (result) => {
+        this.uploadResults.set(result);
+        this.uploading.set(false);
+        this.uploadProgress.set(100);
 
-         if (result.successful > 0) {
-           this.toastr.success(
-             `Se crearon exitosamente ${result.successful} productos`
-           );
-         }
+        if (result.successful > 0) {
+          this.toastr.success(
+            `Se crearon exitosamente ${result.successful} productos`
+          );
+        }
 
-         if (result.failed > 0) {
-           this.toastr.warning(
-             `${result.failed} productos no se pudieron crear`
-           );
-           // Mostrar errores detallados
-           result.errors.forEach(err => {
-             this.toastr.error(`Fila ${err.row}: ${err.error}`, 'Error en producto', {
-               timeOut: 10000,
-               extendedTimeOut: 2000
-             });
-           });
-         }
+        if (result.failed > 0) {
+          this.toastr.warning(
+            `${result.failed} productos no se pudieron crear`
+          );
+          // Mostrar errores detallados
+          result.errors.forEach(err => {
+            this.toastr.error(`Fila ${err.row}: ${err.error}`, 'Error en producto', {
+              timeOut: 3000,
+              extendedTimeOut: 2000
+            });
+          });
+        }
 
-         setTimeout(() => {
-           this.closeExcelDialog();
-           if (result.successful > 0) {
-             this.showImagesDialog.set(true);
-           }
-         }, 1500);
-       },
-       error: (error) => {
-         this.uploading.set(false);
-         console.error('Error uploading products:', error);
-         this.toastr.error('Error al cargar los productos: ' + (error.message || 'Error desconocido'));
-       }
-     });
-   }
+        setTimeout(() => {
+          this.closeExcelDialog();
+          if (result.successful > 0) {
+            this.showImagesDialog.set(true);
+          }
+        }, 1500);
+      },
+      error: (error) => {
+        this.uploading.set(false);
+        console.error('Error uploading products:', error);
+        this.toastr.error('Error al cargar los productos: ' + (error.message || 'Error desconocido'));
+      }
+    });
+  }
 
   // ========== MANEJO DE IMÁGENES ==========
 
@@ -261,12 +264,7 @@ export class BulkProductsUploadComponent {
    * Abre el diálogo para carga de imágenes
    */
   openImagesDialog(): void {
-    if (this.uploadResults() === null) {
-      this.toastr.warning(
-        'Primero debes cargar productos desde Excel'
-      );
-      return;
-    }
+
     this.imageFiles.set([]);
     this.showImagesDialog.set(true);
   }
@@ -277,6 +275,7 @@ export class BulkProductsUploadComponent {
   closeImagesDialog(): void {
     this.showImagesDialog.set(false);
     this.imageFiles.set([]);
+    this.uploadClosed.emit();
   }
 
   /**
@@ -320,25 +319,10 @@ export class BulkProductsUploadComponent {
       return;
     }
 
-    const result = this.uploadResults();
-    if (!result || result.productIds.length === 0) {
-      this.toastr.error('No hay productos cargados');
-      return;
-    }
-
-    // Crear map de códigos a IDs (usando los IDs de productos creados)
-    const productCodeMap = new Map<string, number>();
-    result.productIds.forEach((id, index) => {
-      const codigo = this.excelData()[index]?.codigo;
-      if (codigo) {
-        productCodeMap.set(codigo.toUpperCase(), id);
-      }
-    });
-
     this.uploading.set(true);
     this.uploadProgress.set(0);
 
-    this.bulkUploadService.uploadImagesBulk(files, productCodeMap).subscribe({
+    this.bulkUploadService.uploadImagesBulk(files).subscribe({
       next: (uploadResult) => {
         this.uploading.set(false);
         this.uploadProgress.set(100);
@@ -353,7 +337,7 @@ export class BulkProductsUploadComponent {
           this.toastr.warning(
             `${uploadResult.failed} imágenes no se pudieron cargar`
           );
-          uploadResult.errors.forEach(error => {
+          uploadResult.errors.forEach((error: any) => {
             console.warn(error);
           });
         }

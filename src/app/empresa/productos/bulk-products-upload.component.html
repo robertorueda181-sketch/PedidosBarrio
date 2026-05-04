@@ -1,22 +1,31 @@
 <!-- Botones de carga masiva -->
 @if (downloadingTemplate()) {
-  <app-loader />
+<app-loader />
 }
 <div class="bulk-upload-buttons">
 
-     <button (click)="openExcelDialog()" class="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-slate-900 rounded-xl">
-      <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-     Importar Productos
-    </button>
+  <button (click)="openExcelDialog()"
+    class="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-slate-900 rounded-xl">
+    <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path
+        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+    </svg>
+    Importar Productos
+  </button>
 
-      <button  (click)="openImagesDialog()" class="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-orange-900 bg-orange-50 rounded-xl hover:bg-orange-100 transition-colors">
-      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-      Importar Imágenes
-    </button>
+  <button (click)="openImagesDialog()"
+    class="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-orange-900 bg-orange-50 rounded-xl hover:bg-orange-100 transition-colors">
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path
+        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+    </svg>
+    Importar Imágenes
+  </button>
 </div>
 
 <!-- Diálogo de carga de Excel -->
-<p-dialog [visible]="showExcelDialog()" (visibleChange)="showExcelDialog.set($event)" header="Cargar Productos desde Excel" [modal]="true"
+<p-dialog [visible]="showExcelDialog()" (visibleChange)="showExcelDialog.set($event)"
+  header="Cargar Productos desde Excel" [modal]="true"
   [style]="{ width: isMobile() ? '95vw' : '90vw', maxWidth: '800px' }" [draggable]="false">
 
   <div class="dialog-content">
@@ -27,14 +36,12 @@
       @if (!excelFile()) {
       <div class="file-drop-zone" id="excelDropZone">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M12 4v16m8-8H4" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
         </svg>
         <p>Arrastra tu archivo aquí o</p>
         <label class="file-input-label">
           haz clic para seleccionar
-          <input type="file" accept=".xlsx,.xls,.csv" (change)="onExcelFileSelected($event)"
-            style="display: none;" />
+          <input type="file" accept=".xlsx,.xls,.csv" (change)="onExcelFileSelected($event)" style="display: none;" />
         </label>
         <p class="file-help">Formatos: XLSX, XLS o CSV (máx. 5 MB)</p>
       </div>
@@ -104,15 +111,16 @@
   </div>
 
   <ng-template pTemplate="footer">
-    <button pButton type="button" label="Cancelar" icon="pi pi-times" (click)="closeExcelDialog()"
-      class="p-button-text" [disabled]="uploading()"></button>
+    <button pButton type="button" label="Cancelar" icon="pi pi-times" (click)="closeExcelDialog()" class="p-button-text"
+      [disabled]="uploading()"></button>
     <button pButton type="button" label="Cargar Productos" icon="pi pi-check" (click)="uploadExcelProducts()"
       [disabled]="excelData().length === 0 || uploading()"></button>
   </ng-template>
 </p-dialog>
 
 <!-- Diálogo de carga de imágenes -->
-<p-dialog [visible]="showImagesDialog()" (visibleChange)="showImagesDialog.set($event)" header="Cargar Imágenes Masivamente" [modal]="true"
+<p-dialog [visible]="showImagesDialog()" (visibleChange)="showImagesDialog.set($event)"
+  header="Cargar Imágenes Masivamente" [modal]="true"
   [style]="{ width: isMobile() ? '95vw' : '90vw', maxWidth: '800px' }" [draggable]="false">
 
   <div class="dialog-content">
@@ -121,7 +129,7 @@
         <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
       </svg>
       <p>Las imágenes se asignarán a los productos según el nombre del archivo (debe coincidir con el código del
-        producto)</p>
+        producto y el nombre de su variante. Ejm: producto-m-rojo.jpg o producto-m-rojo.png)</p>
     </div>
 
     <!-- Zona de arrastre de imágenes -->
@@ -133,8 +141,7 @@
       <p>Arrastra imágenes aquí o</p>
       <label class="file-input-label">
         haz clic para seleccionar
-        <input type="file" accept="image/*" multiple (change)="onImagesSelected($event)"
-          style="display: none;" />
+        <input type="file" accept="image/*" multiple (change)="onImagesSelected($event)" style="display: none;" />
       </label>
       <p class="file-help">Formatos: JPG, PNG, WebP, AVIF (máx. 10 MB cada una)</p>
     </div>
@@ -181,8 +188,8 @@
 </p-dialog>
 
 <!-- Diálogo de vista previa completa -->
-<p-dialog [visible]="showPreviewDialog()" (visibleChange)="showPreviewDialog.set($event)" header="Vista Previa de Datos" [modal]="true"
-  [style]="{ width: isMobile() ? '95vw' : '90vw', maxWidth: '1000px' }" [draggable]="false"
+<p-dialog [visible]="showPreviewDialog()" (visibleChange)="showPreviewDialog.set($event)" header="Vista Previa de Datos"
+  [modal]="true" [style]="{ width: isMobile() ? '95vw' : '90vw', maxWidth: '1000px' }" [draggable]="false"
   [maximizable]="true">
 
   <div class="preview-full-table">

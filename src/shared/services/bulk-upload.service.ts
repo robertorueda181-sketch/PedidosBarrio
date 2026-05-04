@@ -112,66 +112,24 @@ export class BulkUploadService {
       );
   }
 
-  /**
-   * Carga imágenes de forma masiva basándose en códigos de productos
-   * @param files Array de archivos de imagen
-   * @param productCodeMap Map de código de producto a ID
-   * @returns Observable con resultado de la carga
-   */
-  uploadImagesBulk(
-    files: File[],
-    productCodeMap: Map<string, number>
-  ): Observable<{ successful: number; failed: number; errors: string[] }> {
-    const result = {
-      successful: 0,
-      failed: 0,
-      errors: [] as string[]
-    };
-
-    const uploadObservables = files.map(file => {
-      // Extraer el nombre sin extensión como código del producto
-      const fileNameWithoutExt = file.name.split('.').slice(0, -1).join('.');
-      const productId = productCodeMap.get(fileNameWithoutExt.toUpperCase());
-
-      if (!productId) {
-        result.errors.push(
-          `No se encontró producto con código ${fileNameWithoutExt}`
-        );
-        result.failed++;
-        return of(null);
-      }
-
-      return this.productoService.uploadImagen(file, productId, '', true).pipe(
-        (source) => new Observable(observer => {
-          source.subscribe({
-            next: () => {
-              result.successful++;
-              observer.next(true);
-              observer.complete();
-            },
-            error: (error) => {
-              result.errors.push(
-                `Error al subir imagen ${file.name}: ${error?.error?.message || 'Error desconocido'}`
-              );
-              result.failed++;
-              observer.next(null);
-              observer.complete();
-            }
-          });
-        })
-      );
+  uploadImagesBulk(files: File[]): Observable<any> {
+    const formData = new FormData();
+    files.forEach(file => {
+      formData.append('imagenes', file);
     });
 
-    if (uploadObservables.length === 0) {
-      return of(result);
-    }
-
-    return forkJoin(uploadObservables).pipe(
-      (source) => new Observable(observer => {
-        source.subscribe({
-          next: () => observer.next(result),
-          error: () => observer.next(result),
-          complete: () => observer.complete()
+    return this.http.post(`${this.config.apiUrl}/Presentaciones/carga-imagenes`, formData).pipe(
+      map((response: any) => ({
+        successful: files.length, // O parsear del response si el backend devuelve detalle
+        failed: 0,
+        errors: []
+      })),
+      catchError((error) => {
+        console.error('Error uploading images bulk:', error);
+        return of({
+          successful: 0,
+          failed: files.length,
+          errors: [error?.error?.message || 'Error al subir las imágenes']
         });
       })
     );

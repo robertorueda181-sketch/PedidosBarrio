@@ -65,6 +65,7 @@ export class ProductoEditorComponent {
     priceVaries: false,
     variantTitle: 'Tamaño',
     variants: [] as EditorVariant[],
+    presentationNames: [] as string[],
     visible: true
   };
 
@@ -125,7 +126,10 @@ export class ProductoEditorComponent {
         let basePrice = detalle.precioActual || 0;
         let isGeneralSingle = false;
 
+        let presentationNames: string[] = [];
+
         if (detalle.presentaciones && detalle.presentaciones.length > 0) {
+          presentationNames = detalle.presentaciones.map(p => p.descripcion || '');
           const allOpciones = detalle.presentaciones.flatMap((p: any) => p.opciones || p.precios || []);
           
           if (detalle.presentaciones.length === 1 && allOpciones.length === 1 && 
@@ -169,6 +173,7 @@ export class ProductoEditorComponent {
           priceVaries: !isGeneralSingle && variantes.length > 0,
           variantTitle: 'Variantes',
           variants: (!isGeneralSingle && variantes.length > 0) ? variantes : [{ id: crypto.randomUUID(), label: 'Opción 1', price: basePrice }],
+          presentationNames: presentationNames,
           visible: detalle.visible ?? true
         };
 

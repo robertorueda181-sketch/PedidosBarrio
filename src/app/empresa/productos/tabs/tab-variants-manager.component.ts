@@ -341,7 +341,7 @@ export class TabVariantsManagerComponent implements OnChanges {
     this.options.set(
       valueSets.slice(0, this.maxOptions).map((values, index) => ({
         id: crypto.randomUUID(),
-        name: `Opcion ${index + 1}`,
+        name: this.initialOptionNames[index] || `Opcion ${index + 1}`,
         values,
         draftValue: ''
       }))

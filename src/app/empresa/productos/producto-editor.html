@@ -94,6 +94,7 @@
             <app-tab-variants-manager
               [basePrice]="form.basePrice"
               [initialVariants]="initialVariantsForManager"
+              [initialOptionNames]="form.presentationNames"
               (variantsChange)="onVariantsManaged($event)"
               (optionsChange)="onVariantOptionsManaged($event)"
               (groupByChange)="onPreviewGroupByChange($event)">
