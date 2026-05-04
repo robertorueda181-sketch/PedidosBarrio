@@ -9,8 +9,8 @@
         cartesiana.</p>
     </div>
     <div class="flex flex-wrap gap-2">
-      <button pButton type="button" icon="pi pi-plus" label="Agregar variante" [disabled]="options().length >= maxOptions"
-        (click)="addOption()">
+      <button pButton type="button" icon="pi pi-plus" label="Agregar variante"
+        [disabled]="options().length >= maxOptions" (click)="addOption()">
       </button>
     </div>
   </header>
@@ -30,11 +30,11 @@
       </div>
       <label for="optionValues">Opciones de {{ option.name }}</label>
       <div class="option-add-row">
-        
+
         <input pInputText [ngModel]="option.draftValue" (ngModelChange)="updateDraftValue(option.id, $event)"
           (keydown.enter)="addOptionValue(option.id)" placeholder="Ej: S, M, L" />
         <button pButton type="button" icon="pi pi-plus" [text]="true" (click)="addOptionValue(option.id)">
-        agregar</button>
+          agregar</button>
       </div>
 
       <div class="chips-list">
@@ -53,76 +53,166 @@
     <div class="variants-table-wrap">
       @if (variantsArray.length > 0) {
       @if (groupByOptions().length > 1) {
-        <div class="flex flex-col gap-2 p-3 border-b border-slate-200 sm:flex-row sm:items-center sm:gap-3">
-          <label for="groupBySelect" class="text-sm font-semibold text-slate-700">Agrupar por</label>
-          <select id="groupBySelect" [ngModel]="groupByOptionIndex()" (ngModelChange)="setGroupByIndex($event)"
-            [ngModelOptions]="{ standalone: true }"
-            class="w-full sm:w-auto min-w-0 border border-slate-300 rounded-lg px-3 py-2 bg-white text-sm">
-            @for (option of groupByOptions(); track option.index) {
-            <option [value]="option.index">{{ option.label }}</option>
-            }
-          </select>
-        </div>
+      <div class="flex flex-col gap-2 p-3 border-b border-slate-200 sm:flex-row sm:items-center sm:gap-3">
+        <label for="groupBySelect" class="text-sm font-semibold text-slate-700">Agrupar por</label>
+        <select id="groupBySelect" [ngModel]="groupByOptionIndex()" (ngModelChange)="setGroupByIndex($event)"
+          [ngModelOptions]="{ standalone: true }"
+          class="w-full sm:w-auto min-w-0 border border-slate-300 rounded-lg px-3 py-2 bg-white text-sm">
+          @for (option of groupByOptions(); track option.index) {
+          <option [value]="option.index">{{ option.label }}</option>
+          }
+        </select>
+      </div>
       }
       <div class="variants-alert">
         Tienes {{ variantsArray.length }} combinaciones. Faltan {{ pendingPricesCount() }} precios por completar.
       </div>
       }
-       <table class="variants-table">
-         <thead>
-           <tr>
-             <th>Nombre</th>
-             <th>Descripción</th>
-             <th>Precio</th>
-             <th>Stock</th>
-           </tr>
-         </thead>
-         <tbody formArrayName="variants">
-           @if (!variantsArray.length) {
-           <tr>
-             <td colspan="4" class="empty-row">
-               Agrega valores en tus opciones para generar variantes.
-             </td>
-           </tr>
-           } @else {
-           @for (group of groupedRows(); track group.groupKey) {
-           <tr class="group-row">
-             <td [attr.colspan]="1">
-               <strong>{{ group.groupLabel }}</strong>
-               <small>{{ group.rowIndexes.length }} variantes</small>
-             </td>
-             <td></td>
-             <td>
-               <p-inputNumber [ngModel]="groupPrice(group)" (ngModelChange)="applyGroupPrice(group, $event)"
-                 [ngModelOptions]="{ standalone: true }" mode="currency" currency="PEN" locale="es-PE"
-                 [minFractionDigits]="2">
-               </p-inputNumber>
-             </td>
-             <td></td>
-           </tr>
-           @for (rowIndex of group.rowIndexes; track rowIndex) {
-           <tr [formGroupName]="rowIndex">
-             <td>
-               <input pInputText formControlName="name" readonly />
-             </td>
-             <td>
-               <input pInputText formControlName="descripcion" placeholder="Descripción" />
-             </td>
-             <td>
-               <p-inputNumber formControlName="price" mode="currency" currency="PEN" locale="es-PE"
-                 [minFractionDigits]="2">
-               </p-inputNumber>
-             </td>
-             <td>
-               <p-inputNumber formControlName="stock" [minFractionDigits]="0" [min]="0" placeholder="Stock">
-               </p-inputNumber>
-             </td>
-           </tr>
-           }
-           }
-           }
-         </tbody>
-       </table>
+      <table class="variants-table">
+        <thead>
+          <tr>
+
+            <th>Nombre</th>
+            <th>Imagen</th>
+            <th>Descripción</th>
+            <th>Precio</th>
+
+          </tr>
+        </thead>
+        <tbody formArrayName="variants">
+          @if (!variantsArray.length) {
+          <tr>
+            <td colspan="5" class="empty-row">
+              Agrega valores en tus opciones para generar variantes.
+            </td>
+          </tr>
+          } @else {
+          @for (group of groupedRows(); track group.groupKey) {
+          <tr class="group-row">
+            <td [attr.colspan]="1">
+              <strong>{{ group.groupLabel }}</strong>
+              <small>{{ group.rowIndexes.length }} variantes</small>
+            </td>
+            <td></td>
+            <td>
+              <p-inputNumber [ngModel]="groupPrice(group)" (ngModelChange)="applyGroupPrice(group, $event)"
+                [ngModelOptions]="{ standalone: true }" mode="currency" currency="PEN" locale="es-PE"
+                [minFractionDigits]="2">
+              </p-inputNumber>
+            </td>
+            <td></td>
+            <td></td>
+          </tr>
+          @for (rowIndex of group.rowIndexes; track rowIndex) {
+          <tr [formGroupName]="rowIndex">
+
+            <td>
+              <input pInputText formControlName="name" readonly />
+            </td>
+            <td>
+              <div class="variant-image-cell flex justify-center items-center h-full">
+                @if (variantsArray.at(rowIndex).controls.imagen.value) {
+                <div
+                  class="variant-image-preview relative group w-10 h-10 rounded overflow-hidden border border-slate-200">
+                  <img [src]="variantsArray.at(rowIndex).controls.imagen.value" class="w-full h-full object-cover" />
+                  <button type="button"
+                    class="absolute inset-0 bg-black/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                    (click)="removeImage(rowIndex)">
+                    <i class="pi pi-trash text-xs"></i>
+                  </button>
+                </div>
+                } @else {
+                <button pButton type="button" icon="pi pi-image"
+                  class="p-button-rounded p-button-text p-button-sm p-button-secondary"
+                  (click)="openImageDialog(rowIndex)"></button>
+                }
+              </div>
+            </td>
+            <td>
+              <input pInputText formControlName="descripcion" placeholder="Descripción" />
+            </td>
+            <td>
+              <p-inputNumber formControlName="price" mode="currency" currency="PEN" locale="es-PE"
+                [minFractionDigits]="2">
+              </p-inputNumber>
+            </td>
+
+          </tr>
+          }
+          }
+          }
+        </tbody>
+      </table>
     </div>
   </form>
+
+  <p-dialog header="Seleccionar imagen para variante" [visible]="showImageDialog()" [modal]="true"
+    [style]="{width: '50vw'}" [styleClass]="'image-dialog'" (onHide)="closeImageDialog()">
+
+    <p-tabs [value]="activeImageTab()" (valueChange)="activeImageTab.set($event === 'catalog' ? 'catalog' : 'upload')">
+      <p-tablist>
+        <p-tab value="upload">Subir nueva</p-tab>
+        <p-tab value="catalog">Catálogo de imágenes</p-tab>
+      </p-tablist>
+
+      <p-tabpanels>
+        <p-tabpanel value="upload">
+          <div class="image-modal-content pt-4">
+            <div class="field image-modal-step">
+              <label class="block text-sm font-medium text-slate-700 mb-2">Cargar y recortar imagen</label>
+              <div class="editor-inline-box border-2 border-dashed border-slate-300 rounded-lg p-6 text-center">
+                <div class="file-upload-wrapper">
+                  <input #fileInput type="file" id="variantFileInput" accept="image/*"
+                    (change)="handleFileInModal($event)" style="display: none;" />
+                  <label for="variantFileInput"
+                    class="file-upload-label cursor-pointer flex flex-col items-center gap-2">
+                    <i class="pi pi-upload text-3xl text-slate-400"></i>
+                    <span class="font-medium text-blue-600 hover:text-blue-500">Seleccionar archivo</span>
+                    <small class="text-slate-500">PNG, JPG o WEBP</small>
+                  </label>
+                </div>
+
+                @if (imageFile()) {
+                <div class="cropper-wrapper mt-4 border border-slate-200 rounded overflow-hidden">
+                  <image-cropper [imageFile]="imageFile() || undefined" [maintainAspectRatio]="true" [aspectRatio]="1"
+                    [resizeToWidth]="900" format="png" (imageCropped)="imageCropped($event)"
+                    (imageLoaded)="imageLoaded($event)" (cropperReady)="cropperReady()"
+                    (loadImageFailed)="loadImageFailed()">
+                  </image-cropper>
+                </div>
+                }
+              </div>
+            </div>
+          </div>
+
+          <div class="flex justify-end gap-2 mt-4 pt-4 border-t border-slate-100">
+            <button pButton type="button" label="Cancelar" severity="secondary" (click)="closeImageDialog()"></button>
+            @if (previewSrc()) {
+            <button pButton type="button" label="Guardar imagen" [loading]="uploadingImage()"
+              (click)="applyImage()"></button>
+            }
+          </div>
+        </p-tabpanel>
+
+        <p-tabpanel value="catalog">
+          <div class="catalog-grid grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4 pt-4">
+            @if (catalogImages().length > 0) {
+            @for (img of catalogImages(); track img) {
+            <div
+              class="catalog-item aspect-square rounded-lg border border-slate-200 overflow-hidden cursor-pointer hover:ring-2 hover:ring-blue-500 transition-all"
+              (click)="selectFromCatalog(img)">
+              <img [src]="img" class="w-full h-full object-cover" />
+            </div>
+            }
+            } @else {
+            <div class="col-span-full py-8 text-center text-slate-500">
+              <i class="pi pi-images text-4xl mb-3 text-slate-300"></i>
+              <p>No hay imágenes subidas anteriormente.</p>
+            </div>
+            }
+          </div>
+        </p-tabpanel>
+      </p-tabpanels>
+    </p-tabs>
+  </p-dialog>
 </section>

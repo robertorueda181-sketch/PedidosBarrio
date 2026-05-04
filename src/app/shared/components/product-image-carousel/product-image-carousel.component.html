@@ -1,0 +1,54 @@
+<div class="relative w-full aspect-square bg-slate-50 overflow-hidden group">
+  @if (images.length > 0) {
+    <!-- Contenedor de las imagenes (deslizante) -->
+    <div 
+      class="flex transition-transform duration-500 ease-out h-full"
+      [style.transform]="'translateX(-' + (currentIndex() * 100) + '%)'">
+      
+      @for (img of images; track img) {
+        <div class="w-full h-full flex-shrink-0 relative">
+          <img [src]="img" class="w-full h-full object-cover" alt="Product preview image" />
+          <!-- Sombra interior sutil -->
+          <div class="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent pointer-events-none"></div>
+        </div>
+      }
+    </div>
+
+    <!-- Botones Anterior / Siguiente (visibles al hacer hover o siempre en movil) -->
+    @if (images.length > 1) {
+      <button 
+        (click)="prev()"
+        class="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center bg-white/80 hover:bg-white backdrop-blur shadow-md rounded-full text-slate-800 transition-all opacity-0 group-hover:opacity-100 focus:opacity-100 z-10"
+        aria-label="Anterior">
+        <i class="pi pi-chevron-left text-sm"></i>
+      </button>
+
+      <button 
+        (click)="next()"
+        class="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center bg-white/80 hover:bg-white backdrop-blur shadow-md rounded-full text-slate-800 transition-all opacity-0 group-hover:opacity-100 focus:opacity-100 z-10"
+        aria-label="Siguiente">
+        <i class="pi pi-chevron-right text-sm"></i>
+      </button>
+
+      <!-- Puntos de paginación inferiores -->
+      <div class="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5 z-10">
+        @for (img of images; track img; let i = $index) {
+          <button 
+            (click)="goTo(i)"
+            class="w-2 h-2 rounded-full transition-all duration-300"
+            [class.bg-white]="i === currentIndex()"
+            [class.w-4]="i === currentIndex()"
+            [class.bg-white/50]="i !== currentIndex()"
+            [attr.aria-label]="'Ir a la imagen ' + (i + 1)">
+          </button>
+        }
+      </div>
+    }
+  } @else {
+    <!-- Placeholder cuando no hay imágenes -->
+    <div class="absolute inset-0 flex flex-col items-center justify-center text-slate-300">
+      <i class="pi pi-image text-4xl mb-2"></i>
+      <span class="text-sm font-medium">Sin imagen</span>
+    </div>
+  }
+</div>

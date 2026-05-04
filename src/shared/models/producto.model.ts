@@ -4,6 +4,7 @@ export interface Precio {
     cantidadMinima: number;
     modalidad: string;
     esPrincipal: boolean;
+    imagen?: string;
 }
 
 export interface Producto {
@@ -48,6 +49,7 @@ export interface PrecioDetalle {
     precioValor: number;
     esPrincipal: boolean;
     descripcion: string;
+    imagen?: string;
 }
 
 export interface Presentacion {

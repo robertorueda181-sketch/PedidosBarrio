@@ -4,4 +4,5 @@ export interface EditorVariant {
   price: number;
   descripcion?: string;
   stock?: number;
+  imagen?: string;
 }

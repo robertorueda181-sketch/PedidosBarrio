@@ -189,17 +189,8 @@
         <!-- Scrollable Content -->
         <div class="flex-1 overflow-y-auto pb-4 relative custom-scrollbar">
           
-          <!-- Image -->
-          <div class="w-full aspect-square bg-slate-50 relative">
-            @if (form.image) {
-              <img [src]="form.image" class="w-full h-full object-cover" alt="preview" />
-            } @else {
-              <div class="absolute inset-0 flex flex-col items-center justify-center text-slate-300">
-                <i class="pi pi-image text-4xl mb-2"></i>
-                <span class="text-sm">Sin imagen</span>
-              </div>
-            }
-          </div>
+          <!-- Image Carousel -->
+          <app-product-image-carousel [images]="allImages"></app-product-image-carousel>
 
           <!-- Product Info -->
           <div class="p-4 flex flex-col gap-2">

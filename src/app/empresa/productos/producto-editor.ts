@@ -19,6 +19,8 @@ import { TabVariantsManagerComponent, VariantFormValue, VariantOptionPayload } f
 import { ProductoDetalle } from '../../../shared/models/producto.model';
 import { ProductoService } from '../../../shared/services/producto.service';
 import { EditorVariant } from '../shared/interfaces/productos/editor-variant.interface';
+import { ProductImageCarouselComponent } from '../../shared/components/product-image-carousel/product-image-carousel.component';
+
 @Component({
   selector: 'app-producto-editor',
   standalone: true,
@@ -36,7 +38,8 @@ import { EditorVariant } from '../shared/interfaces/productos/editor-variant.int
     ChipModule,
     DialogModule,
     ImageCropperComponent,
-    TabVariantsManagerComponent
+    TabVariantsManagerComponent,
+    ProductImageCarouselComponent
   ],
 
   templateUrl: './producto-editor.html',
@@ -83,7 +86,21 @@ export class ProductoEditorComponent {
   croppedImagePreview = signal('');
   private tempPreviewUrl: string | null = null;
 
-
+  get allImages(): string[] {
+    const images: string[] = [];
+    if (this.form.image) {
+      images.push(this.form.image);
+    }
+    
+    // Si hay una variante seleccionada en el preview que tiene imagen, la podemos poner primero (opcional)
+    // Pero el requerimiento es cargar "todas las imagenes como un carrusel".
+    this.form.variants.forEach(v => {
+      if (v.imagen && !images.includes(v.imagen)) {
+        images.push(v.imagen);
+      }
+    });
+    return images;
+  }
 
   ngOnInit(): void {
     console.log(this.productoService);
@@ -121,9 +138,9 @@ export class ProductoEditorComponent {
     this.loading.set(true);
     this.productoService.getProductoDetalle(productId).subscribe({
       next: (detalle: ProductoDetalle) => {
+        console.log(detalle);
         // Cargar variantes desde presentaciones si existen, de lo contrario usar precios
         let variantes: any[] = [];
-        let basePrice = detalle.precioActual || 0;
         let isGeneralSingle = false;
 
         let presentationNames: string[] = [];
@@ -131,52 +148,37 @@ export class ProductoEditorComponent {
         if (detalle.presentaciones && detalle.presentaciones.length > 0) {
           presentationNames = detalle.presentaciones.map(p => p.descripcion || '');
           const allOpciones = detalle.presentaciones.flatMap((p: any) => p.opciones || p.precios || []);
-          
-          if (detalle.presentaciones.length === 1 && allOpciones.length === 1 && 
-             (detalle.presentaciones[0].descripcion?.toLowerCase() === 'general' || allOpciones[0].valor?.toLowerCase() === 'general')) {
-            isGeneralSingle = true;
-            basePrice = allOpciones[0].precio ?? basePrice;
-          } else {
-            // Convertir opciones de presentaciones a variantes
-            const presentacionVariants = allOpciones.map((op: any) => {
-              // Convertir 'M/Rojo' a 'M / Rojo' para el tab-variants-manager
-              const labelFormat = op.descripcion ? op.descripcion.replace(/\//g, ' / ') : (op.valor || 'Variante');
-              return {
-                id: String(op.presentacionOpcionID || op.idPrecio || crypto.randomUUID()),
-                label: labelFormat,
-                price: op.precio ?? 0,
-                descripcion: op.descripcion || '',
-                stock: op.stock ?? 0
-              };
-            });
-            variantes = presentacionVariants;
-          }
-        } else {
-          // Usar precios como antes (variantes sin descripcion ni stock)
-          variantes = (detalle.precios || [])
-            .filter((p) => !p.esPrincipal)
-            .map((p) => ({
-              id: String(p.idPrecio),
-              label: p.descripcion || 'Variante',
-              price: p.precioValor ?? detalle.precioActual ?? 0,
-              descripcion: p.descripcion || '',
-              stock: 0
-            }));
+
+          const presentacionVariants = allOpciones.map((op: any) => {
+            // Convertir 'M/Rojo' a 'M / Rojo' para el tab-variants-manager
+            const labelFormat = op.descripcion ? op.descripcion.replace(/\//g, ' / ') : (op.valor || 'Variante');
+            return {
+              id: String(op.presentacionOpcionID || op.idPrecio || crypto.randomUUID()),
+              label: op.valor,
+              price: op.precio ?? 0,
+              descripcion: labelFormat,
+              stock: op.stock ?? 0,
+              imagen: op.imagen || ''
+            };
+          });
+          variantes = presentacionVariants;
         }
+
 
         this.form = {
           name: detalle.nombre || '',
           description: detalle.descripcion || '',
           categoryId: detalle.categoriaID ?? null,
           image: detalle.imagenPrincipal || '',
-          basePrice: basePrice,
+          basePrice: detalle.precioActual || 0,
           priceVaries: !isGeneralSingle && variantes.length > 0,
           variantTitle: 'Variantes',
-          variants: (!isGeneralSingle && variantes.length > 0) ? variantes : [{ id: crypto.randomUUID(), label: 'Opción 1', price: basePrice }],
+          variants: (!isGeneralSingle && variantes.length > 0) ? variantes : [{ id: crypto.randomUUID(), label: 'Opción 1', price: detalle.precioActual || 0 }],
           presentationNames: presentationNames,
           visible: detalle.visible ?? true
         };
 
+        console.log(this.form);
         this.selectedVariantId = this.form.variants[0]?.id ?? null;
         this.loading.set(false);
       },
@@ -207,6 +209,9 @@ export class ProductoEditorComponent {
       id: variant.key,
       label: variant.name,
       price: Number(variant.price ?? this.form.basePrice),
+      descripcion: variant.descripcion,
+      stock: variant.stock,
+      imagen: variant.imagen
     }));
 
     this.form.priceVaries = this.form.variants.length > 0;
@@ -288,7 +293,8 @@ export class ProductoEditorComponent {
         descripcion: variant.label,
         cantidadMinima: 1,
         modalidad: 'Variante',
-        esPrincipal: false
+        esPrincipal: false,
+        imagen: variant.imagen
       }))
     ];
 
@@ -436,7 +442,8 @@ export class ProductoEditorComponent {
       name: v.label,
       price: v.price,
       descripcion: v.descripcion,
-      stock: v.stock
+      stock: v.stock,
+      imagen: v.imagen
     }));
   }
 

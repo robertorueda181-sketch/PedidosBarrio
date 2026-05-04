@@ -9,6 +9,11 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { InputTextModule } from 'primeng/inputtext';
 import { finalize } from 'rxjs/operators';
 import { LoaderComponent } from '../../../../shared/components/loader/loader';
+import { DialogModule } from 'primeng/dialog';
+import { TabsModule } from 'primeng/tabs';
+import { ImageCropperComponent, ImageCroppedEvent, LoadedImage } from 'ngx-image-cropper';
+import { ImagenesService } from '../../../../shared/services/imagenes.service';
+import { ToastrService } from 'ngx-toastr';
 
 interface VariantOption {
   id: string;
@@ -29,6 +34,7 @@ export interface VariantFormValue {
   price: number;
   descripcion?: string;
   stock?: number;
+  imagen?: string;
 }
 
 export interface VariantOptionPayload {
@@ -42,6 +48,7 @@ type VariantRowForm = FormGroup<{
   price: FormControl<number>;
   descripcion: FormControl<string>;
   stock: FormControl<number>;
+  imagen: FormControl<string>;
 }>;
 
 @Component({
@@ -54,7 +61,10 @@ type VariantRowForm = FormGroup<{
     InputTextModule,
     InputNumberModule,
     ButtonModule,
-    LoaderComponent
+    LoaderComponent,
+    DialogModule,
+    TabsModule,
+    ImageCropperComponent
   ],
   templateUrl: './tab-variants-manager.component.html',
   styleUrl: './tab-variants-manager.component.css'
@@ -63,6 +73,8 @@ export class TabVariantsManagerComponent implements OnChanges {
   private readonly fb = inject(FormBuilder);
   private readonly destroyRef = inject(DestroyRef);
   private readonly http = inject(HttpClient);
+  private readonly imagenesService = inject(ImagenesService);
+  private readonly toastr = inject(ToastrService);
 
   @Input() basePrice = 0;
   @Input() initialVariants: Array<Partial<VariantFormValue>> = [];
@@ -79,6 +91,17 @@ export class TabVariantsManagerComponent implements OnChanges {
   protected readonly groupByOptionIndex = signal(0);
   private hasBootstrapped = false;
   private readonly rowsSnapshot = signal<VariantFormValue[]>([]);
+
+  // Image modal state
+  protected readonly showImageDialog = signal(false);
+  protected readonly activeImageTab = signal<'upload' | 'catalog'>('upload');
+  protected readonly imageFile = signal<File | null>(null);
+  protected readonly uploadingImage = signal(false);
+  protected readonly croppedImageBlob = signal<Blob | null>(null);
+  protected readonly croppedImagePreview = signal('');
+  protected catalogImages = signal<string[]>([]);
+  private tempPreviewUrl: string | null = null;
+  private currentImageRowIndex: number | null = null;
 
   protected readonly combinations = computed(() => {
     const trimmedValueArrays = this.options()
@@ -121,7 +144,7 @@ export class TabVariantsManagerComponent implements OnChanges {
     const groupIndex = this.groupByOptionIndex();
 
     snapshot.forEach((variant, rowIndex) => {
-      const parts = variant.name.split(' / ').map((part) => part.trim()).filter(Boolean);
+      const parts = (variant.descripcion || '').split(' / ').map((part) => part.trim()).filter(Boolean);
       const groupLabel = parts[groupIndex] || 'Sin valor';
       const groupKey = `${groupIndex}:${groupLabel}`;
 
@@ -155,9 +178,9 @@ export class TabVariantsManagerComponent implements OnChanges {
       return;
     }
 
-    if (changes['basePrice'] && !changes['basePrice'].firstChange) {
-      this.applyBasePriceToEmptyPrices();
-    }
+    // if (changes['basePrice'] && !changes['basePrice'].firstChange) {
+    //   this.applyBasePriceToEmptyPrices();
+    // }
   }
 
   protected get variantsArray(): FormArray<VariantRowForm> {
@@ -169,7 +192,7 @@ export class TabVariantsManagerComponent implements OnChanges {
       return;
     }
     let nameOption = ''
-    if(this.options().length === 1)
+    if (this.options().length === 1)
       nameOption = 'Color'
     else
       nameOption = `Opcion ${this.options().length + 1}`
@@ -318,6 +341,7 @@ export class TabVariantsManagerComponent implements OnChanges {
         price: Number(variant.price ?? this.basePrice ?? 0),
         descripcion: variant.descripcion ?? '',
         stock: Number(variant.stock ?? 0),
+        imagen: variant.imagen ?? '',
       }))
       .filter((variant) => variant.name.length > 0);
 
@@ -327,7 +351,7 @@ export class TabVariantsManagerComponent implements OnChanges {
 
     const valueSets: string[][] = [];
     parsed.forEach((variant) => {
-      const chunks = variant.name.split(' / ').map((chunk) => chunk.trim()).filter(Boolean);
+      const chunks = variant.descripcion.split(' / ').map((chunk) => chunk.trim()).filter(Boolean);
       chunks.forEach((chunk, idx) => {
         if (!valueSets[idx]) {
           valueSets[idx] = [];
@@ -370,6 +394,7 @@ export class TabVariantsManagerComponent implements OnChanges {
         price: Number(previous?.price ?? 0),
         descripcion: previous?.descripcion ?? '',
         stock: Number(previous?.stock ?? 0),
+        imagen: previous?.imagen ?? '',
       });
     });
 
@@ -384,6 +409,7 @@ export class TabVariantsManagerComponent implements OnChanges {
       price: this.fb.nonNullable.control(Number(row.price), { validators: [Validators.min(0)] }),
       descripcion: this.fb.nonNullable.control(row.descripcion ?? ''),
       stock: this.fb.nonNullable.control(Number(row.stock ?? 0), { validators: [Validators.min(0)] }),
+      imagen: this.fb.nonNullable.control(row.imagen ?? ''),
     });
   }
 
@@ -394,10 +420,10 @@ export class TabVariantsManagerComponent implements OnChanges {
     rows.forEach((row) => this.variantsArray.push(row, { emitEvent: false }));
   }
 
-  private applyBasePriceToEmptyPrices(): void {
-    // Intencionalmente no se pisan precios en variantes generadas.
-    // El usuario debe completar precios manualmente para cada combinacion.
-  }
+  // private applyBasePriceToEmptyPrices(): void {
+  //   // Intencionalmente no se pisan precios en variantes generadas.
+  //   // El usuario debe completar precios manualmente para cada combinacion.
+  // }
 
   private emitVariants(): void {
     const payload = this.variantsArray.controls.map((control) => control.getRawValue());
@@ -434,5 +460,113 @@ export class TabVariantsManagerComponent implements OnChanges {
       this.groupByOptionIndex.set(0);
       this.groupByChange.emit(0);
     }
+  }
+
+  // Image modal methods
+  protected openImageDialog(rowIndex: number): void {
+    this.currentImageRowIndex = rowIndex;
+    this.imageFile.set(null);
+    this.croppedImageBlob.set(null);
+    this.croppedImagePreview.set('');
+    this.clearTempPreviewUrl();
+    this.activeImageTab.set('upload');
+    this.showImageDialog.set(true);
+    this.catalogImages.set([]);
+  }
+
+  protected closeImageDialog(): void {
+    this.clearTempPreviewUrl();
+    this.showImageDialog.set(false);
+    this.imageFile.set(null);
+    this.uploadingImage.set(false);
+    this.croppedImageBlob.set(null);
+    this.croppedImagePreview.set('');
+    this.currentImageRowIndex = null;
+  }
+
+  protected previewSrc(): string {
+    return this.croppedImagePreview() || this.tempPreviewUrl || '';
+  }
+
+  protected handleFileInModal(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      this.toastr.warning('Selecciona un archivo de imagen válido');
+      input.value = '';
+      return;
+    }
+
+    this.clearTempPreviewUrl();
+    this.imageFile.set(file);
+    this.croppedImageBlob.set(null);
+    this.croppedImagePreview.set('');
+    this.tempPreviewUrl = URL.createObjectURL(file);
+    input.value = '';
+  }
+
+  protected imageCropped(event: ImageCroppedEvent): void {
+    this.croppedImageBlob.set(event.blob ?? null);
+    this.croppedImagePreview.set(event.base64 ?? '');
+  }
+
+  protected imageLoaded(_image: LoadedImage): void { }
+  protected cropperReady(): void { }
+  protected loadImageFailed(): void {
+    this.toastr.error('No se pudo cargar la imagen seleccionada');
+  }
+
+  protected applyImage(): void {
+    const originalFile = this.imageFile();
+    const croppedBlob = this.croppedImageBlob();
+    const file = croppedBlob
+      ? new File([croppedBlob], `variante_${Date.now()}.png`, { type: croppedBlob.type || 'image/png' })
+      : originalFile;
+
+    if (!file) return;
+
+    this.uploadingImage.set(true);
+
+    this.imagenesService.optimizeImage(file, 'Producto').subscribe({
+      next: (imageUrl) => {
+        this.setImageToRow(imageUrl);
+        this.closeImageDialog();
+        this.toastr.success('Imagen cargada correctamente');
+      },
+      error: (err) => {
+        console.error('Upload failed:', err);
+        this.toastr.error('Error al cargar la imagen. Intenta de nuevo.');
+        this.uploadingImage.set(false);
+      }
+    });
+  }
+
+  protected selectFromCatalog(imageUrl: string): void {
+    this.setImageToRow(imageUrl);
+    this.closeImageDialog();
+    this.toastr.success('Imagen seleccionada del catálogo');
+  }
+
+  private setImageToRow(imageUrl: string): void {
+    if (this.currentImageRowIndex !== null && this.currentImageRowIndex >= 0) {
+      this.variantsArray.at(this.currentImageRowIndex).controls.imagen.setValue(imageUrl);
+      this.emitVariants();
+    }
+  }
+
+  protected removeImage(rowIndex: number): void {
+    this.variantsArray.at(rowIndex).controls.imagen.setValue('');
+    this.emitVariants();
+  }
+
+  private clearTempPreviewUrl(): void {
+    if (!this.tempPreviewUrl) {
+      return;
+    }
+    URL.revokeObjectURL(this.tempPreviewUrl);
+    this.tempPreviewUrl = null;
   }
 }
