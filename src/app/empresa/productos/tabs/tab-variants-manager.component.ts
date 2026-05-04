@@ -27,6 +27,8 @@ export interface VariantFormValue {
   name: string;
   key: string;
   price: number;
+  descripcion?: string;
+  stock?: number;
 }
 
 export interface VariantOptionPayload {
@@ -38,6 +40,8 @@ type VariantRowForm = FormGroup<{
   name: FormControl<string>;
   key: FormControl<string>;
   price: FormControl<number>;
+  descripcion: FormControl<string>;
+  stock: FormControl<number>;
 }>;
 
 @Component({
@@ -62,6 +66,7 @@ export class TabVariantsManagerComponent implements OnChanges {
 
   @Input() basePrice = 0;
   @Input() initialVariants: Array<Partial<VariantFormValue>> = [];
+  @Input() initialOptionNames: string[] = [];
   @Output() variantsChange = new EventEmitter<VariantFormValue[]>();
   @Output() optionsChange = new EventEmitter<VariantOptionPayload[]>();
   @Output() groupByChange = new EventEmitter<number>();
@@ -311,6 +316,8 @@ export class TabVariantsManagerComponent implements OnChanges {
         name: String(variant.name ?? '').trim(),
         key: String(variant.key ?? variant.name ?? '').trim(),
         price: Number(variant.price ?? this.basePrice ?? 0),
+        descripcion: variant.descripcion ?? '',
+        stock: Number(variant.stock ?? 0),
       }))
       .filter((variant) => variant.name.length > 0);
 
@@ -361,6 +368,8 @@ export class TabVariantsManagerComponent implements OnChanges {
         key,
         name,
         price: Number(previous?.price ?? 0),
+        descripcion: previous?.descripcion ?? '',
+        stock: Number(previous?.stock ?? 0),
       });
     });
 
@@ -373,6 +382,8 @@ export class TabVariantsManagerComponent implements OnChanges {
       name: this.fb.nonNullable.control(row.name),
       key: this.fb.nonNullable.control(row.key),
       price: this.fb.nonNullable.control(Number(row.price), { validators: [Validators.min(0)] }),
+      descripcion: this.fb.nonNullable.control(row.descripcion ?? ''),
+      stock: this.fb.nonNullable.control(Number(row.stock ?? 0), { validators: [Validators.min(0)] }),
     });
   }
 

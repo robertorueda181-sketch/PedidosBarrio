@@ -68,52 +68,61 @@
         Tienes {{ variantsArray.length }} combinaciones. Faltan {{ pendingPricesCount() }} precios por completar.
       </div>
       }
-      <table class="variants-table">
-        <thead>
-          <tr>
-            <th>Nombre</th>
-            <th>Precio</th>
-          </tr>
-        </thead>
-        <tbody formArrayName="variants">
-          @if (!variantsArray.length) {
-          <tr>
-            <td colspan="4" class="empty-row">
-              Agrega valores en tus opciones para generar variantes.
-            </td>
-          </tr>
-          } @else {
-          @for (group of groupedRows(); track group.groupKey) {
-          <tr class="group-row">
-            <td>
-              <strong>{{ group.groupLabel }}</strong>
-              <small>{{ group.rowIndexes.length }} variantes</small>
-            </td>
-            <td>
-              <p-inputNumber [ngModel]="groupPrice(group)" (ngModelChange)="applyGroupPrice(group, $event)"
-                [ngModelOptions]="{ standalone: true }" mode="currency" currency="PEN" locale="es-PE"
-                [minFractionDigits]="2">
-              </p-inputNumber>
-            </td>
-            <td colspan="2"></td>
-          </tr>
-          @for (rowIndex of group.rowIndexes; track rowIndex) {
-          <tr [formGroupName]="rowIndex">
-            <td>
-              <input pInputText formControlName="name" readonly />
-            </td>
-            <td>
-              <p-inputNumber formControlName="price" mode="currency" currency="PEN" locale="es-PE"
-                [minFractionDigits]="2">
-              </p-inputNumber>
-            </td>
-      
-          </tr>
-          }
-          }
-          }
-        </tbody>
-      </table>
+       <table class="variants-table">
+         <thead>
+           <tr>
+             <th>Nombre</th>
+             <th>Descripción</th>
+             <th>Precio</th>
+             <th>Stock</th>
+           </tr>
+         </thead>
+         <tbody formArrayName="variants">
+           @if (!variantsArray.length) {
+           <tr>
+             <td colspan="4" class="empty-row">
+               Agrega valores en tus opciones para generar variantes.
+             </td>
+           </tr>
+           } @else {
+           @for (group of groupedRows(); track group.groupKey) {
+           <tr class="group-row">
+             <td [attr.colspan]="1">
+               <strong>{{ group.groupLabel }}</strong>
+               <small>{{ group.rowIndexes.length }} variantes</small>
+             </td>
+             <td></td>
+             <td>
+               <p-inputNumber [ngModel]="groupPrice(group)" (ngModelChange)="applyGroupPrice(group, $event)"
+                 [ngModelOptions]="{ standalone: true }" mode="currency" currency="PEN" locale="es-PE"
+                 [minFractionDigits]="2">
+               </p-inputNumber>
+             </td>
+             <td></td>
+           </tr>
+           @for (rowIndex of group.rowIndexes; track rowIndex) {
+           <tr [formGroupName]="rowIndex">
+             <td>
+               <input pInputText formControlName="name" readonly />
+             </td>
+             <td>
+               <input pInputText formControlName="descripcion" placeholder="Descripción" />
+             </td>
+             <td>
+               <p-inputNumber formControlName="price" mode="currency" currency="PEN" locale="es-PE"
+                 [minFractionDigits]="2">
+               </p-inputNumber>
+             </td>
+             <td>
+               <p-inputNumber formControlName="stock" [minFractionDigits]="0" [min]="0" placeholder="Stock">
+               </p-inputNumber>
+             </td>
+           </tr>
+           }
+           }
+           }
+         </tbody>
+       </table>
     </div>
   </form>
 </section>

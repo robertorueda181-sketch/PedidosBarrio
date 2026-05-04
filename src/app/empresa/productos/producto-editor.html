@@ -93,7 +93,7 @@
           <p-tabpanel value="variantes">
             <app-tab-variants-manager
               [basePrice]="form.basePrice"
-              [initialVariants]="form.variants"
+              [initialVariants]="initialVariantsForManager"
               (variantsChange)="onVariantsManaged($event)"
               (optionsChange)="onVariantOptionsManaged($event)"
               (groupByChange)="onPreviewGroupByChange($event)">

@@ -120,23 +120,55 @@ export class ProductoEditorComponent {
     this.loading.set(true);
     this.productoService.getProductoDetalle(productId).subscribe({
       next: (detalle: ProductoDetalle) => {
-        const variantes = (detalle.precios || [])
-          .filter((p) => !p.esPrincipal)
-          .map((p) => ({
-            id: String(p.idPrecio),
-            label: p.descripcion || 'Variante',
-            price: p.precioValor ?? detalle.precioActual ?? 0
-          }));
+        // Cargar variantes desde presentaciones si existen, de lo contrario usar precios
+        let variantes: any[] = [];
+        let basePrice = detalle.precioActual || 0;
+        let isGeneralSingle = false;
+
+        if (detalle.presentaciones && detalle.presentaciones.length > 0) {
+          const allOpciones = detalle.presentaciones.flatMap((p: any) => p.opciones || p.precios || []);
+          
+          if (detalle.presentaciones.length === 1 && allOpciones.length === 1 && 
+             (detalle.presentaciones[0].descripcion?.toLowerCase() === 'general' || allOpciones[0].valor?.toLowerCase() === 'general')) {
+            isGeneralSingle = true;
+            basePrice = allOpciones[0].precio ?? basePrice;
+          } else {
+            // Convertir opciones de presentaciones a variantes
+            const presentacionVariants = allOpciones.map((op: any) => {
+              // Convertir 'M/Rojo' a 'M / Rojo' para el tab-variants-manager
+              const labelFormat = op.descripcion ? op.descripcion.replace(/\//g, ' / ') : (op.valor || 'Variante');
+              return {
+                id: String(op.presentacionOpcionID || op.idPrecio || crypto.randomUUID()),
+                label: labelFormat,
+                price: op.precio ?? 0,
+                descripcion: op.descripcion || '',
+                stock: op.stock ?? 0
+              };
+            });
+            variantes = presentacionVariants;
+          }
+        } else {
+          // Usar precios como antes (variantes sin descripcion ni stock)
+          variantes = (detalle.precios || [])
+            .filter((p) => !p.esPrincipal)
+            .map((p) => ({
+              id: String(p.idPrecio),
+              label: p.descripcion || 'Variante',
+              price: p.precioValor ?? detalle.precioActual ?? 0,
+              descripcion: p.descripcion || '',
+              stock: 0
+            }));
+        }
 
         this.form = {
           name: detalle.nombre || '',
           description: detalle.descripcion || '',
           categoryId: detalle.categoriaID ?? null,
           image: detalle.imagenPrincipal || '',
-          basePrice: detalle.precioActual || 0,
-          priceVaries: variantes.length > 0,
+          basePrice: basePrice,
+          priceVaries: !isGeneralSingle && variantes.length > 0,
           variantTitle: 'Variantes',
-          variants: variantes.length > 0 ? variantes : [{ id: crypto.randomUUID(), label: 'Opción 1', price: detalle.precioActual || 0 }],
+          variants: (!isGeneralSingle && variantes.length > 0) ? variantes : [{ id: crypto.randomUUID(), label: 'Opción 1', price: basePrice }],
           visible: detalle.visible ?? true
         };
 
@@ -391,6 +423,16 @@ export class ProductoEditorComponent {
       .map((_, index) => index)
       .filter((index) => index !== safePrimary);
     return [safePrimary, ...others];
+  }
+
+  get initialVariantsForManager(): Array<Partial<VariantFormValue>> {
+    return this.form.variants.map(v => ({
+      key: v.id,
+      name: v.label,
+      price: v.price,
+      descripcion: v.descripcion,
+      stock: v.stock
+    }));
   }
 
   isPreviewOptionUnlocked(optionIndex: number): boolean {
