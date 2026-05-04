@@ -9,9 +9,6 @@
         cartesiana.</p>
     </div>
     <div class="flex flex-wrap gap-2">
-      <button pButton type="button" icon="pi pi-download" label="Descargar plantilla" [outlined]="true"
-        (click)="downloadTemplate()">
-      </button>
       <button pButton type="button" icon="pi pi-plus" label="Agregar variante" [disabled]="options().length >= maxOptions"
         (click)="addOption()">
       </button>

@@ -177,46 +177,6 @@ export class BulkUploadService {
     );
   }
 
-  /**
-   * Descarga una plantilla Excel de ejemplo
-   */
-  downloadExcelTemplate(): void {
-    const template = [
-      {
-        'Nombre': 'Ceviche de Camarón',
-        'Descripción': 'Ceviche fresco de camarón con limón y ají',
-        'Precio': 25.00,
-        'Categoría ID': 1,
-        'Código': 'CEV-CAM-001',
-        'Stock': 10,
-        'Stock Mínimo': 2,
-        'Inventario': 'Sí'
-      },
-      {
-        'Nombre': 'Lomo Saltado',
-        'Descripción': 'Lomo de res salteado con papas',
-        'Precio': 35.00,
-        'Categoría ID': 1,
-        'Código': 'LOM-SAL-002',
-        'Stock': 15,
-        'Stock Mínimo': 3,
-        'Inventario': 'Sí'
-      }
-    ];
-
-     try {
-       // Usar SheetJS para crear el Excel
-       const ws = XLSX.utils.json_to_sheet(template);
-       const wb = XLSX.utils.book_new();
-       XLSX.utils.book_append_sheet(wb, ws, 'Productos');
-
-       // Descargar
-       XLSX.writeFile(wb, 'plantilla-productos.xlsx');
-     } catch (error) {
-       console.error('Error al descargar plantilla:', error);
-       alert('Error al generar la plantilla Excel');
-     }
-  }
 
   /**
    * Valida el formato del archivo Excel
