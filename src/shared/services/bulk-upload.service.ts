@@ -27,9 +27,8 @@ export interface ExcelProductData {
   nombre: string;
   descripcion?: string;
   precio: number;
-  categoriaID: number;
+  categoria: string;
   codigo?: string;
-  stock?: number;
   stockMinimo?: number;
   inventario?: boolean;
 }
@@ -72,7 +71,7 @@ export class BulkUploadService {
             nombre: row[columnMapping.nombre]?.toString().trim(),
             descripcion: row[columnMapping.descripcion]?.toString().trim(),
             precio: parseFloat(row[columnMapping.precio]) || 0,
-            categoriaID: parseInt(row[columnMapping.categoriaID]) || 1,
+            categoria: row[columnMapping.categoriaID] || 1,
             codigo: columnMapping.codigo ? row[columnMapping.codigo]?.toString().trim() : undefined,
             stock: columnMapping.stock ? parseInt(row[columnMapping.stock]) || 0 : 0,
             stockMinimo: columnMapping.stockMinimo ? parseInt(row[columnMapping.stockMinimo]) || 0 : 0,

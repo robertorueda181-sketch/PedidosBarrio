@@ -56,72 +56,10 @@
       }
     </div>
 
-    <!-- Sección de mapeo de columnas -->
-    @if (excelFile()) {
-    <div class="mapping-section">
-      <h3>Paso 2: Mapear Columnas</h3>
-      <p class="section-help">Asigna las columnas de tu archivo Excel</p>
-
-      <div class="mapping-grid">
-        <div class="mapping-item">
-          <label>Nombre del Producto</label>
-          <input type="text" [ngModel]="columnMapping().nombre" (ngModelChange)="updateColumnMapping('nombre', $event)"
-            placeholder="ej. Nombre" />
-        </div>
-
-        <div class="mapping-item">
-          <label>Descripción</label>
-          <input type="text" [ngModel]="columnMapping().descripcion" (ngModelChange)="updateColumnMapping('descripcion', $event)"
-            placeholder="ej. Descripción" />
-        </div>
-
-        <div class="mapping-item">
-          <label>Precio *</label>
-          <input type="text" [ngModel]="columnMapping().precio" (ngModelChange)="updateColumnMapping('precio', $event)"
-            placeholder="ej. Precio" />
-        </div>
-
-        <div class="mapping-item">
-          <label>Categoría ID *</label>
-          <input type="text" [ngModel]="columnMapping().categoriaID" (ngModelChange)="updateColumnMapping('categoriaID', $event)"
-            placeholder="ej. Categoría ID" />
-        </div>
-
-        <div class="mapping-item">
-          <label>Código del Producto</label>
-          <input type="text" [ngModel]="columnMapping().codigo" (ngModelChange)="updateColumnMapping('codigo', $event)"
-            placeholder="ej. Código" />
-        </div>
-
-        <div class="mapping-item">
-          <label>Stock</label>
-          <input type="text" [ngModel]="columnMapping().stock" (ngModelChange)="updateColumnMapping('stock', $event)"
-            placeholder="ej. Stock" />
-        </div>
-
-        <div class="mapping-item">
-          <label>Stock Mínimo</label>
-          <input type="text" [ngModel]="columnMapping().stockMinimo" (ngModelChange)="updateColumnMapping('stockMinimo', $event)"
-            placeholder="ej. Stock Mínimo" />
-        </div>
-
-        <div class="mapping-item">
-          <label>Inventario</label>
-          <input type="text" [ngModel]="columnMapping().inventario" (ngModelChange)="updateColumnMapping('inventario', $event)"
-            placeholder="ej. Inventario" />
-        </div>
-      </div>
-
-      <button class="btn-secondary" (click)="parseExcelFile()" [disabled]="loading()">
-        {{ loading() ? 'Procesando...' : 'Procesar Archivo' }}
-      </button>
-    </div>
-    }
-
     <!-- Vista previa de datos -->
     @if (excelData().length > 0) {
     <div class="preview-section">
-      <h3>Paso 3: Revisar Datos ({{ excelData().length }} productos)</h3>
+      <h3>Paso 2: Revisar Datos ({{ excelData().length }} productos)</h3>
 
       <div class="preview-table">
         <table>
@@ -140,7 +78,7 @@
               <td>{{ $index + 1 }}</td>
               <td>{{ product.nombre }}</td>
               <td>S/ {{ product.precio.toFixed(2) }}</td>
-              <td>{{ product.categoriaID }}</td>
+              <td>{{ product.categoria }}</td>
               <td>{{ product.codigo || '-' }}</td>
             </tr>
             }
@@ -266,7 +204,7 @@
           <td>{{ product.nombre }}</td>
           <td>{{ product.descripcion || '-' }}</td>
           <td>S/ {{ product.precio.toFixed(2) }}</td>
-          <td>{{ product.categoriaID }}</td>
+          <td>{{ product.categoria }}</td>
           <td>{{ product.codigo || '-' }}</td>
         </tr>
         }
