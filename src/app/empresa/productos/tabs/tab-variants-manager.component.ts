@@ -9,11 +9,8 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { InputTextModule } from 'primeng/inputtext';
 import { finalize } from 'rxjs/operators';
 import { LoaderComponent } from '../../../../shared/components/loader/loader';
-import { DialogModule } from 'primeng/dialog';
-import { TabsModule } from 'primeng/tabs';
-import { ImageCropperComponent, ImageCroppedEvent, LoadedImage } from 'ngx-image-cropper';
-import { ImagenesService } from '../../../../shared/services/imagenes.service';
 import { ToastrService } from 'ngx-toastr';
+import { ImagePickerDialogComponent } from '../../../shared/components/image-picker-dialog/image-picker-dialog.component';
 
 interface VariantOption {
   id: string;
@@ -62,9 +59,7 @@ type VariantRowForm = FormGroup<{
     InputNumberModule,
     ButtonModule,
     LoaderComponent,
-    DialogModule,
-    TabsModule,
-    ImageCropperComponent
+    ImagePickerDialogComponent
   ],
   templateUrl: './tab-variants-manager.component.html',
   styleUrl: './tab-variants-manager.component.css'
@@ -73,7 +68,6 @@ export class TabVariantsManagerComponent implements OnChanges {
   private readonly fb = inject(FormBuilder);
   private readonly destroyRef = inject(DestroyRef);
   private readonly http = inject(HttpClient);
-  private readonly imagenesService = inject(ImagenesService);
   private readonly toastr = inject(ToastrService);
 
   @Input() basePrice = 0;
@@ -94,13 +88,6 @@ export class TabVariantsManagerComponent implements OnChanges {
 
   // Image modal state
   protected readonly showImageDialog = signal(false);
-  protected readonly activeImageTab = signal<'upload' | 'catalog'>('upload');
-  protected readonly imageFile = signal<File | null>(null);
-  protected readonly uploadingImage = signal(false);
-  protected readonly croppedImageBlob = signal<Blob | null>(null);
-  protected readonly croppedImagePreview = signal('');
-  protected catalogImages = signal<string[]>([]);
-  private tempPreviewUrl: string | null = null;
   private currentImageRowIndex: number | null = null;
 
   protected readonly combinations = computed(() => {
@@ -465,92 +452,10 @@ export class TabVariantsManagerComponent implements OnChanges {
   // Image modal methods
   protected openImageDialog(rowIndex: number): void {
     this.currentImageRowIndex = rowIndex;
-    this.imageFile.set(null);
-    this.croppedImageBlob.set(null);
-    this.croppedImagePreview.set('');
-    this.clearTempPreviewUrl();
-    this.activeImageTab.set('upload');
     this.showImageDialog.set(true);
-    this.catalogImages.set([]);
   }
 
-  protected closeImageDialog(): void {
-    this.clearTempPreviewUrl();
-    this.showImageDialog.set(false);
-    this.imageFile.set(null);
-    this.uploadingImage.set(false);
-    this.croppedImageBlob.set(null);
-    this.croppedImagePreview.set('');
-    this.currentImageRowIndex = null;
-  }
-
-  protected previewSrc(): string {
-    return this.croppedImagePreview() || this.tempPreviewUrl || '';
-  }
-
-  protected handleFileInModal(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
-
-    if (!file) return;
-
-    if (!file.type.startsWith('image/')) {
-      this.toastr.warning('Selecciona un archivo de imagen válido');
-      input.value = '';
-      return;
-    }
-
-    this.clearTempPreviewUrl();
-    this.imageFile.set(file);
-    this.croppedImageBlob.set(null);
-    this.croppedImagePreview.set('');
-    this.tempPreviewUrl = URL.createObjectURL(file);
-    input.value = '';
-  }
-
-  protected imageCropped(event: ImageCroppedEvent): void {
-    this.croppedImageBlob.set(event.blob ?? null);
-    this.croppedImagePreview.set(event.base64 ?? '');
-  }
-
-  protected imageLoaded(_image: LoadedImage): void { }
-  protected cropperReady(): void { }
-  protected loadImageFailed(): void {
-    this.toastr.error('No se pudo cargar la imagen seleccionada');
-  }
-
-  protected applyImage(): void {
-    const originalFile = this.imageFile();
-    const croppedBlob = this.croppedImageBlob();
-    const file = croppedBlob
-      ? new File([croppedBlob], `variante_${Date.now()}.png`, { type: croppedBlob.type || 'image/png' })
-      : originalFile;
-
-    if (!file) return;
-
-    this.uploadingImage.set(true);
-
-    this.imagenesService.optimizeImage(file, 'Producto').subscribe({
-      next: (imageUrl) => {
-        this.setImageToRow(imageUrl);
-        this.closeImageDialog();
-        this.toastr.success('Imagen cargada correctamente');
-      },
-      error: (err) => {
-        console.error('Upload failed:', err);
-        this.toastr.error('Error al cargar la imagen. Intenta de nuevo.');
-        this.uploadingImage.set(false);
-      }
-    });
-  }
-
-  protected selectFromCatalog(imageUrl: string): void {
-    this.setImageToRow(imageUrl);
-    this.closeImageDialog();
-    this.toastr.success('Imagen seleccionada del catálogo');
-  }
-
-  private setImageToRow(imageUrl: string): void {
+  protected onImageSelected(imageUrl: string): void {
     if (this.currentImageRowIndex !== null && this.currentImageRowIndex >= 0) {
       this.variantsArray.at(this.currentImageRowIndex).controls.imagen.setValue(imageUrl);
       this.emitVariants();
@@ -560,13 +465,5 @@ export class TabVariantsManagerComponent implements OnChanges {
   protected removeImage(rowIndex: number): void {
     this.variantsArray.at(rowIndex).controls.imagen.setValue('');
     this.emitVariants();
-  }
-
-  private clearTempPreviewUrl(): void {
-    if (!this.tempPreviewUrl) {
-      return;
-    }
-    URL.revokeObjectURL(this.tempPreviewUrl);
-    this.tempPreviewUrl = null;
   }
 }

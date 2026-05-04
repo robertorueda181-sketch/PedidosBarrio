@@ -27,12 +27,8 @@
 
             <div class="field">
               <label>Categoría *</label>
-              <p-select
-                [(ngModel)]="form.categoryId"
-                [options]="categories()"
-                optionLabel="descripcion"
-                optionValue="categoriaID"
-                placeholder="Selecciona una categoría">
+              <p-select [(ngModel)]="form.categoryId" [options]="categories()" optionLabel="descripcion"
+                optionValue="categoriaID" placeholder="Selecciona una categoría">
               </p-select>
             </div>
 
@@ -46,31 +42,20 @@
               <div class="image-section image-section-pro">
                 <div class="image-preview-small image-preview-elevated">
                   @if (form.image) {
-                    <img [src]="form.image" alt="Vista previa del producto" />
+                  <img [src]="form.image" alt="Vista previa del producto" />
                   } @else {
-                    <div class="placeholder placeholder-compact">
-                      <i class="pi pi-image"></i>
-                    </div>
+                  <div class="placeholder placeholder-compact">
+                    <i class="pi pi-image"></i>
+                  </div>
                   }
                 </div>
                 <div class="image-actions">
-                  <button
-                    pButton
-                    type="button"
-                    label="Subir y recortar"
-                    icon="pi pi-image"
-                    (click)="openImageDialog()">
+                  <button pButton type="button" label="Subir y recortar" icon="pi pi-image" (click)="openImageDialog()">
                   </button>
                   @if (form.image) {
-                    <button
-                      pButton
-                      type="button"
-                      severity="danger"
-                      icon="pi pi-trash"
-                      label="Quitar"
-                      outlined
-                      (click)="clearImage()">
-                    </button>
+                  <button pButton type="button" severity="danger" icon="pi pi-trash" label="Quitar" outlined
+                    (click)="clearImage()">
+                  </button>
                   }
                 </div>
               </div>
@@ -79,25 +64,16 @@
             <div class="field">
               <label>Precio base *</label>
 
-              <p-inputNumber
-                [(ngModel)]="form.basePrice"
-                mode="currency"
-                currency="PEN"
-                locale="es-PE"
-                [minFractionDigits]="2"
-                (ngModelChange)="onBasePriceChange()">
+              <p-inputNumber [(ngModel)]="form.basePrice" mode="currency" currency="PEN" locale="es-PE"
+                [minFractionDigits]="2" (ngModelChange)="onBasePriceChange()">
               </p-inputNumber>
             </div>
           </p-tabpanel>
 
           <p-tabpanel value="variantes">
-            <app-tab-variants-manager
-              [basePrice]="form.basePrice"
-              [initialVariants]="initialVariantsForManager"
-              [initialOptionNames]="form.presentationNames"
-              (variantsChange)="onVariantsManaged($event)"
-              (optionsChange)="onVariantOptionsManaged($event)"
-              (groupByChange)="onPreviewGroupByChange($event)">
+            <app-tab-variants-manager [basePrice]="form.basePrice" [initialVariants]="initialVariantsForManager"
+              [initialOptionNames]="form.presentationNames" (variantsChange)="onVariantsManaged($event)"
+              (optionsChange)="onVariantOptionsManaged($event)" (groupByChange)="onPreviewGroupByChange($event)">
             </app-tab-variants-manager>
           </p-tabpanel>
         </p-tabpanels>
@@ -105,82 +81,26 @@
 
       <!-- Image Edit Dialog -->
 
-      <p-dialog
-        header="Imagen del producto"
+      <app-image-picker-dialog
         [visible]="showImageDialog()"
-        [modal]="true"
-        [style]="{width: '50vw'}"
-        [styleClass]="'image-dialog'"
-        (onHide)="closeImageDialog()">
-        <div class="image-modal-content">
-          <div class="field image-modal-step">
-            <label>Cargar y recortar imagen</label>
-            <div class="editor-inline-box">
-              <div class="file-upload-wrapper">
-                <input
-                  #fileInput
-                  type="file"
-                  id="fileInput"
-                  accept="image/*"
-                  (change)="handleFileInModal($event)"
-                  style="display: none;" />
-                <label for="fileInput" class="file-upload-label">
-                  <i class="pi pi-upload"></i>
-                  <span>Seleccionar archivo</span>
-                  <small>PNG, JPG o WEBP</small>
-                </label>
-              </div>
-
-              @if (imageFile()) {
-                <div class="cropper-wrapper">
-                  <image-cropper
-                    [imageFile]="imageFile() || undefined"
-                    [maintainAspectRatio]="true"
-                    [aspectRatio]="1"
-                    [resizeToWidth]="900"
-                    format="png"
-                    (imageCropped)="imageCropped($event)"
-                    (imageLoaded)="imageLoaded($event)"
-                    (cropperReady)="cropperReady()"
-                    (loadImageFailed)="loadImageFailed()">
-                  </image-cropper>
-                </div>
-              }
-            </div>
-          </div>
-        </div>
-
-        <ng-template pTemplate="footer">
-          <button
-            pButton
-            type="button"
-            label="Cancelar"
-            severity="secondary"
-            (click)="closeImageDialog()">
-          </button>
-          @if (previewSrc()) {
-            <button
-              pButton
-              type="button"
-              label="Guardar imagen"
-              [loading]="uploadingImage()"
-              (click)="applyImage()">
-            </button>
-          }
-        </ng-template>
-      </p-dialog>
+        (visibleChange)="showImageDialog.set($event)"
+        (imageSelected)="onImageSelected($event)">
+      </app-image-picker-dialog>
     </section>
 
 
-    <aside class="editor-preview hidden lg:flex justify-center items-start bg-slate-100 border-none shadow-inner p-6 rounded-2xl">
+    <aside
+      class="editor-preview hidden lg:flex justify-center items-start bg-slate-100 border-none shadow-inner p-6 rounded-2xl">
       <!-- Mobile Mockup Frame -->
-      <div class="relative w-[300px] min-w-[300px] h-[640px] bg-white border-[6px] border-slate-800 rounded-[2rem] shadow-2xl overflow-hidden flex flex-col ring-2 ring-slate-200">
-        
+      <div
+        class="relative w-[300px] min-w-[300px] h-[640px] bg-white border-[6px] border-slate-800 rounded-[2rem] shadow-2xl overflow-hidden flex flex-col ring-2 ring-slate-200">
+
         <!-- Mobile Notch -->
         <div class="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-5 bg-slate-800 rounded-b-xl z-20"></div>
-        
+
         <!-- App Header Dummy -->
-        <div class="bg-white pt-8 pb-3 px-4 shadow-sm border-b border-slate-100 flex items-center justify-between z-10 shrink-0">
+        <div
+          class="bg-white pt-8 pb-3 px-4 shadow-sm border-b border-slate-100 flex items-center justify-between z-10 shrink-0">
           <i class="pi pi-arrow-left text-slate-500"></i>
           <span class="font-semibold text-slate-800 text-sm">Detalle de Producto</span>
           <i class="pi pi-share-alt text-slate-500"></i>
@@ -188,91 +108,65 @@
 
         <!-- Scrollable Content -->
         <div class="flex-1 overflow-y-auto pb-4 relative custom-scrollbar">
-          
+
           <!-- Image Carousel -->
           <app-product-image-carousel [images]="allImages"></app-product-image-carousel>
 
           <!-- Product Info -->
           <div class="p-4 flex flex-col gap-2">
             <h3 class="text-xl font-bold text-slate-900 m-0">{{ form.name || 'Nombre del producto' }}</h3>
-            <p class="text-sm text-slate-500 m-0 leading-relaxed">{{ form.description || 'Descripción del producto' }}</p>
-            
+            <p class="text-sm text-slate-500 m-0 leading-relaxed">{{ form.description || 'Descripción del producto' }}
+            </p>
+
             <div class="text-2xl font-bold text-emerald-600 mt-2">
               S/. {{ previewDisplayedPrice | number:'1.2-2' }}
             </div>
 
             <!-- Variants Logic -->
             @if (hasActiveVariants) {
-              <div class="mt-4 border-t border-slate-100 pt-4 preview-variants">
-                <h4 class="text-sm font-semibold text-slate-800 mb-3">{{ form.variantTitle || 'Variantes' }}</h4>
+            <div class="mt-4 border-t border-slate-100 pt-4 preview-variants">
+              <h4 class="text-sm font-semibold text-slate-800 mb-3">{{ form.variantTitle || 'Variantes' }}</h4>
 
-                @if (variantOptions().length > 0) {
-                  @for (optionIndex of previewOrderOptionIndexes; track optionIndex) {
-                    <div class="preview-selector-group mb-4">
-                      <p class="preview-selector-title text-xs font-semibold text-slate-500 uppercase mb-2">{{ variantOptions()[optionIndex].name }}</p>
-                      @if (isPreviewOptionUnlocked(optionIndex)) {
-                        <div class="preview-selector flex flex-wrap gap-2">
-                          @for (value of getAvailableValues(optionIndex); track value) {
-                            <button
-                              pButton
-                              type="button"
-                              [outlined]="previewSelections()[optionIndex] !== value"
-                              [severity]="previewSelections()[optionIndex] === value ? 'info' : 'secondary'"
-                              size="small"
-                              class="p-button-sm text-sm"
-                              (click)="selectPreviewValue(optionIndex, value)">
-                              {{ value }}
-                            </button>
-                          }
-                        </div>
-                      } @else {
-                        <div class="preview-hint text-xs text-slate-400">Selecciona antes la variante principal.</div>
-                      }
-                    </div>
+              @if (variantOptions().length > 0) {
+              @for (optionIndex of previewOrderOptionIndexes; track optionIndex) {
+              <div class="preview-selector-group mb-4">
+                <p class="preview-selector-title text-xs font-semibold text-slate-500 uppercase mb-2">{{
+                  variantOptions()[optionIndex].name }}</p>
+                @if (isPreviewOptionUnlocked(optionIndex)) {
+                <div class="preview-selector flex flex-wrap gap-2">
+                  @for (value of getAvailableValues(optionIndex); track value) {
+                  <button pButton type="button" [outlined]="previewSelections()[optionIndex] !== value"
+                    [severity]="previewSelections()[optionIndex] === value ? 'info' : 'secondary'" size="small"
+                    class="p-button-sm text-sm" (click)="selectPreviewValue(optionIndex, value)">
+                    {{ value }}
+                  </button>
                   }
+                </div>
                 } @else {
-                  <div class="preview-selector flex flex-wrap gap-2 mb-4">
-                    @for (variant of form.variants; track variant.id) {
-                      <button
-                        pButton
-                        type="button"
-                        [outlined]="selectedVariantId !== variant.id"
-                        [severity]="selectedVariantId === variant.id ? 'info' : 'secondary'"
-                        size="small"
-                        class="p-button-sm text-sm"
-                        (click)="selectVariant(variant.id)">
-                        {{ variant.label }}
-                      </button>
-                    }
-                  </div>
-                }
-
-                <!-- Selected Variant Price / Hint -->
-                @if (selectedPreviewFromOptions; as selected) {
-                  <div class="preview-variant-row selected-row mt-2 p-2 bg-blue-50 border border-blue-100 rounded-lg flex justify-between items-center text-sm">
-                    <span class="text-blue-800 font-medium">{{ selected.label }}</span>
-                    <span class="text-blue-900 font-bold">S/. {{ previewPrice(selected) | number:'1.2-2' }}</span>
-                  </div>
-                } @else {
-                  @if (variantOptions().length > 0) {
-                    <div class="preview-hint text-xs text-amber-600 bg-amber-50 p-2 rounded border border-amber-100">Selecciona primero {{ previewPrimaryOptionName }} para continuar.</div>
-                  } @else {
-                    @for (variant of form.variants; track variant.id) {
-                      <div class="preview-variant-row flex justify-between py-1 text-sm border-b border-slate-50 last:border-0">
-                        <span class="text-slate-600">{{ variant.label }}</span>
-                        <span class="font-semibold text-slate-800">S/. {{ previewPrice(variant) | number:'1.2-2' }}</span>
-                      </div>
-                    }
-                  }
+                <div class="preview-hint text-xs text-slate-400">Selecciona antes la variante principal.</div>
                 }
               </div>
+              }
+              } @else {
+              <div class="preview-selector flex flex-wrap gap-2 mb-4">
+                @for (variant of form.variants; track variant.id) {
+                <button pButton type="button" [outlined]="selectedVariantId !== variant.id"
+                  [severity]="selectedVariantId === variant.id ? 'info' : 'secondary'" size="small"
+                  class="p-button-sm text-sm" (click)="selectVariant(variant.id)">
+                  {{ variant.label }}
+                </button>
+                }
+              </div>
+              }
+            </div>
             }
           </div>
         </div>
 
         <!-- Sticky Bottom Bar -->
         <div class="bg-white p-4 border-t border-slate-100 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-10 shrink-0">
-          <button pButton type="button" [disabled]="true" label="Agregar al carrito" icon="pi pi-shopping-cart" class="w-full p-button-rounded"></button>
+          <button pButton type="button" [disabled]="true" label="Agregar al carrito" icon="pi pi-shopping-cart"
+            class="w-full p-button-rounded"></button>
         </div>
 
       </div>

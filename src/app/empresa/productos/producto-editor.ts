@@ -13,7 +13,7 @@ import { SelectModule } from 'primeng/select';
 import { TabsModule } from 'primeng/tabs';
 import { TextareaModule } from 'primeng/textarea';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
-import { ImageCropperComponent, ImageCroppedEvent, LoadedImage } from 'ngx-image-cropper';
+import { ImagePickerDialogComponent } from '../../shared/components/image-picker-dialog/image-picker-dialog.component';
 import { ImagenesService } from '../../../shared/services/imagenes.service';
 import { TabVariantsManagerComponent, VariantFormValue, VariantOptionPayload } from './tabs/tab-variants-manager.component';
 import { ProductoDetalle } from '../../../shared/models/producto.model';
@@ -37,9 +37,9 @@ import { ProductImageCarouselComponent } from '../../shared/components/product-i
     CardModule,
     ChipModule,
     DialogModule,
-    ImageCropperComponent,
     TabVariantsManagerComponent,
-    ProductImageCarouselComponent
+    ProductImageCarouselComponent,
+    ImagePickerDialogComponent
   ],
 
   templateUrl: './producto-editor.html',
@@ -80,18 +80,13 @@ export class ProductoEditorComponent {
 
   // Image modal state
   showImageDialog = signal(false);
-  imageFile = signal<File | null>(null);
-  uploadingImage = signal(false);
-  croppedImageBlob = signal<Blob | null>(null);
-  croppedImagePreview = signal('');
-  private tempPreviewUrl: string | null = null;
 
   get allImages(): string[] {
     const images: string[] = [];
     if (this.form.image) {
       images.push(this.form.image);
     }
-    
+
     // Si hay una variante seleccionada en el preview que tiene imagen, la podemos poner primero (opcional)
     // Pero el requerimiento es cargar "todas las imagenes como un carrusel".
     this.form.variants.forEach(v => {
@@ -369,7 +364,7 @@ export class ProductoEditorComponent {
     }
 
     const matched = this.form.variants.find((variant) => {
-      const parts = variant.label.split(' / ').map((part) => part.trim());
+      const parts = (variant.descripcion || variant.label).split(' / ').map((part) => part.trim());
       return selectedIndexes.every((idx) => parts[idx] === selections[idx]);
     });
 
@@ -382,7 +377,7 @@ export class ProductoEditorComponent {
     if (this.form.variants.length > 1) return true;
     if (this.form.variants.length === 1) {
       const label = this.form.variants[0].label.trim().toLowerCase();
-      if (label === 'opción 1' || label === 'opcion 1' || label === 'variante' || label === '') {
+      if (label === '') {
         return false;
       }
       return true;
@@ -414,7 +409,7 @@ export class ProductoEditorComponent {
     }
 
     const key = options.map((_, index) => selections[index]).join(' / ');
-    return this.form.variants.find((variant) => variant.label === key) ?? null;
+    return this.form.variants.find((variant) => (variant.descripcion || variant.label) === key) ?? null;
   }
 
   get previewPrimaryOptionName(): string {
@@ -482,7 +477,7 @@ export class ProductoEditorComponent {
     const selections = this.previewSelections();
     const valueSet = new Set<string>();
     this.form.variants.forEach((variant) => {
-      const parts = variant.label.split(' / ').map((part) => part.trim());
+      const parts = (variant.descripcion || variant.label).split(' / ').map((part) => part.trim());
       const matches = order.slice(0, orderPos).every((idx) => parts[idx] === selections[idx]);
       if (matches && parts[optionIndex]) {
         valueSet.add(parts[optionIndex]);
@@ -493,105 +488,15 @@ export class ProductoEditorComponent {
 
   // Image modal methods
   openImageDialog(): void {
-    this.imageFile.set(null);
-    this.croppedImageBlob.set(null);
-    this.croppedImagePreview.set('');
-    this.clearTempPreviewUrl();
     this.showImageDialog.set(true);
   }
 
-
-  closeImageDialog(): void {
-    this.clearTempPreviewUrl();
-    this.showImageDialog.set(false);
-    this.imageFile.set(null);
-    this.uploadingImage.set(false);
-    this.croppedImageBlob.set(null);
-    this.croppedImagePreview.set('');
+  onImageSelected(imageUrl: string): void {
+    this.form.image = imageUrl;
   }
-
-
-  previewSrc(): string {
-    return this.croppedImagePreview() || this.tempPreviewUrl || '';
-  }
-
-  handleFileInModal(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
-
-    if (!file) return;
-
-    if (!file.type.startsWith('image/')) {
-      this.toastr.warning('Selecciona un archivo de imagen válido');
-      input.value = '';
-      return;
-    }
-
-    this.clearTempPreviewUrl();
-    this.imageFile.set(file);
-    this.croppedImageBlob.set(null);
-    this.croppedImagePreview.set('');
-    this.tempPreviewUrl = URL.createObjectURL(file);
-    input.value = '';
-  }
-
-
-  imageCropped(event: ImageCroppedEvent): void {
-    this.croppedImageBlob.set(event.blob ?? null);
-    this.croppedImagePreview.set(event.base64 ?? '');
-  }
-
-  imageLoaded(_image: LoadedImage): void {
-    // Hook para futuros estados visuales de carga.
-  }
-
-  cropperReady(): void {
-    // Hook para futuros estados de inicializacion del cropper.
-  }
-
-  loadImageFailed(): void {
-    this.toastr.error('No se pudo cargar la imagen seleccionada');
-  }
-
-
-
-
-  applyImage(): void {
-    const originalFile = this.imageFile();
-    const croppedBlob = this.croppedImageBlob();
-    const file = croppedBlob
-      ? new File([croppedBlob], `producto_${Date.now()}.png`, { type: croppedBlob.type || 'image/png' })
-      : originalFile;
-
-    if (!file) return;
-
-    this.uploadingImage.set(true);
-
-    this.imagenesService.optimizeImage(file, 'Producto').subscribe({
-      next: (imageUrl) => {
-        this.form.image = imageUrl;
-        this.closeImageDialog();
-        this.toastr.success('Imagen cargada correctamente');
-      },
-      error: (err) => {
-        console.error('Upload failed:', err);
-        this.toastr.error('Error al cargar la imagen. Intenta de nuevo.');
-        this.uploadingImage.set(false);
-      }
-    });
-  }
-
 
   clearImage(): void {
     this.form.image = '';
-  }
-
-  private clearTempPreviewUrl(): void {
-    if (!this.tempPreviewUrl) {
-      return;
-    }
-    URL.revokeObjectURL(this.tempPreviewUrl);
-    this.tempPreviewUrl = null;
   }
 
 }
